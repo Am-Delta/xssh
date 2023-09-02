@@ -255,6 +255,7 @@ def Login_test(username, password, host):
     try:
         Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
         port, udgpw = Session.Ports()
+        int(port)
         return True
     except:
         return False
