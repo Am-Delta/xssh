@@ -1538,9 +1538,11 @@ def text_private(bot, message):
                 hours = int(link)
                 if 1 <= hours <= 72:
                     settings = get_settings()
-                    settings['backup'] = (hours * 60) * 60 
+                    settings['backup'] = hours
                     update_settings(settings)
-                    message.reply_text("Done✔️")
+                    keyboard = [[InlineKeyboardButton("<<", callback_data='Backup')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    message.reply_text("Done✔️", reply_markup=reply_markup)
                     delete_cache(chat_id)
                 else:
                     message.reply_text("The number is too high send between 1-72 or /cancel")
@@ -1551,14 +1553,18 @@ def text_private(bot, message):
             settings = get_settings()
             settings['start'] = link
             update_settings(settings)
-            message.reply_text("Done✔️")
+            keyboard = [[InlineKeyboardButton("<<", callback_data='WSMSG')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text("Done✔️", reply_markup=reply_markup)
             delete_cache(chat_id)
 
         elif "Price_message" == status:
             settings = get_settings()
             settings['list'] = link
             update_settings(settings)
-            message.reply_text("Done✔️")
+            keyboard = [[InlineKeyboardButton("<<", callback_data='WLMSG')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text("Done✔️", reply_markup=reply_markup)
             delete_cache(chat_id)
 
         elif "Sponser" == status:
@@ -1568,7 +1574,9 @@ def text_private(bot, message):
                     settings = get_settings()
                     settings['sponser'] = link
                     update_settings(settings)
-                    message.reply_text("Done✔️")
+                    keyboard = [[InlineKeyboardButton("<<", callback_data='sponser')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    message.reply_text("Done✔️", reply_markup=reply_markup)
                     delete_cache(chat_id)
                 except:
                     message.reply_text("🔴Error. Check these:\n\n1. the bot not added to the channel or group\n2. Your not in the channel or group\n3. The channel or group deos not exist.")
@@ -1582,7 +1590,9 @@ def text_private(bot, message):
                 settings = get_settings()
                 settings['auto_delete'] = days
                 update_settings(settings)
-                message.reply_text("Done✔️")
+                keyboard = [[InlineKeyboardButton("<<", callback_data='AutoDelete')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
                 message.reply_text("Only numbers or /cancel")
@@ -1593,7 +1603,9 @@ def text_private(bot, message):
                 settings = get_settings()
                 settings['usd'] = usd
                 update_settings(settings)
-                message.reply_text("Done✔️")
+                keyboard = [[InlineKeyboardButton("<<", callback_data='USD')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
                 message.reply_text("Only numbers or /cancel")
@@ -1604,7 +1616,9 @@ def text_private(bot, message):
                 settings = get_settings()
                 settings['maximum'] = maximum
                 update_settings(settings)
-                message.reply_text("Done✔️")
+                keyboard = [[InlineKeyboardButton("<<", callback_data='maximum')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
                 message.reply_text("Only numbers or /cancel")
@@ -2888,7 +2902,7 @@ def call_bkon(bot, query):
             if backup[0] is False:
                 chat_id = query.message.chat.id
                 text = ""
-                query.edit_message_text(text=f"Starting... delay every {str((get_settings()['backup'] // 60) // 60)}h")
+                query.edit_message_text(text=f"Starting... delay every {str(get_settings()['backup'])}h")
                 backup.clear()
                 backup.append(True)
                 run_backup.clear()
@@ -2931,7 +2945,7 @@ def call_bkon(bot, query):
                                     count_errors += 1
                                     text += f"Error To Login: {host}"
                         bot.send_message(chat_id, f"🖥Servers: {str(count_all)}\n🟢Goods: {str(count_goods)}\n🔴Errors: {str(count_errors)}\n\nErrors info: {text}")
-                        sleep(get_settings()['backup'])
+                        sleep((get_settings()['backup'] * 60) * 60)
                     else:
                         break
             else:
