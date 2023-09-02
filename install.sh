@@ -37,6 +37,6 @@ mv /root/botCh/data.json /root/bot
 
 cd /root/bot
 
-clear
+#clear
 
 python3 run.py
