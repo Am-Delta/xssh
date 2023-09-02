@@ -33,6 +33,7 @@ def Login(username, password, host):
                 print(f"Login and saved session at ssh/{host}.session | Code: ", responde.status_code)
             else:
                 print("Error : ", responde.status_code)
+                return False
         return True
     except Exception as e:
         print(e)
