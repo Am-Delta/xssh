@@ -6,4 +6,4 @@ tgcrypto
 selectolax
 bs4
 requests
-colorama
+termcolor
