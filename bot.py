@@ -2922,43 +2922,46 @@ def call_bkon(bot, query):
                 run_backup.append(True)
                 while True:
                     if run_backup[0] is True:
-                        count_all, count_errors, count_goods = (0,)*3
-                        with open("Pannels.txt", 'r') as txt:
-                            for data in txt.readlines():
-                                do = True
-                                count_all += 1
-                                data = data.replace('\n', "")
-                                host = data.split("@")[0]
-                                username = (data.split(":")[0]).split("@")[1]
-                                password = data.split(":")[1]
-                                session = 'ssh/' + host + ".session"
-                                if Path(session).is_file() is False:
-                                    if sshx.Login(username, password, host) is False:
-                                        do = False
-                                if do is True:
-                                    try:
-                                        Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-                                        status, content = Session.Backup_content()
-                                        if status is True:
-                                            f = folder + "/" + host + ".sql"
-                                            if Path(f).is_file() is True:
-                                                os.remove(f)
-                                            with open(f, 'wb') as file:
-                                                file.write(content)
-                                            sleep(1)
-                                            bot.send_document(chat_id, document=open(f, 'rb'), caption=f"Saved at {f}", file_name=f)
-                                            count_goods += 1
-                                        else:
+                        if (int(time()) - start_time) < ((get_settings()['backup'] * 60) * 60):
+                            sleep(3)
+                        else:
+                            count_all, count_errors, count_goods = (0,)*3
+                            with open("Pannels.txt", 'r') as txt:
+                                for data in txt.readlines():
+                                    do = True
+                                    count_all += 1
+                                    data = data.replace('\n', "")
+                                    host = data.split("@")[0]
+                                    username = (data.split(":")[0]).split("@")[1]
+                                    password = data.split(":")[1]
+                                    session = 'ssh/' + host + ".session"
+                                    if Path(session).is_file() is False:
+                                        if sshx.Login(username, password, host) is False:
+                                            do = False
+                                    if do is True:
+                                        try:
+                                            Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                                            status, content = Session.Backup_content()
+                                            if status is True:
+                                                f = folder + "/" + host + ".sql"
+                                                if Path(f).is_file() is True:
+                                                    os.remove(f)
+                                                with open(f, 'wb') as file:
+                                                    file.write(content)
+                                                sleep(1)
+                                                bot.send_document(chat_id, document=open(f, 'rb'), caption=f"Saved at {f}", file_name=f)
+                                                count_goods += 1
+                                            else:
+                                                count_errors += 1
+                                                text += f"{content} | {host}"
+                                        except Exception as e:
                                             count_errors += 1
-                                            text += f"{content} | {host}"
-                                    except Exception as e:
+                                            text += f"{str(e)} | {host}"
+                                    else:
                                         count_errors += 1
-                                        text += f"{str(e)} | {host}"
-                                else:
-                                    count_errors += 1
-                                    text += f"Error To Login: {host}"
-                        bot.send_message(chat_id, f"🖥Servers: {str(count_all)}\n🟢Goods: {str(count_goods)}\n🔴Errors: {str(count_errors)}\n\nErrors info: {text}")
-                        sleep((get_settings()['backup'] * 60) * 60)
+                                        text += f"Error To Login: {host}"
+                            bot.send_message(chat_id, f"🖥Servers: {str(count_all)}\n🟢Goods: {str(count_goods)}\n🔴Errors: {str(count_errors)}\n\nErrors info: {text}")
+                            start_time = int(time())
                     else:
                         break
             else:
