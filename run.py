@@ -83,6 +83,7 @@ def settings():
             api_id = "24467048"
             api_hash = "7e81e7df9b9b66deab287cb47bbc6d8a"
             api = True
+            break
         else:
             try:
                 int(data)
