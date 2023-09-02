@@ -5,5 +5,5 @@ Shahan SSH user management telegram bot
 
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/Am-Delta/Shahan-TG-bot/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/Am-Delta/bot/master/install.sh)
 ```
