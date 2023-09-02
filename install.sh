@@ -3,16 +3,7 @@ echo "Running ..."
 sudo apt install python3
 sudo apt install pip
 sudo apt install git
-sudo apt-get install screen
-pip install termcolor
-pip install pyrogram
-pip install bs4
-pip install requests
-pip install tgcrypto
-pip install qrcode
-pip install random2
-pip install cryptocompare
-pip install selectolax
+pip install -r r.txt
 
 mkdir /root/botCh
 
