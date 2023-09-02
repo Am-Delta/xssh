@@ -251,6 +251,15 @@ def get_host_username(text):
             return None, None
 
 
+def Login_test(username, password, host):
+    try:
+        Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+        port, udgpw = Session.Ports()
+        return True
+    except:
+        return False
+
+
 def update_host(link):
     text = "🗒Logs:\n"
     from_host = (link.split("/change from ")[1]).split(" to")[0]
@@ -265,6 +274,10 @@ def update_host(link):
             password = data.split(":")[1]
             if sshx.Login(username, password, to_host) is False:
                 text += "Please send the correct Login data."
+                return text
+            if Login_test(username, password, to_host) is False:
+                text += "Please send the correct Login data."
+                return text
         else:
             text += "This host is exist."
             return text
@@ -892,8 +905,11 @@ def start_add(bot, message):
                     if sshx.Login(username, password, host) is False:
                         message.reply_text("Please send the correct Login data")
                     else:
-                        txt.writelines(data + "\n")
-                        message.reply_text("Added")
+                        if Login_test(username, password, host) is True:
+                            txt.writelines(data + "\n")
+                            message.reply_text("Added")
+                        else:
+                            message.reply_text("Wrong Login data")
                 else:
                     message.reply_text("This server is exist")
         except Exception as e:
@@ -1198,10 +1214,9 @@ def text_private(bot, message):
                     try:
                         Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                         text = Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]))
-                        port = Session.Ports()
+                        port, udgpw = Session.Ports()
                         url = f"ssh://{cache_list[1]}:{passw}@{host}:{port}"
                         photo = QR_Maker(url)
-                        text = text.replace("Port : 22", ("Port : " + port))
                         text += "\n\nURL: " + "<pre>" + url + "</pre>"
                         bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
                         os.remove(photo)
@@ -1263,10 +1278,9 @@ def text_private(bot, message):
                 try:
                     Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                     text = Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]))
-                    port = Session.Ports()
+                    port, udgpw = Session.Ports()
                     url = f"ssh://{cache_list[1]}:{passw}@{host}:{port}"
                     photo = QR_Maker(url)
-                    text = text.replace("Port : 22", ("Port : " + port))
                     text += "\n\nURL: " + "<pre>" + url + "</pre>"
                     bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
                     os.remove(photo)
@@ -2525,11 +2539,10 @@ def call_Confirmed(bot, query):
             text = f"🥰مرسی از خریدتون\n\n"
             text += Session.Create(user, passw, connection_limit, days, GB)
             if "Error" not in text:
-                port = Session.Ports()
+                port, udgpw = Session.Ports()
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 url = f"ssh://{user}:{passw}@{host}:{port}"
                 photo = QR_Maker(url)
-                text = text.replace("Port : 22", ("Port : " + port))
                 text += "\n\nURL: " + "<pre>" + url + "</pre>"
                 bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
                 os.remove(photo)
@@ -2976,7 +2989,7 @@ def call_bkbot(bot, query):
         try:
             bot.send_document(chat_id, document=open(file, 'rb'), file_name=file)
         except Exception as e:
-            logs += (str(e) + "\n")
+            logs += ("File: " + file + " " + str(e) + "\n")
         sleep(0.5)
     bot.send_message(chat_id, logs)
 
