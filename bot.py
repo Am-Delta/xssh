@@ -119,7 +119,10 @@ def server_cb_creator(job):
                 keyboard.append([InlineKeyboardButton(hosts[i], callback_data=(job + hosts[i])), InlineKeyboardButton(hosts[i + 1], callback_data=(job + hosts[i + 1]))])
             keyboard.append([InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
     else:
-        keyboard.append([InlineKeyboardButton(hosts[0], callback_data=(job + hosts[0]))])
+        if hosts == []:
+            pass
+        else:
+            keyboard.append([InlineKeyboardButton(hosts[0], callback_data=(job + hosts[0]))])
     keyboard.append([InlineKeyboardButton("<< back", callback_data="back_admin")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
@@ -168,26 +171,15 @@ def checker_notify(ids):
 
 
 def trx_price(irr_price):
-    irr_price = int(irr_price) * 1000
-    file = "irr.txt"
-    if Path(file).is_file() is True:
-        with open("irr.txt", 'r') as f:
-            for i in f.readlines():
-                irr = int(i)
-                break
-    else:
-        irr = 50000
+    irr_price = int(irr_price)
+    irr = (get_settings())['usd']
     try:
         trx = cryptocompare.get_price('TRX', currency='USD')['TRX']["USD"]
         price = (irr_price / irr) / trx
         price = str("{:.2f}".format(float(price))) + " TRX"
     except:
-        if irr_price == 160000:
-            price = "3.2 $"
-        elif irr_price == 90000:
-            price = "2 $"
-        else:
-            price = "مبلغ مشخص نیست لطفا از کارت به کارت استفاده کنین"
+        price = str("{:.2f}".format(float(irr_price / irr))) + "$"
+        #price = "مبلغ مشخص نیست لطفا از کارت به کارت استفاده کنین"
     return price
 
 
@@ -2247,7 +2239,7 @@ def call_change(bot, query):
 
 @app.on_callback_query(filters.regex('wallet'))
 def call_wallet(bot, query):
-    keyboard = [[InlineKeyboardButton("🔧Change", callback_data='ChangeWallet')], [InlineKeyboardButton("<< Back", callback_data='back_admin')]]
+    keyboard = [[InlineKeyboardButton("🔧Change", callback_data='ChangeWallet')], [InlineKeyboardButton("<< Back", callback_data='settings')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     name, username, wallet, crypto = get_wallet_info()
     text = f"💳Wallet: <pre>{str(wallet)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}"
@@ -2256,7 +2248,7 @@ def call_wallet(bot, query):
 
 @app.on_callback_query(filters.regex('Card'))
 def call_card(bot, query):
-    keyboard = [[InlineKeyboardButton("🔧Change", callback_data='Change')], [InlineKeyboardButton("<< Back", callback_data='back_admin')]]
+    keyboard = [[InlineKeyboardButton("🔧Change", callback_data='Change')], [InlineKeyboardButton("<< Back", callback_data='settings')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     name, username, card = get_card_info()
     text = f"💳Card: <pre>{str(card)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}"
@@ -2271,6 +2263,19 @@ def call_change(bot, query):
         query.edit_message_text(text="OK send the new card only number")
     else:
         query.answer("Please /cancel it first", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('ANS_'))
+def call_ANS(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        data = query.data
+        cache_list = [data.split("ANS_")[1]]
+        add_collector(chat_id, "answer", cache_list, [])
+        add_cache(chat_id, "answer")
+        bot.send_message(chat_id, "Send your message or /cancel")
+    else:
+        bot.send_message(chat_id, "Please /cancel it first")
 
 
 @app.on_callback_query(filters.regex("RLS_"))
@@ -2369,7 +2374,7 @@ def call_buy(bot, query):
             if settings['traffic'][i] == 0:
                 traffic = "نامحدود"
             else:
-                traffic = str(settings['traffic'][i])
+                traffic = str(settings['traffic'][i]) + " گیگ"
             text += f"{str(i + 1)}. {traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن\n"
             tcb = f"{traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن"
             cb = f"BU_{str(settings['days'][i])}-{str(settings['traffic'][i])}#{str(settings['connections'][i])}&{str(settings['prices'][i])}"
@@ -2495,11 +2500,13 @@ def call_Confirmed(bot, query):
             USERNAME = cache_list[-1]
         else:
             USERNAME = "None"
-        host = get_random_server()
-        user = host.split('.')[0] + "a" + str(randint(1243, 6523))
-        passw = str(randint(214254, 999999))
-        username, password = get_host_username_password(host)
         try:
+            host = get_random_server()
+            if host is None:
+                query.answer(f"Error: Add a host", show_alert=True)
+            user = host.split('.')[0] + "a" + str(randint(1243, 6523))
+            passw = str(randint(214254, 999999))
+            username, password = get_host_username_password(host)
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
             text = f"🥰مرسی از خریدتون\n\n"
             text += Session.Create(user, passw, connection_limit, days, GB)
@@ -2602,7 +2609,7 @@ def call_UPG(bot, query):
                 if settings['traffic'][i] == 0:
                     traffic = "نامحدود"
                 else:
-                    traffic = str(settings['traffic'][i])
+                    traffic = str(settings['traffic'][i]) + " گیگ"
                 tcb = f"{traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن"
                 cb = f"UPB_{str(settings['days'][i])}-{str(settings['traffic'][i])}#{str(settings['connections'][i])}&{str(settings['prices'][i])}:{user}@{host}"
                 keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
@@ -2785,6 +2792,8 @@ def call_ID(bot, query):
 @app.on_callback_query(filters.regex('support'))
 def call_support(bot, query):
     chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
     if check_cache(chat_id) is False:
         keyboard = []
         randomize = []
@@ -2865,7 +2874,7 @@ def call_bktimer(bot, query):
     chat_id = query.message.chat.id
     add_cache(chat_id, "backup_timer")
     text = "OK send a number 1-72"
-    keyboard = [[InlineKeyboardButton("<<", callback_data='backup')]]
+    keyboard = [[InlineKeyboardButton("<<", callback_data='Backup')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
@@ -2936,7 +2945,7 @@ def call_bkoff(bot, query):
         backup.append(False)
         run_backup.clear()
         run_backup.append(False)
-        keyboard = [[InlineKeyboardButton("<<", callback_data='backup')]]
+        keyboard = [[InlineKeyboardButton("<<", callback_data='Backup')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text="Stopped.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -2958,7 +2967,7 @@ def call_bkbot(bot, query):
     bot.send_message(chat_id, logs)
 
 
-@app.on_callback_query(filters.regex('backup'))
+@app.on_callback_query(filters.regex('Backup'))
 def call_backup(bot, query):
     chat_id = query.message.chat.id
     delete_cache(chat_id)
@@ -3140,11 +3149,13 @@ def call_BSOPtion(bot, query):
     if settings['buy'] == "on":
         emoji = "🟢"
         cb = 'off'
+        emoji_cb = "🔴"
     else:
         emoji = "🔴"
         cb = 'on'
+        emoji_cb = "🟢"
     keyboard = [
-        [InlineKeyboardButton(f"{cb} {emoji}", callback_data=f'EBS_{cb}')],
+        [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'EBS_{cb}')],
     ]
     text = '<b>Shop Settings</b>\n\n' + "Current: " + settings['buy'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
@@ -3178,7 +3189,7 @@ def call_ADMINPRICES(bot, query):
         if settings['traffic'][i] == 0:
             traffic = "نامحدود"
         else:
-            traffic = str(settings['traffic'][i])
+            traffic = str(settings['traffic'][i]) + " گیگ"
         currnet += f"{str(i + 1)}. {traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن\n"
     text = '<b>Prices Settings</b>\n\n' + "Current: \n" + currnet
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
@@ -3207,7 +3218,7 @@ def call_DAPR(bot, query):
             if settings['traffic'][i] == 0:
                 traffic = "نامحدود"
             else:
-                traffic = str(settings['traffic'][i])
+                traffic = str(settings['traffic'][i]) + " گیگ"
             tcb = f"{traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن"
             cb = "DSELP_" + str(i)
             keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
@@ -3244,7 +3255,7 @@ def call_settings(bot, query):
     keyboard = [
         [InlineKeyboardButton("💵ولت ترون", callback_data='wallet'), InlineKeyboardButton("شماره کارت💳", callback_data='Card')],
         [InlineKeyboardButton("پیام استارت📃", callback_data='WSMSG'), InlineKeyboardButton("پیام تعرفه قیمت💰", callback_data='WLMSG')],
-        [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("بکاپ📥", callback_data='backup')],
+        [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("بکاپ📥", callback_data='Backup')],
         [InlineKeyboardButton("حذف خودکار کاربر🗑", callback_data='AutoDelete'), InlineKeyboardButton("قیمت دلار💲", callback_data='USD')],
         [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')],
         [InlineKeyboardButton("وضعیت خرید", callback_data='BSOPtion')],
