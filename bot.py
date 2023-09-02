@@ -2979,10 +2979,10 @@ def call_backup(bot, query):
     ]
     settings = get_settings()
     if backup[0] is False:
-        backup = "OFF ❌"
+        backup_status = "OFF ❌"
     else:
-        backup = "ON ✅"
-    text = '<b>Backup Settings</b>\n\n' + "🔄Status\n\n" + "Backup: " + backup + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
+        backup_status = "ON ✅"
+    text = '<b>Backup Settings</b>\n\n' + "🔄Status\n\n" + "Backup: " + backup_status + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
