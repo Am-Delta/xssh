@@ -1,0 +1,9 @@
+pyrogram
+random2
+qrcode
+cryptocompare
+tgcrypto
+selectolax
+bs4
+requests
+colorama
