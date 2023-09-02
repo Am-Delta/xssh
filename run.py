@@ -16,16 +16,6 @@ if not os.path.exists('cache'):
 print(
     colored(
     """
-        █▀▀ █▀█ █▀▀ ▄▀█ ▀█▀ █▀▀ █▀▄   █▄▄ █▄█   █▀▄ █▀▀ █   ▀█▀ ▄▀█   █▀▀ █▀█ █▀█ █ █ █▀█
-        █▄▄ █▀▄ ██▄ █▀█  █  ██▄ █▄▀   █▄█  █    █▄▀ ██▄ █▄▄  █  █▀█   █▄█ █▀▄ █▄█ █▄█ █▀▀
-
-    """, 'red'
-    )
-)
-
-print(
-    colored(
-    """
                                     Telegram: @delta_bcc
     """, 'red'
     )
@@ -47,7 +37,7 @@ def run():
     if Path("ssh.db").is_file() is False:
         os.system('python3 sshdb.py')
         print("Database Created, change the settings in the bot")
-    print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you want stop the bot use this command:\n\npkill python3\n\nYou can now close the window.", 'white'))
+    print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you want stop the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
     os.system('nohup python3 session-updater.py &')
     os.system('nohup python3 backup-ssh.py &')
     os.system('nohup python3 bot.py &')
