@@ -16,8 +16,8 @@ c.execute("""CREATE TABLE Users (
             ID int,
             Name text,
             Username text,
-            Host text,
-            Account text
+            Account text,
+            Host text
             )""")
 
 
