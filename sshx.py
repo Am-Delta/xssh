@@ -164,12 +164,16 @@ class PANNEL:
     def Ports(self):
         s = self.r.get(self.url + "/p/setting.php").text
         html = HTMLParser(s)
+        port = ""
+        udgpw = ""
         for inp in html.css('input'):
             alt = inp.attributes.get("name", None)
             if alt is not None:
                 if 'port' == inp.attributes['name']:
-                    return inp.attributes['value']
-        return port
+                    port = inp.attributes['value']
+                elif 'udpport' == inp.attributes['name']:
+                    udgpw = inp.attributes['value']
+        return port, udgpw
 
     def Backup_content(self):
         try:
@@ -295,9 +299,8 @@ class PANNEL:
             if s.status_code == 200:
                 if traffic == '':
                     traffic = "Unlimited♾"
-                #port = self.Ports()
-                port = "22"
-                return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : 7301-7309\nUsername : {uname}\nPassword : {passw}\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+                port, udgpw = self.Ports()
+                return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {uname}\nPassword : {passw}\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
         except Exception as e:
             return "Error: " + str(e)
 
@@ -366,14 +369,14 @@ class PANNEL:
 
     def User_info(self):
         try:
-            port = self.Ports()
+            port, udgpw = self.Ports()
             usage = self.usage + " GB"
             status = self.status
             if "فعال" == status:
                 status += "🟢"
             else:
                 status += "🔴"
-            return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : 7301-7309\nUsername : {self.uname}\nPassword : {self.passwd}\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+            return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {self.uname}\nPassword : {self.passwd}\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
         except Exception as e:
             return "Error: " + str(e)
 
