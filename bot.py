@@ -1439,7 +1439,7 @@ def text_private(bot, message):
             try:
                 keyboard = [[InlineKeyboardButton("✍️ پاسخ", callback_data=('SUPRT_' + str(chat_id)))]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                bot.send_message(cache_list[0], link, reply_markup=reply_markup)
+                bot.send_message(int(cache_list[0]), link, reply_markup=reply_markup)
                 message.reply_text("Sent")
             except:
                 message.reply_text("The user blocked the bot")
@@ -2969,7 +2969,7 @@ def call_bkoff(bot, query):
 @app.on_callback_query(filters.regex('BKupBot'))
 def call_bkbot(bot, query):
     chat_id = query.message.chat.id
-    query.edit_message_text(text="Sending...", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text="Sending...")
     files = ["All.txt", "ssh.db", "data.json", "Pannels.txt", "logs.txt"]
     logs = "Done✔️\n\nLogs:\n\n"
     for file in files:
