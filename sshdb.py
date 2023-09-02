@@ -10,7 +10,6 @@ c.execute("""CREATE TABLE Buy (
             Status text,
             Data text
             )""")
-conn.commit()
 
 
 c.execute("""CREATE TABLE Users (
@@ -18,17 +17,14 @@ c.execute("""CREATE TABLE Users (
             Name text,
             Username text,
             Host text,
-            Account text,
-            Host text
+            Account text
             )""")
-conn.commit()
 
 
 c.execute("""CREATE TABLE Cache (
             Chat int,
             Status text
             )""")
-conn.commit()
 
 
 c.execute("""CREATE TABLE Collector (
@@ -37,7 +33,6 @@ c.execute("""CREATE TABLE Collector (
             Cache int,
             Hosts text
             )""")
-conn.commit()
 
 c.execute("""CREATE TABLE Pay (
             ID int,
@@ -45,7 +40,6 @@ c.execute("""CREATE TABLE Pay (
             Username text,
             Card int
             )""")
-conn.commit()
 
 c.execute("INSERT INTO Pay (ID, Name, Username, Card) VALUES (?, ?, ?, ?)", (1, "Default", "None", 565000020002))
 conn.commit()
@@ -69,7 +63,6 @@ c.execute("""CREATE TABLE Checked (
             Confirm text,
             Checked int
             )""")
-conn.commit()
 
 
 c.execute("""CREATE TABLE Sellers (
@@ -78,13 +71,12 @@ c.execute("""CREATE TABLE Sellers (
             Username text,
             'limit' int
             )""")
-conn.commit()
+
 
 c.execute("""CREATE TABLE Settings (
             ID int,
             Settings text
             )""")
-conn.commit()
 
 
 settings = {
