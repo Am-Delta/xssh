@@ -2920,6 +2920,7 @@ def call_bkon(bot, query):
                 backup.append(True)
                 run_backup.clear()
                 run_backup.append(True)
+                start_time = int(time()) + ((get_settings()['backup'] * 60) * 60) + 5
                 while True:
                     if run_backup[0] is True:
                         if (int(time()) - start_time) < ((get_settings()['backup'] * 60) * 60):
