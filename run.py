@@ -13,13 +13,6 @@ if not os.path.exists('backup'):
 if not os.path.exists('cache'):
     os.makedirs('cache')
 
-print(
-    colored(
-    """
-                                    Telegram: @delta_bcc
-    """, 'red'
-    )
-)
 
 new_dict = {}
 file = "data.json"
@@ -28,9 +21,6 @@ file = "data.json"
 def run():
     if Path("Pannels.txt").is_file() is False:
         open("Pannels.txt", "w")
-    if Path("irr.txt").is_file() is False:
-        with open("irr.txt", "a+") as f:
-            f.writelines("50000")
     if Path("All.txt").is_file() is False:
         with open("All.txt", "a+") as f:
             f.writelines("1" + "\n")
