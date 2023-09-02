@@ -15,7 +15,8 @@ pip install termcolor
 
 mkdir /root/botCh
 
-pkill python3
+pkill -9 python3
+pkill -9 python
 
 mv /root/bot/Pannels.txt /root/botCh
 mv /root/bot/backup /root/botCh
