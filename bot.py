@@ -2612,22 +2612,28 @@ def call_upgrade(bot, query):
         delete_code_buy(code)
     accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
     keyboard = []
+    settings = get_settings()
     if status is False:
         query.answer("سرویسی پیدا نشد. اگه سرویسی دارین دکمه اطلاعات سرویس بزنین و بفرستین 🙂", show_alert=True)
     else:
-        if len(accounts) >= 2:
-            if len(accounts) % 2 == 0:
-                for i in range(0, len(accounts) - 1, 2):
-                    keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+        if settings['buy'] == 'on':
+            if len(accounts) >= 2:
+                if len(accounts) % 2 == 0:
+                    for i in range(0, len(accounts) - 1, 2):
+                        keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                else:
+                    for i in range(0, len(accounts) - 1, 2):
+                        keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                    keyboard.append([InlineKeyboardButton(accounts[-1], callback_data=("UPG_" + hosts[-1] + "$" + accounts[-1]))])
             else:
-                for i in range(0, len(accounts) - 1, 2):
-                    keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
-                keyboard.append([InlineKeyboardButton(accounts[-1], callback_data=("UPG_" + hosts[-1] + "$" + accounts[-1]))])
+                keyboard.append([InlineKeyboardButton(accounts[0], callback_data=("UPG_" + hosts[0] + "$" + accounts[0]))])
+            keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
         else:
-            keyboard.append([InlineKeyboardButton(accounts[0], callback_data=("UPG_" + hosts[0] + "$" + accounts[0]))])
-        keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
+            keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            query.edit_message_text(text="فروش غیرفعاله", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('UPG_'))
