@@ -12,6 +12,7 @@ from pathlib import Path
 from time import time, sleep
 from random import randint, choice
 from pyrogram import Client, filters, enums
+from pyrogram.errors import NotAcceptable, BadRequest
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 session = "run"
@@ -1030,18 +1031,23 @@ def start_user(bot, message):
         message.reply_text(text, reply_markup=Seller_Tools_keys(), parse_mode=enums.ParseMode.HTML)
     else:
         if (get_settings())['sponser'] == "None":
-            text = (get_settings())['start']
-            message.reply_text(text, reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+            message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
         else:
             try:
                 chat_member = bot.get_chat_member((get_settings())['sponser'], chat_id)
-                text = (get_settings())['start']
-                message.reply_text(text, reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
-            except:
-                text = "برای استفاده از ربات اینجا باید جوین بشین:" + "\n\n" + (get_settings())['sponser']
-                keyboard = [[InlineKeyboardButton("جوین شدم✅", callback_data="JOIN")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                message.reply_text(text, reply_markup=reply_markup)
+                message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+
+            except NotAcceptable:
+                message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+
+            except BadRequest as e:
+                if "USER_NOT_PARTICIPANT" in str(e):
+                    text = "برای استفاده از ربات اینجا باید جوین بشین:" + "\n\n" + (get_settings())['sponser']
+                    keyboard = [[InlineKeyboardButton("جوین شدم✅", callback_data="JOIN")]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    message.reply_text(text, reply_markup=reply_markup)
+                else:
+                    message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_message(filters.private & filters.text)
@@ -1592,9 +1598,18 @@ def text_private(bot, message):
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     message.reply_text("Done✔️", reply_markup=reply_markup)
                     delete_cache(chat_id)
-                except:
-                    message.reply_text("🔴Error. Check these:\n\n1. the bot not added to the channel or group\n2. Your not in the channel or group\n3. The channel or group deos not exist.")
+
+                except NotAcceptable:
+                    message.reply_text("🔴Error: The bot not added to the channel or group")
                     delete_cache(chat_id)
+
+                except BadRequest as e:
+                    if "USER_NOT_PARTICIPANT" in str(e):
+                        message.reply_text("🔴Error: Your not in the channel or group")
+                    else:
+                        message.reply_text("🔴Error: The channel or group deos not exist.")
+                    delete_cache(chat_id)
+
             else:
                 message.reply_text("Send the correct form: @channel")
 
