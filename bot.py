@@ -2920,10 +2920,11 @@ def call_bkon(bot, query):
                 backup.append(True)
                 run_backup.clear()
                 run_backup.append(True)
-                start_time = int(time()) + ((get_settings()['backup'] * 60) * 60) + 5
+                first = True
+                start_time = 1
                 while True:
                     if run_backup[0] is True:
-                        if (int(time()) - start_time) < ((get_settings()['backup'] * 60) * 60):
+                        if ((int(time()) - start_time) < ((get_settings()['backup'] * 60) * 60)) and (first is False):
                             sleep(3)
                         else:
                             count_all, count_errors, count_goods = (0,)*3
@@ -2963,6 +2964,7 @@ def call_bkon(bot, query):
                                         text += f"Error To Login: {host}"
                             bot.send_message(chat_id, f"🖥Servers: {str(count_all)}\n🟢Goods: {str(count_goods)}\n🔴Errors: {str(count_errors)}\n\nErrors info: {text}")
                             start_time = int(time())
+                            first = False
                     else:
                         break
             else:
