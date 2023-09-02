@@ -904,12 +904,11 @@ def start_add(bot, message):
                     password = data.split(":")[1]
                     if sshx.Login(username, password, host) is False:
                         message.reply_text("Please send the correct Login data")
+                    if Login_test(username, password, host) is True:
+                        txt.writelines(data + "\n")
+                        message.reply_text("Added")
                     else:
-                        if Login_test(username, password, host) is True:
-                            txt.writelines(data + "\n")
-                            message.reply_text("Added")
-                        else:
-                            message.reply_text("Wrong Login data")
+                        message.reply_text("Wrong Login data")
                 else:
                     message.reply_text("This server is exist")
         except Exception as e:
