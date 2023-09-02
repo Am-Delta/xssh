@@ -45,7 +45,7 @@ def run():
         with open("All.txt", "a+") as f:
             f.writelines("1" + "\n")
     if Path("ssh.db").is_file() is False:
-        os.system('sshdb.py')
+        os.system('python3 sshdb.py')
         print("Database Created, change the settings in the bot")
     print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you want stop the bot use this command:\n\npkill python3\n\nYou can now close the window.", 'white'))
     os.system('nohup python3 session-updater.py &')
