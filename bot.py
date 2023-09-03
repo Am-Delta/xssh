@@ -1841,17 +1841,21 @@ def text_private(bot, message):
 
         elif "A_traffic" == status:
             try:
-                traffic = int(link)
+                int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 settings = get_settings()
                 prices = settings['prices']
-                prices.append(cache_list[0])
+                prices.append(int(cache_list[0]))
+                settings['prices'] = prices
                 connections = settings['connections']
-                connections.append(cache_list[1])
+                connections.append(int(cache_list[1]))
+                settings['connections'] = connections
                 days = settings['days']
-                days.append(cache_list[2])
+                days.append(int(cache_list[2]))
+                settings['days'] = connections
                 traffic = settings['traffic']
-                traffic.append(traffic)
+                traffic.append(int(link))
+                settings['traffic'] = traffic
                 update_settings(settings)
                 keyboard = [[InlineKeyboardButton("<<", callback_data='ADMINPRICES')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3889,7 +3893,7 @@ def call_FLCHON(bot, query):
                                     if sshx.Login(username, password, host) is False:
                                         do = False
                                 if do is True:
-                                    try:
+                                    if True:
                                         Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                                         if host in checked_connections:
                                             checked_connections.remove(host)
@@ -3901,11 +3905,11 @@ def call_FLCHON(bot, query):
                                         else:
                                             if "Error" not in content:
                                                 checked_filtering.remove(host)
-                                    except:
+                                    '''except:
                                         if host not in checked_connections:
                                             text = "🔴Connection Error: " + host
                                             checked_connections.append(host)
-                                            bot.send_message(chat_id, text)
+                                            bot.send_message(chat_id, text)'''
                         sleep(300)
                     else:
                         break
@@ -3949,7 +3953,7 @@ def call_APRX(bot, query):
     delete_cache(chat_id)
     add_cache(chat_id, "proxy")
     text = "OK send the proxy"
-    keyboard.append([InlineKeyboardButton("<<", callback_data='Sprx')])
+    keyboard = [[InlineKeyboardButton("<<", callback_data='Sprx')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
