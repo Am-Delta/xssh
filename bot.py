@@ -1231,15 +1231,41 @@ def text_private(bot, message):
                 sleep(0.2)
                 message.reply_text(text='🫡بزودی درخواستتون بررسی میشه')
                 delete_cache(chat_id)
+
+            elif ("USP_" in status):
+                host = (status.split("_")[1]).split("$")[0]
+                user = status.split("$")[1]
+                passw = link
+                if 4 <= len(passw) <= 16:
+                    username, password = get_host_username_password(host)
+                    try:
+                        Session = sshx.PANNEL(host, username, password, 'User', user)
+                        text = Session.Password(passw)
+                        if "Error" not in text:
+                            text = f"پسورد اکانت {user} به {passw} تغییر پیدا کرد 🫵"
+                        else:
+                            text = "خطایی پیش اومد بعدا امتحان کنین😑"
+                    except:
+                        text = "خطایی پیش اومد بعدا امتحان کنین😑"
+                    message.reply_text(text)
+                    delete_cache(chat_id)
+                elif passw <= 3:
+                    message.reply_text("پسورد خیلی کوتاهه! بین 4 تا 16 کاراکتر باید باشه")
+                else:
+                    message.reply_text("پسورد خیلی طولانیه! بین 4 تا 16 کاراکتر باید باشه")
+
             return
 
         if status == "name_none":
-            cache_list, host_cahce = get_collector_cache(chat_id)
-            message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
-            cache_list.append(link)
-            delete_cache(chat_id)
-            add_cache(chat_id, "GB_none")
-            update_collector(chat_id, cache_list, host_cahce)
+            if len(link) <= 16:
+                cache_list, host_cahce = get_collector_cache(chat_id)
+                message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
+                cache_list.append(link)
+                delete_cache(chat_id)
+                add_cache(chat_id, "GB_none")
+                update_collector(chat_id, cache_list, host_cahce)
+            else:
+                message.reply_text("The name is too long, send between 1-16 characters")
 
         elif status == "GB_none":
             try:
@@ -1346,25 +1372,35 @@ def text_private(bot, message):
         elif status == "CPassword":
             try:
                 passw = link
-                cache_list, host_cahce = get_collector_cache(chat_id)
-                host = cache_list[0]
-                user = cache_list[1]
-                username, password = get_host_username_password(host)
-                Session = sshx.PANNEL(host, username, password, 'User', user)
-                text = Session.Password(passw)
-                message.reply_text(text)
+                if 4 <= len(passw) <= 16:
+                    cache_list, host_cahce = get_collector_cache(chat_id)
+                    host = cache_list[0]
+                    user = cache_list[1]
+                    username, password = get_host_username_password(host)
+                    Session = sshx.PANNEL(host, username, password, 'User', user)
+                    text = Session.Password(passw)
+                    message.reply_text(text)
+                    delete_cache(chat_id)
+                    delete_collector(chat_id)
+                elif passw <= 3:
+                    message.reply_text("The password is too Short, send between 4-16 characters")
+                else:
+                    message.reply_text("The password is too Long, send between 4-16 characters")
             except Exception as e:
                 message.reply_text(f"Error: {str(e)}")
-            delete_cache(chat_id)
-            delete_collector(chat_id)
+                delete_cache(chat_id)
+                delete_collector(chat_id)
 
         elif status == "name":
-            cache_list, host_cahce = get_collector_cache(chat_id)
-            message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
-            cache_list.append(link)
-            delete_cache(chat_id)
-            add_cache(chat_id, "GB")
-            update_collector(chat_id, cache_list, host_cahce)
+            if len(link) <= 16:
+                cache_list, host_cahce = get_collector_cache(chat_id)
+                message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
+                cache_list.append(link)
+                delete_cache(chat_id)
+                add_cache(chat_id, "GB")
+                update_collector(chat_id, cache_list, host_cahce)
+            else:
+                message.reply_text("The name is too long, send between 1-16 characters")
 
         elif status == "GB":
             try:
@@ -3175,6 +3211,7 @@ def call_BU(bot, query):
         query.answer("دوباره تلاش کنید", show_alert=True)
         delete_cache(chat_id)
 
+
 @app.on_callback_query(filters.regex('UPTXR_'))
 def call_UPTXR(bot, query):
     chat_id = query.message.chat.id
@@ -3360,8 +3397,25 @@ def call_service(bot, query):
         query.answer("چیزی پیدا نشد. اگه سرویسی دارین دکمه اطلاعات سرویس بزنین و سرویستون بفرستین 🙂", show_alert=True)
 
 
+@app.on_callback_query(filters.regex('SELFCPA_'))
+def call_SELFCPA(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    host = (data.split("_")[1]).split("$")[0]
+    user = data.split("$")[1]
+    cb = host + "$" + user
+    add_cache(chat_id, "USP_" + cb)
+    keyboard.append([InlineKeyboardButton("<<", callback_data=f'ID_{cb}')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text='خب پسورد جدیدتون بفرستین', reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('ID_'))
 def call_ID(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
     data = query.data
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
@@ -3432,7 +3486,7 @@ def call_FREEPX(bot, query):
         query.answer("این بخش غیرفعاله☹️", show_alert=True)
     else:
         text = "Telegram Proxy:\n\n" + proxy
-    query.edit_message_text(text=text, reply_markup=reply_markup)
+        query.edit_message_text(text=text, reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('help'))
