@@ -3402,6 +3402,7 @@ def call_SELFCPA(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
+    data = query.data
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
     cb = host + "$" + user
