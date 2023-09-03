@@ -272,7 +272,7 @@ def Login_test(username, password, host):
 
 def update_host(link):
     text = "🗒Logs:\n"
-    from_host = (link.split("/change from ")[1]).split(" to")[0]
+    from_host = (link.split("/transfer from ")[1]).split(" to")[0]
     data = link.split("to ")[1]
     with open("Pannels.txt", 'a+') as txt:
         if from_host in txt.read():
@@ -791,7 +791,7 @@ def cancel(bot, message):
         delete_cache(chat_id)
         delete_collector(chat_id)
     if chat_id in admin_id:
-        message.reply_text("Canceled❌\n/add\n/remove\n/change\n/specific\n/edit", reply_markup=Admin_Tools_keys())
+        message.reply_text("Canceled❌\n/add\n/remove\n/transfer\n/specific\n/edit", reply_markup=Admin_Tools_keys())
     elif chat_id in seller_id:
         message.reply_text("Canceled❌", reply_markup=Seller_Tools_keys())
     else:
@@ -1052,8 +1052,8 @@ def start_specific(bot, message):
 @app.on_message(filters.chat(admin_id) & filters.command('change'))
 def start_change(bot, message):
     link = message.text
-    if link == "/change":
-        message.reply_text("<pre>/change from domain to domain@user:pass</pre>", parse_mode=enums.ParseMode.HTML)
+    if link == "/transfer":
+        message.reply_text("<pre>/transfer from domain to domain@user:pass</pre>", parse_mode=enums.ParseMode.HTML)
     else:
         if os.stat("Pannels.txt").st_size == 0:
             message.reply_text("There's not any server /add a server")
@@ -1067,7 +1067,7 @@ def start_change(bot, message):
 
 @app.on_message(filters.chat(admin_id) & filters.command('start'))
 def start_admin(bot, message):
-    text = '🔻<b>Tools</b>\n\n/add\n/remove\n/change\n/specific\n/edit'
+    text = '🔻<b>Tools</b>\n\n/add\n/remove\n/transfer\n/specific\n/edit'
     message.reply_text(text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
@@ -1866,9 +1866,9 @@ def text_private(bot, message):
                 message.reply_text("Only numbers or /cancel")
 
         elif "proxy" == status:
-            if "https://t.me/proxy?" in link:
+            if "t.me/proxy?" in link:
                 settings = get_settings()
-                settings['proxy'] = link
+                settings['proxy'] = 'https://' + link
                 update_settings(settings)
                 keyboard = [[InlineKeyboardButton("<<", callback_data='Sprx')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1959,7 +1959,7 @@ def text_private(bot, message):
 
 @app.on_callback_query(filters.regex('back_admin'))
 def call_back(bot, query):
-    text = '🔻<b>We\'re back</b>\n\n/add\n/remove\n/change\n/specific\n/edit'
+    text = '🔻<b>We\'re back</b>\n\n/add\n/remove\n/transfer\n/specific\n/edit'
     query.edit_message_text(text=text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
@@ -2103,7 +2103,7 @@ def call_hosts(bot, query):
                             [InlineKeyboardButton("✉️پیام اتصال", callback_data=f"HSMSC_{host}")],
                             [InlineKeyboardButton("❌حذف کاربران منقضی", callback_data=f"HSAR_{host}")],
                             [InlineKeyboardButton("🔒محدودیت کاربر", callback_data=f"HSUL_{host}")],
-                            [InlineKeyboardButton("🎁مهدیه روزانه", callback_data=f"HSUGift_{host}")],
+                            [InlineKeyboardButton("🎁هدیه روزانه", callback_data=f"HSUGift_{host}")],
                             [InlineKeyboardButton("🔙Back", callback_data="servers")]
                         ]
                         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2427,7 +2427,7 @@ def call_CAPASS(bot, query):
 @app.on_callback_query(filters.regex('ADPASS'))
 def call_ADPASS(bot, query):
     if check_cache(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a Server to Change an account password:", reply_markup=server_cb_creator("CAPASS_"))
+        query.edit_message_text(text="Select a Server to Change password of an account:", reply_markup=server_cb_creator("CAPASS_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -2447,7 +2447,7 @@ def call_RTRF(bot, query):
 @app.on_callback_query(filters.regex('TrfRes'))
 def call_TrfRes(bot, query):
     if check_cache(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a Server to Change an account password:", reply_markup=server_cb_creator("RTRF_"))
+        query.edit_message_text(text="Select a Server to Reset traffic of an account:", reply_markup=server_cb_creator("RTRF_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -2470,7 +2470,7 @@ def call_CTRPLUS(bot, query):
 @app.on_callback_query(filters.regex('TrfPlus'))
 def call_TrfPlus(bot, query):
     if check_cache(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a Server to Change an account password:", reply_markup=server_cb_creator("CTRPLUS_"))
+        query.edit_message_text(text="Select a Server to update traffic of an account:", reply_markup=server_cb_creator("CTRPLUS_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3904,12 +3904,13 @@ def call_FLCHON(bot, query):
                                             bot.send_message(chat_id, text)
                                         else:
                                             if "Error" not in content:
-                                                checked_filtering.remove(host)
-                                    '''except:
+                                                if host in checked_connections:
+                                                    checked_filtering.remove(host)
+                                    except:
                                         if host not in checked_connections:
                                             text = "🔴Connection Error: " + host
                                             checked_connections.append(host)
-                                            bot.send_message(chat_id, text)'''
+                                            bot.send_message(chat_id, text)
                         sleep(300)
                     else:
                         break
@@ -3990,7 +3991,7 @@ def call_Sprx(bot, query):
 @app.on_callback_query(filters.regex('settings'))
 def call_settings(bot, query):
     keyboard = [
-        [InlineKeyboardButton("💵ولت ترون", callback_data='wallet'), InlineKeyboardButton("شماره کارت💳", callback_data='Card')],
+        [InlineKeyboardButton("ولت ترون💵", callback_data='wallet'), InlineKeyboardButton("شماره کارت💳", callback_data='Card')],
         [InlineKeyboardButton("پیام استارت📃", callback_data='WSMSG'), InlineKeyboardButton("پیام تعرفه قیمت💰", callback_data='WLMSG')],
         [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("بکاپ📥", callback_data='Backup')],
         [InlineKeyboardButton("حذف خودکار کاربر🗑", callback_data='AutoDelete'), InlineKeyboardButton("قیمت دلار💲", callback_data='USD')],
