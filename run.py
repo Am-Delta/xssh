@@ -1,5 +1,7 @@
 import os
+import re
 import json
+import sqlite3
 from termcolor import colored
 from pathlib import Path
 
@@ -18,6 +20,28 @@ new_dict = {}
 file = "data.json"
 
 
+def db_update():
+    conn = sqlite3.connect('ssh.db', check_same_thread=False)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Settings WHERE ID=:ID", {'ID': 1})
+    records = cur.fetchall()
+    s = records[0][1]
+    s = s.replace("\'", "\"")
+    p = re.compile('(?<!\\\\)\'')
+    s = p.sub('\"', s)
+    settings = json.loads(s)
+    if settings.get('proxy', None) is None:
+        add_dict = {
+            "plus-traffic": [10, 20],
+            "plus-prices": [20000, 35000],
+            "proxy": "None"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+    conn.commit()
+    cur.close()
+
+
 def run():
     if Path("Pannels.txt").is_file() is False:
         open("Pannels.txt", "w")
@@ -27,6 +51,7 @@ def run():
     if Path("ssh.db").is_file() is False:
         os.system('python3 sshdb.py')
         print("Database Created, change the settings in the bot")
+    db_update()
     print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you want stop the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
     os.system('nohup python3 session-updater.py &')
     os.system('nohup python3 backup-ssh.py &')
