@@ -91,7 +91,10 @@ settings = {
     "prices": [50000, 150000],
     "connections": [1, 2],
     "days": [30, 30],
-    "traffic": [50, 100]
+    "traffic": [50, 100],
+    "plus-traffic": [10, 20],
+    "plus-prices": [20000, 35000],
+    "proxy": "None"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
