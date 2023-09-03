@@ -139,6 +139,17 @@ def Get_list(html):
     return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, server_traffic, int(info[1]), True
 
 
+def check_premium_spliter(html):
+    for a in html.css('a.waves-effect'):
+        href = a.attributes.get("href", None)
+        if href is None:
+            return True, "Yes"
+        elif "http://shahanpanel.online" in href:
+            return False, "NO"
+        else:
+            return True, "YES"
+
+
 class PANNEL:
     def __init__(self, host, username, password, job, uname):
         self.host = host
@@ -170,9 +181,11 @@ class PANNEL:
             alt = inp.attributes.get("name", None)
             if alt is not None:
                 if 'port' == inp.attributes['name']:
-                    port = inp.attributes['value']
+                    if inp.attributes.get('value', None) is not None:
+                        port = str(inp.attributes.get('value', None))
                 elif 'udpport' == inp.attributes['name']:
-                    udgpw = inp.attributes['value']
+                    if inp.attributes.get('value', None) is not None:
+                        udgpw = str(inp.attributes.get('value', None))
         return port, udgpw
 
     def Backup_content(self):
@@ -229,18 +242,43 @@ class PANNEL:
             s = self.r.get(self.url + "/p/index.php").text
             html = HTMLParser(s)
             server_traffic = 0
+            clients_usage = 0
+            counter = 1
+            cpu = "?"
+            ram = "?"
+            storage = "?"
             for setr in html.css('small.pull-left'):
-                if "گیگابایت" in setr.text():
-                    server_traffic = float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))
+                if counter == 1:
+                    ram = setr.text()
+                elif counter == 2:
+                    cpu = setr.text()
+                elif counter == 3:
+                    storage = setr.text()
+                elif counter == 4:
+                    if "گیگابایت" in setr.text():
+                        server_traffic = float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))
+                    elif "ترابایت" in setr.text():
+                        server_traffic = float(((setr.text()).split("ترابایت")[0]).replace(" ", '')) * 1024
+                elif counter == 5:
+                    if "گیگابایت" in setr.text():
+                        clients_usage = float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))
+                    elif "ترابایت" in setr.text():
+                        clients_usage = float(((setr.text()).split("ترابایت")[0]).replace(" ", '')) * 1024
                     break
-                elif "ترابایت" in setr.text():
-                    server_traffic = float(((setr.text()).split("ترابایت")[0]).replace(" ", '')) * 1024
-                    break
+                counter += 1
             info = []
             for data in html.css('span.info-box-number'):
                 info.append(data.text())
-            text = f"🖥Host: {self.host}\n🔃Traffic: {str('{:.2f}'.format(float(server_traffic)))} GB\n👤Clients: {str(info[0])}\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(info[1])}"
-            return text
+            onlines = info[1]
+            if "کاربر" in onlines:
+                onlines = onlines.replace("کاربر", "")
+            Bool, status = self.IP_Check()
+            stats = self.Stats()
+            if "Error" in stats:
+                stats = "Update your Panel to get the stats"
+            t0 = f"\n\nIP Check: {status}\n{stats}"
+            text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\n🔃Traffic: {str('{:.2f}'.format(float(server_traffic)))} GB\n🔄Clients usage: {str('{:.2f}'.format(float(clients_usage)))}\n👤Clients: {str(info[0])} GB\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(onlines)}"
+            return text + t0
         except Exception as e:
             return "Error: " + str(e)
 
@@ -263,6 +301,157 @@ class PANNEL:
         except Exception as e:
             print("Error: " + str(e))
             return [], [], [], [], [], [], [], [], [], [], 0, False
+
+    def Check_Premium(self):
+        try:
+            s = self.r.get(self.url + "/p/setting.php").text
+            html = HTMLParser(s)
+            return check_premium_spliter(html)
+        except Exception as e:
+            return False, "Error: " + str(e)
+
+    def IP_Check(self):
+        try:
+            s = self.r.get(self.url + "/p/checkip.php").text
+            html = HTMLParser(s)
+            count = 0
+            for td in html.css('td.checkip'):
+                try:
+                    if "فیلتر شده" in td.text():
+                        count += 1
+                except:
+                    pass
+            if count >= 3:
+                return True, "Offline ❌"
+            else:
+                return False, "Online ✅"
+        except Exception as e:
+            return False, "Error: " + str(e)
+
+    def Stats(self):
+        try:
+            s = self.r.get(self.url + "/p/serverstatus.php").text
+            html = HTMLParser(s)
+            IPv6 = "?"
+            IPv4 = "?"
+            stats = ""
+            counter = 1
+            for td in html.css('td.checkip'):
+                try:
+                    if ":" in td.text():
+                        IPv6 = td.text()
+                    elif "." in td.text():
+                        IPv4 = td.text()
+                        break
+                    if counter == 2:
+                        if "غیرفعال" in td.text():
+                            status = "✔️"
+                        else:
+                            status = "✖️"
+                        stats += f"Premium: {status}"
+                except:
+                    pass
+                counter += 1
+            return f"IPv6: {IPv6}\nIPv4: {IPv4}\n{stats}"
+        except Exception as e:
+            return "Error: " + str(e)
+
+    def Auto_remove(self, days):
+        try:
+            days = int(days)
+        except:
+            return "Error: only numbers"
+        payload = {
+            'rmexpday': days,
+            'removeexpired': 'removeexpired'
+        }
+        try:
+            s = self.r.post(self.url + "/p/setting.php", data=payload)
+            if s.status_code == 200:
+                return "Done ✔️"
+            else:
+                return "Error: " + str(s.status_code)
+        except Exception as e:
+            return "Error: " + str(e)
+
+    def Message(self, bannermsg):
+        payload = {
+            "banner": bannermsg,
+            "bannermsg": "bannermsg"
+        }
+        try:
+            s = self.r.post(self.url + "/p/setting.php", data=payload)
+            if s.status_code == 200:
+                return "Done ✔️"
+            else:
+                return "Error: " + str(s.status_code)
+        except Exception as e:
+            return "Error: " + str(e)
+
+    def Gift(self, days):
+        try:
+            days = int(days)
+        except:
+            return "Error: only numbers"
+        payload = {
+            "giftday": days,
+            "giftuser": "giftuser"
+        }
+        try:
+            s = self.r.post(self.url + "/p/setting.php", data=payload)
+            if s.status_code == 200:
+                return "Done ✔️"
+            else:
+                return "Error: " + str(s.status_code)
+        except Exception as e:
+            return "Error: " + str(e)
+
+    def Limit_status(self):
+        try:
+            s = self.r.post(self.url + "/p/setting.php").text
+            html = HTMLParser(s)
+            for inp in html.css('input.form-control'):
+                if "غیرفعال" == inp.attributes['name']:
+                    return False
+                elif "فعال" == inp.attributes['name']:
+                    return True
+        except Exception as e:
+            return False
+        return False
+
+    def Limit_on(self):
+        payload = {
+            "limitusers": "changeport"
+        }
+        try:
+            status = self.Limit_status()
+            if status is False:
+                s = self.r.post(self.url + "/p/setting.php", data=payload)
+                if s.status_code == 200:
+                    return "Done ✔️"
+                else:
+                    return "Error: " + str(s.status_code)
+            else:
+                return "🟢Already ON"
+        except Exception as e:
+            return "Error: " + str(e)
+
+    def Limit_off(self):
+        payload = {
+            "notlimitusers": "changeport"
+        }
+        try:
+            status = self.Limit_status()
+            s = self.r.post(self.url + "/p/setting.php", data=payload)
+            if s.status_code == 200:
+                if status is False:
+                    return "🔴Already OFF"
+                else:
+                    return "Done ✔️"
+            else:
+                return "Error: " + str(s.status_code)
+        except Exception as e:
+            return "Error: " + str(e)
 
     def Delete(self, uname):
         payload = {
@@ -301,6 +490,31 @@ class PANNEL:
                     traffic = "Unlimited♾"
                 port, udgpw = self.Ports()
                 return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {uname}\nPassword : {passw}\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+        except Exception as e:
+            return "Error: " + str(e)
+
+    def Password(self, password):
+        if "گیگابایت" in self.traffic:
+            Traffic = int((self.traffic).replace("گیگابایت", ""))
+        elif "نامحدود" in self.traffic:
+            Traffic = ""
+        payload = {
+            'newuserusername': self.uname,
+            'newuserpassword': password,
+            'newusermobile': '',
+            'newuseremail': '',
+            'newusertraffic': Traffic,
+            'newusermultiuser': self.connection_limit,
+            'newuserfinishdate': self.days,
+            'newuserreferral': '',
+            'newusertelegramid': '',
+            'newuserinfo': '',
+            'newusersubmit': 'ثبت'
+        }
+        try:
+            s = self.r.post(self.url + "/p/newuser.php", data=payload)
+            if s.status_code == 200:
+                return f"🟢 Successfully changed to {password}"
         except Exception as e:
             return "Error: " + str(e)
 
