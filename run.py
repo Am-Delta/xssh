@@ -52,7 +52,7 @@ def run():
         os.system('python3 sshdb.py')
         print("Database Created, change the settings in the bot")
     db_update()
-    print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you want stop the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
+    print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you want stop to the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
     os.system('nohup python3 session-updater.py &')
     os.system('nohup python3 backup-ssh.py &')
     os.system('nohup python3 bot.py &')
