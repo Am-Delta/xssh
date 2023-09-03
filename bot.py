@@ -3893,7 +3893,7 @@ def call_FLCHON(bot, query):
                                     if sshx.Login(username, password, host) is False:
                                         do = False
                                 if do is True:
-                                    if True:
+                                    try:
                                         Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                                         if host in checked_connections:
                                             checked_connections.remove(host)
