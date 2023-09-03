@@ -36,6 +36,10 @@ folder = 'backup'
 cache = [False]
 backup = [False]
 run_backup = [False]
+Filtering_system = [False]
+run_filtering = [False]
+checked_filtering = []
+checked_connections = []
 
 
 app = Client(session, api_id, api_hash, bot_token=TOKEN)
@@ -75,12 +79,15 @@ def Admin_Tools_keys():
     keyboard = [
         [InlineKeyboardButton("✔️چکر", callback_data='checker'), InlineKeyboardButton("📊آمار", callback_data='stats')],
         [InlineKeyboardButton("🖥اطلاعات سرور", callback_data='servers'), InlineKeyboardButton("⚫️ظرفیت سرورها", callback_data='full')],
+        [InlineKeyboardButton("⛔️تست فیلترینگ", callback_data='Filtering')],
         [InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data='disable'), InlineKeyboardButton("🟢 فعال کاربر", callback_data='enable')],
         [InlineKeyboardButton("🔄تمدید کاربر ", callback_data='update'), InlineKeyboardButton("🗑حذف اکانت", callback_data='remove')],
         [InlineKeyboardButton("👤اطلاعات اکانت", callback_data='userinfo'), InlineKeyboardButton("📄اکانت های کاربر", callback_data='userconfigs')],
+        [InlineKeyboardButton("🚻ریست ترافیک", callback_data='TrfRes'), InlineKeyboardButton("➕افزایش ترافیک", callback_data='TrfPlus')],
+        [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS')],
         [InlineKeyboardButton("🛠ساخت اکانت یوزر تلگرام", callback_data='create'), InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none')],
         [InlineKeyboardButton("📦ارسال پیام همگانی", callback_data='message'), InlineKeyboardButton("💲فروشنده ها", callback_data='sellers')],
-        [InlineKeyboardButton("تنظیمات⚙️", callback_data='settings')]
+        [InlineKeyboardButton("⚙️تنظیمات", callback_data='settings')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
@@ -102,7 +109,8 @@ def User_Tools_keys():
         [InlineKeyboardButton("🛒خرید🛒", callback_data='buy')],
         [InlineKeyboardButton("💰تعرفه قیمت ها", callback_data='price'), InlineKeyboardButton("🔄تمدید", callback_data='upgrade')],
         [InlineKeyboardButton("ℹ️اطلاعات سرویس", callback_data='config'), InlineKeyboardButton("📦سرویس های من", callback_data='service')],
-        [InlineKeyboardButton("👥پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘راهنمای نصب و اجرا", callback_data='help')]
+        [InlineKeyboardButton("👥پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘راهنمای نصب و اجرا", callback_data='help')],
+        [InlineKeyboardButton("🆓پروکسی تلگرام", callback_data='FREEPX')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
@@ -783,7 +791,7 @@ def cancel(bot, message):
         delete_cache(chat_id)
         delete_collector(chat_id)
     if chat_id in admin_id:
-        message.reply_text("Canceled❌\n/add\n/remove\n/change\n/specific", reply_markup=Admin_Tools_keys())
+        message.reply_text("Canceled❌\n/add\n/remove\n/change\n/specific\n/edit", reply_markup=Admin_Tools_keys())
     elif chat_id in seller_id:
         message.reply_text("Canceled❌", reply_markup=Seller_Tools_keys())
     else:
@@ -888,6 +896,51 @@ def forward(bot, message):
                 message.reply_text("❌This user is Hidden /cancel it", reply_markup=reply_markup)
 
 
+@app.on_message(filters.chat(admin_id) & filters.command('edit'))
+def start_edit(bot, message):
+    link = message.text
+    if link == "/edit":
+        message.reply_text("<pre>/edit domain@user:pass</pre>", parse_mode=enums.ParseMode.HTML)
+    elif "@" not in link:
+        message.reply_text("not correct: /edit domain@user:pass")
+    else:
+        do = False
+        try:
+            data = link.split("/edit ")[1]
+            with open("Pannels.txt", 'a+') as txt:
+                data = link.split("/edit ")[1]
+                if data in txt.read():
+                    host = data.split("@")[0]
+                    username = (data.split(":")[0]).split("@")[1]
+                    password = data.split(":")[1]
+                    for line in txt.readlines():
+                        if host in line:
+                            old_password = line.split(":")[1].replace("\n", "")
+                            old_username = line.split(":")[0].split("@")[1]
+                            break
+                    session = "ssh/" + host + ".session"
+                    os.remove(session)
+                    if sshx.Login(username, password, host) is False:
+                        message.reply_text("Please send the correct Login data")
+                        ssc = sshx.Login(old_username, old_password, host)
+                    if Login_test(username, password, host) is True:
+                        do = True
+                    else:
+                        message.reply_text("Wrong Login data")
+                        ssc = sshx.Login(old_username, old_password, host)
+                else:
+                    message.reply_text("This server does not exist")
+        except Exception as e:
+            message.reply_text("Error: " + str(e))
+        if do is True:
+            with open("Pannels.txt", "w") as f:
+                for line in lines:
+                    if line.strip("\n") != (host + "@" + old_username + ":" + old_password):
+                        f.write(line)
+                f.writelines(data + "\n")
+            message.reply_text("Done✔️")
+
+
 @app.on_message(filters.chat(admin_id) & filters.command('add'))
 def start_add(bot, message):
     link = message.text
@@ -957,7 +1010,7 @@ def start_remove(bot, message):
 
 
 @app.on_message(filters.chat(admin_id) & filters.command('specific'))
-def start_change(bot, message):
+def start_specific(bot, message):
     link = message.text
     chat_id = message.chat.id
     if link == "/specific":
@@ -1014,7 +1067,7 @@ def start_change(bot, message):
 
 @app.on_message(filters.chat(admin_id) & filters.command('start'))
 def start_admin(bot, message):
-    text = '🔻<b>Tools</b>\n\n/add\n/remove\n/change\n/specific'
+    text = '🔻<b>Tools</b>\n\n/add\n/remove\n/change\n/specific\n/edit'
     message.reply_text(text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
@@ -1053,14 +1106,42 @@ def start_user(bot, message):
 @app.on_message(filters.private & filters.text)
 def text_private(bot, message):
     chat_id = message.chat.id
-    if check_cache(chat_id) is True:
+    link = message.text
+    if 'http://' in link:
+        link = link.replace('http://', '')
+    elif 'https://' in link:
+        link = link.replace('https://', '')
+    if check_cache(chat_id) is False:
+        if chat_id in admin_id:
+            try:
+                host, user = get_host_username(link)
+            except:
+                host = None
+                user = None
+            if host is not None:
+                msg = message.reply_text("Wait...").id
+                username, password = get_host_username_password(host)
+                try:
+                    Session = sshx.PANNEL(host, username, password, 'User', user)
+                    text = Session.User_info()
+                    cb = host + "$" + user
+                    keyboard = [
+                        [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
+                        [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
+                        [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))]
+                    ]
+                    if "نامحدود" not in text:
+                        keyboard.append([InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))])
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    bot.edit_message_text(chat_id, msg, text, reply_markup=reply_markup)
+                except:
+                    bot.edit_message_text(chat_id, msg, "چیزی پیدا نشد:(")
+            else:
+                message.reply_text("Menu /start")
+        else:
+            message.reply_text("Menu /start")
+    else:
         status = get_cache_status(chat_id)
-        link = message.text
-
-        if 'http://' in link:
-            link = link.replace('http://', '')
-        elif 'https://' in link:
-            link = link.replace('https://', '')
 
         if chat_id not in (admin_id + seller_id):
             if (status == "config"):
@@ -1231,9 +1312,51 @@ def text_private(bot, message):
                         bot.edit_message_text(chat_id, msg, "Error: " + str(e))
                 delete_cache(chat_id)
                 delete_collector(chat_id)
-            except Exception as e:
-                print(e, "Line days None")
+            except:
                 message.reply_text("Send the correct number or /cancel")
+
+        elif status == "password":
+            try:
+                user = link
+                cache_list, host_cahce = get_collector_cache(chat_id)
+                host = cache_list[0]
+                username, password = get_host_username_password(host)
+                try:
+                    Session = sshx.PANNEL(host, username, password, 'User', user)
+                    text = Session.User_info()
+                    if "Error" not in text:
+                        message.reply_text("Send The new password or /cancel")
+                        cache_list.append(link)
+                        delete_cache(chat_id)
+                        add_cache(chat_id, "CPassword")
+                        update_collector(chat_id, cache_list, host_cahce)
+                    else:
+                        message.reply_text(f"The user not found or \n⭕️ Connection Error: {host}\nLogs: {text}")
+                        delete_cache(chat_id)
+                        delete_collector(chat_id)
+                except Exception as e:
+                    message.reply_text(f"The user not found or \n⭕️ Connection Error: {host}\nLogs: {text}\n\n{str(e)}")
+                    delete_cache(chat_id)
+                    delete_collector(chat_id)
+            except Exception as e:
+                message.reply_text(f"Error: {str(e)}")
+                delete_cache(chat_id)
+                delete_collector(chat_id)
+
+        elif status == "CPassword":
+            try:
+                passw = link
+                cache_list, host_cahce = get_collector_cache(chat_id)
+                host = cache_list[0]
+                user = cache_list[1]
+                username, password = get_host_username_password(host)
+                Session = sshx.PANNEL(host, username, password, 'User', user)
+                text = Session.Password(passw)
+                message.reply_text(text)
+            except Exception as e:
+                message.reply_text(f"Error: {str(e)}")
+            delete_cache(chat_id)
+            delete_collector(chat_id)
 
         elif status == "name":
             cache_list, host_cahce = get_collector_cache(chat_id)
@@ -1407,6 +1530,34 @@ def text_private(bot, message):
                     cache_list.clear()
                     delete_cache(chat_id)
                     delete_collector(chat_id)
+            except:
+                message.reply_text("Send the correct number or /cancel")
+
+        elif status == "plus":
+            user = link
+            cache_list, host_cahce = get_collector_cache(chat_id)
+            cache_list.append(user)
+            delete_cache(chat_id)
+            add_cache(chat_id, "plus-Traffic")
+            message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
+            update_collector(chat_id, cache_list, [])
+
+        elif status == "plus-Traffic":
+            try:
+                traffic = int(link)
+                cache_list, host_cahce = get_collector_cache(chat_id)
+                host = cache_list[0]
+                user = cache_list[1]
+                msg = message.reply_text("Wait...").id
+                username, password = get_host_username_password(host)
+                try:
+                    Session = sshx.PANNEL(host, username, password, 'User', user)
+                    text = Session.Update_Traffic(traffic)
+                except Exception as e:
+                    text = "Error: " + str(e)
+                bot.edit_message_text(chat_id, msg, text)
+                delete_cache(chat_id)
+                delete_collector(chat_id)
             except:
                 message.reply_text("Send the correct number or /cancel")
 
@@ -1693,7 +1844,6 @@ def text_private(bot, message):
                 traffic = int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 settings = get_settings()
-                [price, connections, days]
                 prices = settings['prices']
                 prices.append(cache_list[0])
                 connections = settings['connections']
@@ -1711,13 +1861,101 @@ def text_private(bot, message):
             except:
                 message.reply_text("Only numbers or /cancel")
 
-    else:
-        message.reply_text("Menu /start")
+        elif "proxy" == status:
+            if "https://t.me/proxy?" in link:
+                settings = get_settings()
+                settings['proxy'] = link
+                update_settings(settings)
+                keyboard = [[InlineKeyboardButton("<<", callback_data='Sprx')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text("Done✔️", reply_markup=reply_markup)
+                delete_cache(chat_id)
+            else:
+                message.reply_text("Send link: https://t.me/proxy?server=... or /cancel")
+
+        elif "Connectionmsg_" in status:
+            if len(link) <= 64:
+                host = status.split("Connectionmsg_")[1]
+                if host in Get_hosts():
+                    username, password = get_host_username_password(host)
+                    try:
+                        Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                        text = Session.Message(link)
+                    except Exception as e:
+                        text = "Error: " + str(e)
+                else:
+                    text = "The server does not exist, You might deleted before"
+                keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text(text, reply_markup=reply_markup)
+                delete_cache(chat_id)
+            else:
+                message.reply_text("The message is too long, send a message less than 64 characters")
+
+        elif "AutoRemove_" in status:
+            try:
+                days = int(link)
+                host = status.split("AutoRemove_")[1]
+                if host in Get_hosts():
+                    username, password = get_host_username_password(host)
+                    try:
+                        Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                        text = Session.Auto_remove(days)
+                    except Exception as e:
+                        text = "Error: " + str(e)
+                else:
+                    text = "The server does not exist, You might deleted before"
+                keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text(text, reply_markup=reply_markup)
+                delete_cache(chat_id)
+            except:
+                message.reply_text("Send only number or /cancel")
+
+        elif "Gift_" in status:
+            try:
+                days = int(link)
+                host = status.split("Gift_")[1]
+                if host in Get_hosts():
+                    username, password = get_host_username_password(host)
+                    try:
+                        Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                        text = Session.Gift(days)
+                    except Exception as e:
+                        text = "Error: " + str(e)
+                else:
+                    text = "The server does not exist, You might deleted before"
+                keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text(text, reply_markup=reply_markup)
+                delete_cache(chat_id)
+            except:
+                message.reply_text("Send only number or /cancel")
+
+        elif "Reset_" in status:
+            try:
+                user = link
+                host = status.split("Reset_")[1]
+                if host in Get_hosts():
+                    username, password = get_host_username_password(host)
+                    try:
+                        Session = sshx.PANNEL(host, username, password, 'User', user)
+                        text = Session.Reset_traffic()
+                    except Exception as e:
+                        text = "Error: " + str(e)
+                else:
+                    text = "The server does not exist, You might deleted before"
+            except Exception as e:
+                text = "Error: " + str(e)
+            keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text(text, reply_markup=reply_markup)
+            delete_cache(chat_id)
 
 
 @app.on_callback_query(filters.regex('back_admin'))
 def call_back(bot, query):
-    text = '🔻<b>We\'re back</b>\n\n/add\n/remove\n/change\n/specific'
+    text = '🔻<b>We\'re back</b>\n\n/add\n/remove\n/change\n/specific\n/edit'
     query.edit_message_text(text=text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
@@ -1738,6 +1976,111 @@ def call_servers(bot, query):
     query.edit_message_text(text="Select? ", reply_markup=server_cb_creator("HOST_"))
 
 
+@app.on_callback_query(filters.regex('HSMSC_'))
+def call_HSMSC(bot, query):
+    rt = query.data
+    host = rt.split("HSMSC_")[1]
+    chat_id = query.message.chat.id
+    if host in Get_hosts():
+        if check_cache(chat_id) is True:
+            delete_cache(chat_id)
+        add_cache(chat_id, "Connectionmsg_" + host)
+        bot.send_message(chat_id, "OK, send your message")
+    else:
+        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('HSAR_'))
+def call_HSAR(bot, query):
+    rt = query.data
+    host = rt.split("HSAR_")[1]
+    chat_id = query.message.chat.id
+    if host in Get_hosts():
+        if check_cache(chat_id) is True:
+            delete_cache(chat_id)
+        add_cache(chat_id, "AutoRemove_" + host)
+        bot.send_message(chat_id, "OK, send only number (day)")
+    else:
+        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('HSUGift_'))
+def call_HSUGift(bot, query):
+    rt = query.data
+    host = rt.split("HSUGift_")[1]
+    chat_id = query.message.chat.id
+    if host in Get_hosts():
+        if check_cache(chat_id) is True:
+            delete_cache(chat_id)
+        add_cache(chat_id, "Gift_" + host)
+        bot.send_message(chat_id, "OK, send only number (day)")
+    else:
+        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('HSUL_'))
+def call_HSUL(bot, query):
+    rt = query.data
+    host = rt.split("HSUL_")[1]
+    if host in Get_hosts():
+        keyboard = [
+            [InlineKeyboardButton("✔️ Active", callback_data=f"ULA_{host}")],
+            [InlineKeyboardButton("✖️ Disable", callback_data=f"ULD_{host}")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        bot.send_message(chat_id, f"Limit, server: {host}\nselect:", )
+    else:
+        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('ULA_'))
+def call_ULA(bot, query):
+    rt = query.data
+    host = rt.split("ULA_")[1]
+    if host in Get_hosts():
+        username, password = get_host_username_password(host)
+        try:
+            Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+            text = Session.Limit_on()
+            keyboard = [[InlineKeyboardButton("🔙Back", callback_data=f"HSUL_{host}")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            query.edit_message_text(text=text, reply_markup=reply_markup)
+        except Exception as e:
+            query.edit_message_text(text=f"Error: {str(e)}")
+    else:
+        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('ULD_'))
+def call_ULD(bot, query):
+    rt = query.data
+    host = rt.split("ULD_")[1]
+    if host in Get_hosts():
+        username, password = get_host_username_password(host)
+        try:
+            Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+            text = Session.Limit_off()
+            keyboard = [[InlineKeyboardButton("🔙Back", callback_data=f"HSUL_{host}")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            query.edit_message_text(text=text, reply_markup=reply_markup)
+        except Exception as e:
+            query.edit_message_text(text=f"Error: {str(e)}")
+    else:
+        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('HOST_'))
 def call_hosts(bot, query):
     rt = query.data
@@ -1748,9 +2091,27 @@ def call_hosts(bot, query):
             if data.split("@")[0] == host:
                 username = (data.split(":")[0]).split("@")[1]
                 password = data.split(":")[1]
-                Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-                text = Session.Short_info()
-                query.edit_message_text(text=text)
+                try:
+                    Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                    text = Session.Short_info()
+                    if "Premium: ✔️" in text:
+                        keyboard = [
+                            [InlineKeyboardButton("✉️پیام اتصال", callback_data=f"HSMSC_{host}")],
+                            [InlineKeyboardButton("❌حذف کاربران منقضی", callback_data=f"HSAR_{host}")],
+                            [InlineKeyboardButton("🔒محدودیت کاربر", callback_data=f"HSUL_{host}")],
+                            [InlineKeyboardButton("🎁مهدیه روزانه", callback_data=f"HSUGift_{host}")],
+                            [InlineKeyboardButton("🔙Back", callback_data="servers")]
+                        ]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        query.edit_message_text(text=text, reply_markup=reply_markup)
+                    else:
+                        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        query.edit_message_text(text=text, reply_markup=reply_markup)
+                except Exception as e:
+                    keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    query.edit_message_text(text=("Error: " + str(e)), reply_markup=reply_markup)
                 break
 
 
@@ -1838,12 +2199,9 @@ def call_checker(bot, query):
                     if "❌" in text:
                         bot.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
                     checked_servers += 1
-                else:
-                    print("Done is False")
             except Exception as e:
                 offline_servers += 1
                 logs += f"⭕️ Connection Error: {host}"
-                print("Error: " + str(e))
     count_clients -= count_deleted_clients
     remain_clients += count_deleted_clients
     if len(str(int(servers_traffic))) >= 3:
@@ -1903,7 +2261,6 @@ def call_stats(bot, query):
                 except Exception as e:
                     offline_servers += 1
                     logs += f"⭕️ Connection Error: {host}"
-                    print("Error: " + str(e))
                 if (checked_servers % 5 == 0):
                     query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
         if len(str(int(servers_traffic))) >= 3:
@@ -1919,6 +2276,44 @@ def call_stats(bot, query):
         ID, Name, Username, Limit = get_seller_info(chat_id)
         text = "🏷Your sales: " + str(len(accounts)) + "\n🔻Limit: " + str(Limit)
         query.edit_message_text(text=text, reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('Filtering'))
+def call_filtering(bot, query):
+    keyboard = [[InlineKeyboardButton("<< back", callback_data="back_admin")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Processing Please wait...")
+    start = int(time())
+    FS = ""
+    logs = ""
+    count_servers, checked_servers, blocked_servers, online_servers = (0,)*4
+    with open("Pannels.txt", 'r') as txt:
+        for data in txt.readlines():
+            count_servers += 1
+            data = data.replace('\n', "")
+            host = data.split("@")[0]
+            username = (data.split(":")[0]).split("@")[1]
+            password = data.split(":")[1]
+            try:
+                Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                status, server_msg = Session.IP_Check()
+                if status is True:
+                    blocked_servers += 1
+                    FS += (f"🔴Offline: {host}\n")
+                else:
+                    if "Error" in server_msg:
+                        checked_servers -= 1
+                        FS += (f"❌unknown Error: {host}\n")
+                        logs += (f"⭕️ {server_msg}: {host}\n")
+                    else:
+                        online_servers += 1
+                checked_servers += 1
+            except Exception as e:
+                logs += f"⭕️ Connection Error: {host}"
+            if (checked_servers % 5 == 0):
+                query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
+    text = f"{FS}\n🖥 Servers: {str(count_servers)}\n☑️Check servers: {str(checked_servers)}\n⚠️Blocked servers: {str(blocked_servers)}\n🟢Online servers: {online_servers}\n{logs}\n⏳Time: {str(int(time() - start))}s"
+    query.edit_message_text(text=text, reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('full'))
@@ -1951,7 +2346,6 @@ def call_full(bot, query):
                     remain_clients += (maximum - Clients)
                 checked_servers += 1
             except Exception as e:
-                print("Error: " + str(e))
                 logs += f"⭕️ Connection Error: {host}"
             if (checked_servers % 5 == 0):
                 query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
@@ -2009,6 +2403,72 @@ def call_enable(bot, query):
     else:
         add_cache(query.message.chat.id, "enahost")
         query.edit_message_text(text="Send the host or /cancel")
+
+
+@app.on_callback_query(filters.regex('CAPASS_'))
+def call_CAPASS(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        data = query.data
+        domain = data.split("CAPASS_")[1]
+        cache_list = []
+        cache_list.append(domain)
+        add_collector(chat_id, "password", cache_list, [])
+        add_cache(chat_id, "password")
+        query.edit_message_text(text="Send The User or /cancel")
+    else:
+        query.edit_message_text(text="Please /cancel it first")
+
+
+@app.on_callback_query(filters.regex('ADPASS'))
+def call_ADPASS(bot, query):
+    if check_cache(query.message.chat.id) is False:
+        query.edit_message_text(text="Select a Server to Change an account password:", reply_markup=server_cb_creator("CAPASS_"))
+    else:
+        query.edit_message_text(text="Please /cancel it first")
+
+
+@app.on_callback_query(filters.regex('RTRF_'))
+def call_RTRF(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        data = query.data
+        domain = data.split("RTRF_")[1]
+        add_cache(chat_id, "Reset_" + domain)
+        query.edit_message_text(text="Send The User or /cancel")
+    else:
+        query.edit_message_text(text="Please /cancel it first")
+
+
+@app.on_callback_query(filters.regex('TrfRes'))
+def call_TrfRes(bot, query):
+    if check_cache(query.message.chat.id) is False:
+        query.edit_message_text(text="Select a Server to Change an account password:", reply_markup=server_cb_creator("RTRF_"))
+    else:
+        query.edit_message_text(text="Please /cancel it first")
+
+
+@app.on_callback_query(filters.regex('CTRPLUS_'))
+def call_CTRPLUS(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        data = query.data
+        domain = data.split("CAPASS_")[1]
+        cache_list = []
+        cache_list.append(domain)
+        add_collector(chat_id, "plus", cache_list, [])
+        add_cache(chat_id, "plus")
+        query.edit_message_text(text="Send The User or /cancel")
+    else:
+        query.edit_message_text(text="Please /cancel it first")
+
+
+@app.on_callback_query(filters.regex('TrfPlus'))
+def call_TrfPlus(bot, query):
+    if check_cache(query.message.chat.id) is False:
+        query.edit_message_text(text="Select a Server to Change an account password:", reply_markup=server_cb_creator("CTRPLUS_"))
+    else:
+        query.edit_message_text(text="Please /cancel it first")
 
 
 @app.on_callback_query(filters.regex('DM_'))
@@ -2221,6 +2681,8 @@ def call_IDADMIN(bot, query):
             keyboard = [
                 [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
                 [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
+                [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
+                [InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))],
                 [InlineKeyboardButton("<<", callback_data='back_admin')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2239,21 +2701,41 @@ def call_IDMNU(bot, query):
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
     cb = data.split("_")[1]
-    if check_exist_user(host, user) is True:
+    try:
         chat_id = query.message.chat.id
         status = (data.split("&")[1]).split("_")[0]
         username, password = get_host_username_password(host)
-        if (status != "Update") and (status != "Remove"):
+        if (status != "Update") and (status != "Remove") and (status != "PASSWORD") and (status != "Traffic"):
             Session = sshx.PANNEL(host, username, password, 'User', user)
         if status == "Active":
             text = Session.Enable()
         elif status == "Disable":
             text = Session.Disable()
+        elif status == "Reset":
+            text = Session.Reset_traffic()
+
+        elif status == "Traffic":
+            add_collector(chat_id, "plus", [], [])
+            cache_list = [host, user]
+            delete_cache(chat_id)
+            add_cache(chat_id, "plus-Traffic")
+            text = "Send GB only numbers (0 = unlimited) or /cancel"
+            update_collector(chat_id, cache_list, [])
 
         elif status == "Remove":
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
             text = Session.Delete(user)
-            delete_user(host, user)
+            if check_exist_user(host, user) is True:
+                delete_user(host, user)
+
+        elif status == "PASSWORD":
+            add_collector(chat_id, "password", [], [])
+            cache_list = [host, user]
+            delete_cache(chat_id)
+            add_cache(chat_id, "CPassword")
+            text = "OK send a password or /cancel"
+            update_collector(chat_id, cache_list, [])
+
         elif status == "Update":
             add_collector(chat_id, "update", [], [])
             cache_list = [host, user]
@@ -2264,10 +2746,10 @@ def call_IDMNU(bot, query):
         keyboard = [[InlineKeyboardButton("<<", callback_data=('IDADMIN_' + cb))]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
-    else:
+    except Exception as e:
         keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="چیزی پیدا نشد!", reply_markup=reply_markup)
+        query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('ChangeWallet'))
@@ -2669,11 +3151,71 @@ def call_UPG(bot, query):
 
 
 @app.on_callback_query(filters.regex('UPB_'))
-def call_UPB(bot, query):
+def call_BU(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         data = query.data
         data = data.split("UPB_")[1]
+        cb_cc = "UPC_" + data
+        cb_tr = "UPTXR_" + data
+        keyboard = [
+            [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)]
+        ]
+        keyboard.append([InlineKeyboardButton("<<", callback_data='upgrade')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        try:
+            query.edit_message_text(text="روش پرداختو انتخاب کن:", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+        except:
+            query.edit_message_text(text="📃روش پرداختو انتخاب کن:", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    else:
+        query.answer("دوباره تلاش کنید", show_alert=True)
+        delete_cache(chat_id)
+
+@app.on_callback_query(filters.regex('UPTXR_'))
+def call_UPTXR(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        data = query.data
+        data = data.split("UPTXR_")[1]
+        days = data.split("-")[0]
+        GB = data.split("-")[1].split("#")[0]
+        connection_limit = data.split("#")[1].split("&")[0]
+        price = data.split("&")[1].split(":")[0]
+        user = (data.split("@")[0]).split(":")[1]
+        host = data.split("@")[1]
+        name, username, wallet, crypto = get_wallet_info()
+        add_cache(chat_id, "upgrade")
+        keyboard = []
+        Code = uuid4().hex[0:10]
+        keyboard.append([InlineKeyboardButton("<< Back", callback_data='upgrade_' + Code)])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        cache_list = [days, GB, connection_limit, price, user, host]
+        add_code_buy(chat_id, Code, "upgrade", cache_list)
+        price = trx_price(price)
+        text = f"""
+مبلغ: 
+{price}
+
+به آدرس ترون :
+<pre>{wallet}</pre>
+واریز کنین و سپس رسید عکس خودرا بفرستید
+یکبار روی آدرس بزنین کپی میشه
+
+
+برای کنسل کردن دکمه  بک بزنید
+            """
+        query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    else:
+        query.answer("دوباره تلاش کنید", show_alert=True)
+        delete_cache(chat_id)
+
+
+@app.on_callback_query(filters.regex('UPC_'))
+def call_UPC(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        data = query.data
+        data = data.split("UPC_")[1]
         days = data.split("-")[0]
         GB = data.split("-")[1].split("#")[0]
         connection_limit = data.split("#")[1].split("&")[0]
@@ -2725,16 +3267,16 @@ def call_Confirmed_UPGRADE(bot, query):
         try:
             text = f"🥰مرسی از خریدتون\n\n"
             Session = sshx.PANNEL(host, username, password, 'User', user)
-            data = Session.User_info()
+            '''data = Session.User_info()
             try:
                 old_days = int((data.split('Days : ')[1]).split("\n")[0])
                 if old_days >= 1:
                     days += old_days
-            except Exception as e:
-                print(e)
-                pass
-            text += Session.Update(GB, days, connection_limit)
-            if "Error" not in text:
+            except:
+                pass'''
+            server_msg = Session.Update(GB, days, connection_limit)
+            text += server_msg
+            if "Error" not in server_msg:
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 if check_seller_exist(chat_id) is False:
                     keyboard = [[InlineKeyboardButton("آموزش اتصال📡", callback_data='help')]]
@@ -2745,7 +3287,7 @@ def call_Confirmed_UPGRADE(bot, query):
                 delete_code_buy(code)
                 query.answer("Details sent to the user", show_alert=True)
             else:
-                query.answer(f"Error: {text}", show_alert=True)
+                query.answer(f"Error: {server_msg}", show_alert=True)
         except Exception as e:
             query.answer(f"Error: {str(e)}", show_alert=True)
     else:
@@ -2819,14 +3361,18 @@ def call_ID(bot, query):
     data = query.data
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
+    cb = host + "$" + user
     if check_exist_user(host, user) is True:
         try:
             username, password = get_host_username_password(host)
             Session = sshx.PANNEL(host, username, password, 'User', user)
             text = Session.User_info()
-            keyboard = [
-                [InlineKeyboardButton("<<", callback_data='service')]
-            ]
+            keyboard = [[InlineKeyboardButton("🔑تغییر پسورد", callback_data=('SELFCPA_' + cb))]]
+            settings = get_settings()
+            if settings['buy'] == 'on':
+                keyboard.append([InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb))])
+                #Traffic
+            keyboard.append([InlineKeyboardButton("<<", callback_data='service')])
             reply_markup = InlineKeyboardMarkup(keyboard)
             query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
         except:
@@ -2871,6 +3417,18 @@ def call_support_choose(bot, query):
     keyboard = [[InlineKeyboardButton("<< Back", callback_data='back')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text="خب اسکرین شات یا پیامتون بفرستین 🫡", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('FREEPX'))
+def call_FREEPX(bot, query):
+    keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    proxy = get_settings()['proxy']
+    if proxy == "None":
+        query.answer("این بخش غیرفعاله☹️", show_alert=True)
+    else:
+        text = "Telegram Proxy:\n\n" + proxy
+    query.edit_message_text(text=text, reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('help'))
@@ -2935,7 +3493,6 @@ def call_bkon(bot, query):
         if True:
             if backup[0] is False:
                 chat_id = query.message.chat.id
-                text = ""
                 query.edit_message_text(text=f"Starting... delay every {str(get_settings()['backup'])}h")
                 backup.clear()
                 backup.append(True)
@@ -2945,6 +3502,7 @@ def call_bkon(bot, query):
                 start_time = 1
                 while True:
                     if run_backup[0] is True:
+                        text = ""
                         if ((int(time()) - start_time) < ((get_settings()['backup'] * 60) * 60)) and (first is False):
                             sleep(3)
                         else:
@@ -3258,7 +3816,7 @@ def call_AAPR(bot, query):
     delete_cache(chat_id)
     add_cache(chat_id, "A_price")
     text = "OK send the price only number, Like: 50000 (it means 50000 Toman) or /cancel"
-    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=text, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('DAPR'))
@@ -3304,6 +3862,127 @@ def call_DSELP(bot, query):
     query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('FLCHON'))
+def call_FLCHON(bot, query):
+    if os.stat("Pannels.txt").st_size == 0:
+        query.edit_message_text(text="There's not any server /add a server")
+    else:
+        if True:
+            if Filtering_system[0] is False:
+                chat_id = query.message.chat.id
+                query.edit_message_text(text=f"Started")
+                Filtering_system.clear()
+                Filtering_system.append(True)
+                run_filtering.clear()
+                run_filtering.append(True)
+                while True:
+                    if run_filtering[0] is True:
+                        with open("Pannels.txt", 'r') as txt:
+                            for data in txt.readlines():
+                                do = True
+                                data = data.replace('\n', "")
+                                host = data.split("@")[0]
+                                username = (data.split(":")[0]).split("@")[1]
+                                password = data.split(":")[1]
+                                session = 'ssh/' + host + ".session"
+                                if Path(session).is_file() is False:
+                                    if sshx.Login(username, password, host) is False:
+                                        do = False
+                                if do is True:
+                                    try:
+                                        Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                                        if host in checked_connections:
+                                            checked_connections.remove(host)
+                                        status, content = Session.IP_Check()
+                                        if (status is True) and (host not in checked_filtering):
+                                            text = "🔴Blocked in some countries: " + host
+                                            checked_filtering.append(host)
+                                            bot.send_message(chat_id, text)
+                                        else:
+                                            if "Error" not in content:
+                                                checked_filtering.remove(host)
+                                    except:
+                                        if host not in checked_connections:
+                                            text = "🔴Connection Error: " + host
+                                            checked_connections.append(host)
+                                            bot.send_message(chat_id, text)
+                        sleep(300)
+                    else:
+                        break
+            else:
+                query.answer("Already ON", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('FLCHOFF'))
+def call_FLCHOFF(bot, query):
+    if Filtering_system[0] is True:
+        Filtering_system.clear()
+        Filtering_system.append(False)
+        run_filtering.clear()
+        run_filtering.append(False)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='FILCH')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Stopped.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    else:
+        query.answer("Already OFF", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('FILCH'))
+def call_FILCH(bot, query):
+    keyboard = [
+        [InlineKeyboardButton("ON 🟢", callback_data='FLCHON')],
+        [InlineKeyboardButton("OFF 🔴", callback_data='FLCHOFF')]
+    ]
+    if Filtering_system[0] is False:
+        status = "OFF ❌"
+    else:
+        status = "ON ✅"
+    text = '<b>Filtering System Checker Settings</b>\n\n' + "🔄Status: " + status
+    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('APRX'))
+def call_APRX(bot, query):
+    chat_id = query.message.chat.id
+    delete_cache(chat_id)
+    add_cache(chat_id, "proxy")
+    text = "OK send the proxy"
+    keyboard.append([InlineKeyboardButton("<<", callback_data='Sprx')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('DPRX'))
+def call_DPRX(bot, query):
+    settings = get_settings()
+    settings['proxy'] = "None"
+    update_settings(settings)
+    text = "Done✔️"
+    keyboard.append([InlineKeyboardButton("<<", callback_data='Sprx')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('Sprx'))
+def call_Sprx(bot, query):
+    chat_id = query.message.chat.id
+    delete_cache(chat_id)
+    settings = get_settings()
+    if settings['proxy'] == "None":
+        keyboard = [[InlineKeyboardButton("Add➕", callback_data='APRX')]]
+    else:
+        keyboard = [
+            [InlineKeyboardButton("Edit✏️", callback_data='APRX')],
+            [InlineKeyboardButton("Delete✖️", callback_data='DPRX')],
+        ]
+    text = '<b>Proxy Settings</b>\n\n' + "Current: \n" + settings['proxy']
+    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
 @app.on_callback_query(filters.regex('settings'))
 def call_settings(bot, query):
     keyboard = [
@@ -3311,9 +3990,9 @@ def call_settings(bot, query):
         [InlineKeyboardButton("پیام استارت📃", callback_data='WSMSG'), InlineKeyboardButton("پیام تعرفه قیمت💰", callback_data='WLMSG')],
         [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("بکاپ📥", callback_data='Backup')],
         [InlineKeyboardButton("حذف خودکار کاربر🗑", callback_data='AutoDelete'), InlineKeyboardButton("قیمت دلار💲", callback_data='USD')],
-        [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')],
-        [InlineKeyboardButton("وضعیت خرید", callback_data='BSOPtion')],
-        [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES')]
+        [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES'), InlineKeyboardButton("چکر فیلترینگ🔎", callback_data='FILCH')],
+        [InlineKeyboardButton("وضعیت خرید", callback_data='BSOPtion'), InlineKeyboardButton("پروکسی", callback_data='Sprx')],
+        [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
