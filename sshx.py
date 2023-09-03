@@ -256,14 +256,14 @@ class PANNEL:
                     storage = setr.text()
                 elif counter == 4:
                     if "گیگابایت" in setr.text():
-                        server_traffic = float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))
+                        server_traffic = str('{:.2f}'.format(float(float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))))) + " GB"
                     elif "ترابایت" in setr.text():
-                        server_traffic = float(((setr.text()).split("ترابایت")[0]).replace(" ", '')) * 1024
+                        server_traffic = str('{:.2f}'.format(float(float(((setr.text()).split("ترابایت")[0]).replace(" ", ''))))) + " TB"
                 elif counter == 5:
                     if "گیگابایت" in setr.text():
-                        clients_usage = float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))
+                        clients_usage = str('{:.2f}'.format(float(float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))))) + " GB"
                     elif "ترابایت" in setr.text():
-                        clients_usage = float(((setr.text()).split("ترابایت")[0]).replace(" ", '')) * 1024
+                        clients_usage = str('{:.2f}'.format(float(float(((setr.text()).split("ترابایت")[0]).replace(" ", ''))))) + " TB"
                     break
                 counter += 1
             info = []
@@ -277,7 +277,7 @@ class PANNEL:
             if "Error" in stats:
                 stats = "Update your Panel to get the stats"
             t0 = f"\n\nIP Check: {status}\n{stats}"
-            text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\n🔃Traffic: {str('{:.2f}'.format(float(server_traffic)))} GB\n🔄Clients usage: {str('{:.2f}'.format(float(clients_usage)))}\n👤Clients: {str(info[0])} GB\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(onlines)}"
+            text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {server_traffic}\nClients Traffic: {clients_usage}\n👤Clients: {str(info[0])}\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(onlines)}"
             return text + t0
         except Exception as e:
             return "Error: " + str(e)
@@ -345,9 +345,9 @@ class PANNEL:
                         break
                     if counter == 2:
                         if "غیرفعال" in td.text():
-                            status = "✔️"
-                        else:
                             status = "✖️"
+                        else:
+                            status = "✔️"
                         stats += f"Premium: {status}"
                 except:
                     pass
