@@ -52,4 +52,4 @@ chmod 664 /usr/local/lib/
 
 python3 run.py
 
-echo -ne '\n'
+echo -ne '\n\n'
