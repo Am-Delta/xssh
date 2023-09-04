@@ -45,7 +45,7 @@ rm -r /root/botCh
 
 cd /root/bot
 
-#clear
+clear
 
 chmod 664 /root/bot/
 chmod 664 /usr/local/lib/
