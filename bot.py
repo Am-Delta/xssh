@@ -1249,7 +1249,7 @@ def text_private(bot, message):
                         text = "خطایی پیش اومد بعدا امتحان کنین😑"
                     message.reply_text(text)
                     delete_cache(chat_id)
-                elif passw <= 3:
+                elif len(passw) <= 3:
                     message.reply_text("پسورد خیلی کوتاهه! بین 4 تا 16 کاراکتر باید باشه")
                 else:
                     message.reply_text("پسورد خیلی طولانیه! بین 4 تا 16 کاراکتر باید باشه")
@@ -1382,7 +1382,7 @@ def text_private(bot, message):
                     message.reply_text(text)
                     delete_cache(chat_id)
                     delete_collector(chat_id)
-                elif passw <= 3:
+                elif len(passw) <= 3:
                     message.reply_text("The password is too Short, send between 4-16 characters")
                 else:
                     message.reply_text("The password is too Long, send between 4-16 characters")
