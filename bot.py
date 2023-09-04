@@ -2162,7 +2162,7 @@ def call_hosts(bot, query):
                 password = data.split(":")[1]
                 try:
                     Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-                    text = Session.Short_info()
+                    text = Session.Panel_Short_info()
                     if "Premium: ✔️" in text:
                         keyboard = [
                             [InlineKeyboardButton("✉️پیام اتصال", callback_data=f"HSMSC_{host}")],
@@ -2350,7 +2350,7 @@ def call_stats(bot, query):
             total_clients_traffic = f"{str('{:.2f}'.format(float(clients_traffic) / 1024))} TB"
         else:
             total_clients_traffic = f"{str('{:.2f}'.format(float(clients_traffic)))} GB"
-        text = f"📊Stats\n\n🖥Servers: {str(count_servers)}\n☑️Checked: {str(checked_servers)}\n⚫️Full: {str(full_servers)}\n{logs}\n👤 Clients: {str(count_clients)}\n✔️Active: {str(count_active_clients)}\n🔴Inactive: {str(count_inactive_clients)}\n🟢Online: {str(count_online_clients)}\n⚪️Remain: {str(remain_clients)}\n🔁Servers Traffic: {total_usage_vps}\nClients Traffic: {total_clients_traffic}\n\n👥Bot users: {str(countuser_m())}\n💲Sellers: {str(len(sellers))}\n🏷Sales: {str(sales)}\n\n⏳Time: {str(int(time() - start))}s"
+        text = f"📊Stats\n\n🖥Servers: {str(count_servers)}\n☑️Checked: {str(checked_servers)}\n⚫️Full: {str(full_servers)}\n{logs}\n👤 Clients: {str(count_clients)}\n✔️Active: {str(count_active_clients)}\n🔴Inactive: {str(count_inactive_clients)}\n🟢Online: {str(count_online_clients)}\n⚪️Remain: {str(remain_clients)}\n🔁Servers Traffic: {total_usage_vps}\n🔄Clients Traffic: {total_clients_traffic}\n\n👥Bot users: {str(countuser_m())}\n💲Sellers: {str(len(sellers))}\n🏷Sales: {str(sales)}\n\n⏳Time: {str(int(time() - start))}s"
         query.edit_message_text(text=text, reply_markup=reply_markup)
     else:
         keyboard = [[InlineKeyboardButton("<<", callback_data='back_seller')]]
