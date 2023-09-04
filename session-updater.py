@@ -5,7 +5,7 @@ from selectolax.parser import HTMLParser
 from time import sleep
 from datetime import datetime
 
-sleeper = 900
+sleeper = 600
 
 
 if Path('logs.txt').is_file() is True:
