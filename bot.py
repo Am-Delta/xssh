@@ -3407,7 +3407,7 @@ def call_SELFCPA(bot, query):
     user = data.split("$")[1]
     cb = host + "$" + user
     add_cache(chat_id, "USP_" + cb)
-    keyboard.append([InlineKeyboardButton("<<", callback_data=f'ID_{cb}')])
+    keyboard = [[InlineKeyboardButton("<<", callback_data=f'ID_{cb}')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text='خب پسورد جدیدتون بفرستین', reply_markup=reply_markup)
 
