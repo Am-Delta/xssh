@@ -499,17 +499,16 @@ class PANNEL:
         elif "نامحدود" in self.traffic:
             Traffic = ""
         payload = {
-            'newuserusername': self.uname,
-            'newuserpassword': password,
-            'newusermobile': '',
-            'newuseremail': '',
-            'newusertraffic': Traffic,
-            'newusermultiuser': self.connection_limit,
-            'newuserfinishdate': self.days,
-            'newuserreferral': '',
-            'newusertelegramid': '',
-            'newuserinfo': '',
-            'newusersubmit': 'ثبت'
+            'edituserusername': self.uname,
+            'edituserpassword': password,
+            'editusermobile': '',
+            'edituseremail': '',
+            'editusertraffic': Traffic,
+            'editusermultiuser': self.connection_limit,
+            'edituserfinishdate': self.days,
+            'edituserreferral': '',
+            'edituserinfo': '',
+            'editusersubmit': 'ثبت'
         }
         try:
             s = self.r.post(self.url + "/p/newuser.php", data=payload)
