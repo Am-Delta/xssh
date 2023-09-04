@@ -637,6 +637,11 @@ class PANNEL:
     def Update_Traffic(self, traffic):
         if traffic == 0:
             traffic = ''
+        elif traffic <= -1:
+            traffic = -traffic
+        else:
+            if "گیگابایت" in self.traffic:
+                traffic = int((self.traffic).replace("گیگابایت", "")) + traffic
         payload = {
             'edituserusername': self.uname,
             'edituserpassword': self.passwd,
