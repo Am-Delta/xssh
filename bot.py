@@ -3972,7 +3972,9 @@ def call_FLCHON(bot, query):
         if True:
             if Filtering_system[0] is False:
                 chat_id = query.message.chat.id
-                query.edit_message_text(text=f"Started")
+                keyboard = [[InlineKeyboardButton("<<", callback_data='FILCH')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                query.edit_message_text(text=f"Started✔️", reply_markup=reply_markup)
                 Filtering_system.clear()
                 Filtering_system.append(True)
                 run_filtering.clear()
