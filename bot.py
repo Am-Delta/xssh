@@ -4105,7 +4105,7 @@ def call_settings(bot, query):
         [InlineKeyboardButton("حذف خودکار کاربر🗑", callback_data='AutoDelete'), InlineKeyboardButton("قیمت دلار💲", callback_data='USD')],
         [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES'), InlineKeyboardButton("وضعیت خرید🔐", callback_data='BSOPtion')],
         [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("پروکسی📡", callback_data='Sprx')],
-        [InlineKeyboardButton("راهنما❔", callback_data='HOW')]
+        [InlineKeyboardButton("راهنما❔", callback_data='HOW')],
         [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
