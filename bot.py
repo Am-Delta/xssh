@@ -4192,8 +4192,4 @@ def image_users(bot, message):
             message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡')
         delete_cache(chat_id)
 
-try:
-    app.run()
-except FloodWait as e:
-    print("FloodWait: ", e.value, "s")
-    sleep(e.value)
+app.run()
