@@ -120,7 +120,7 @@ def settings():
 
 
 if Path(file).is_file() is True:
-    print(colored("\nThe old setting exist, Do you want to change settings? send y to change (Default: n)", 'cyan'))
+    print(colored("\nThe old settings exist, Do you want to change the settings? send y to change (Default: n)", 'cyan'))
     job = input("")
     if job == 'y':
         settings()
