@@ -3667,7 +3667,7 @@ def call_bkoff(bot, query):
 def call_bkbot(bot, query):
     chat_id = query.message.chat.id
     query.edit_message_text(text="Sending...")
-    files = ["All.txt", "ssh.db", "data.json", "Pannels.txt", "logs.txt"]
+    files = ["All.txt", "ssh.db", "data.json", "Pannels.txt", "logs.txt", "nohup.out"]
     logs = "Done✔️\n\nLogs:\n\n"
     for file in files:
         try:
@@ -3996,9 +3996,13 @@ def call_FLCHON(bot, query):
                                             checked_connections.remove(host)
                                         status, content = Session.IP_Check()
                                         if (status is True) and (host not in checked_filtering):
-                                            text = "🔴Blocked in some countries: " + host
-                                            checked_filtering.append(host)
-                                            bot.send_message(chat_id, text)
+                                            sleep(10)
+                                            # try again
+                                            status, content = Session.IP_Check()
+                                            if (status is True):
+                                                text = "🔴Blocked in some countries: " + host
+                                                checked_filtering.append(host)
+                                                bot.send_message(chat_id, text)
                                         else:
                                             if "Error" not in content:
                                                 if host in checked_filtering:
