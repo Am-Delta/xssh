@@ -2166,9 +2166,9 @@ def call_hosts(bot, query):
                     if "Premium: ✔️" in text:
                         keyboard = [
                             [InlineKeyboardButton("✉️پیام اتصال", callback_data=f"HSMSC_{host}")],
-                            [InlineKeyboardButton("❌حذف کاربران منقضی", callback_data=f"HSAR_{host}")],
                             [InlineKeyboardButton("🔒محدودیت کاربر", callback_data=f"HSUL_{host}")],
                             [InlineKeyboardButton("🎁هدیه روزانه", callback_data=f"HSUGift_{host}")],
+                            [InlineKeyboardButton("❌حذف کاربران منقضی براساس روز سپری شده", callback_data=f"HSAR_{host}")],
                             [InlineKeyboardButton("🔙Back", callback_data="servers")]
                         ]
                         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2302,7 +2302,7 @@ def call_stats(bot, query):
             for i in range(len(sellers)):
                 accounts, hosts, status = get_all_accounts_by_chat_id(sellers[i][0])
                 sales += len(accounts)
-        count_servers, checked_servers, online_servers, offline_servers, full_servers, count_clients, count_active_clients, count_online_clients, count_inactive_clients, servers_traffic, remain_clients = (0,)*11
+        count_servers, checked_servers, online_servers, offline_servers, full_servers, count_clients, count_active_clients, count_online_clients, count_inactive_clients, servers_traffic, clients_traffic, remain_clients = (0,)*12
         with open("Pannels.txt", 'r') as txt:
             settings = get_settings()
             maximum = settings['maximum']
@@ -2315,7 +2315,17 @@ def call_stats(bot, query):
                 try:
                     Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                     info = Session.Short_info()
-                    servers_traffic += float(info.split("🔃Traffic: ")[1].split(" GB")[0])
+                    traffic_data = info.split("Traffic: ")[1].split('👤Clients')[0]
+                    if "GB" in traffic_data.split('Clients Traffic')[0]:
+                        servers_traffic = float(info.split("Traffic: ")[1].split(" GB")[0])
+                    else:
+                        servers_traffic = float(info.split("Traffic: ")[1].split(" TB")[0]) * 1024
+                    if "GB" in traffic_data.split('Clients Traffic')[1]:
+                        client_traffic = float(info.split("Clients Traffic: ")[1].split(" GB")[0])
+                    else:
+                        client_traffic = float(info.split("Clients Traffic: ")[1].split(" TB")[0]) * 1024
+                    clients_traffic += client_traffic
+                    servers_traffic += server_traffic
                     Clients = int(info.split("👤Clients: ")[1].split("\n")[0])
                     count_clients += Clients
                     count_active_clients += int(info.split("✔️Active: ")[1].split("\n")[0])
@@ -2336,7 +2346,11 @@ def call_stats(bot, query):
             total_usage_vps = f"{str('{:.2f}'.format(float(servers_traffic) / 1024))} TB"
         else:
             total_usage_vps = f"{str('{:.2f}'.format(float(servers_traffic)))} GB"
-        text = f"📊Stats\n\n🖥Servers: {str(count_servers)}\n☑️Checked: {str(checked_servers)}\n⚫️Full: {str(full_servers)}\n{logs}\n👤 Clients: {str(count_clients)}\n✔️Active: {str(count_active_clients)}\n🔴Inactive: {str(count_inactive_clients)}\n🟢Online: {str(count_online_clients)}\n⚪️Remain: {str(remain_clients)}\n🔁Usage: {total_usage_vps}\n\n👥Bot users: {str(countuser_m())}\n💲Sellers: {str(len(sellers))}\n🏷Sales: {str(sales)}\n\n⏳Time: {str(int(time() - start))}s"
+        if len(str(int(clients_traffic))) >= 3:
+            total_clients_traffic = f"{str('{:.2f}'.format(float(clients_traffic) / 1024))} TB"
+        else:
+            total_clients_traffic = f"{str('{:.2f}'.format(float(clients_traffic)))} GB"
+        text = f"📊Stats\n\n🖥Servers: {str(count_servers)}\n☑️Checked: {str(checked_servers)}\n⚫️Full: {str(full_servers)}\n{logs}\n👤 Clients: {str(count_clients)}\n✔️Active: {str(count_active_clients)}\n🔴Inactive: {str(count_inactive_clients)}\n🟢Online: {str(count_online_clients)}\n⚪️Remain: {str(remain_clients)}\n🔁Servers Traffic: {total_usage_vps}\nClients Traffic: {total_clients_traffic}\n\n👥Bot users: {str(countuser_m())}\n💲Sellers: {str(len(sellers))}\n🏷Sales: {str(sales)}\n\n⏳Time: {str(int(time() - start))}s"
         query.edit_message_text(text=text, reply_markup=reply_markup)
     else:
         keyboard = [[InlineKeyboardButton("<<", callback_data='back_seller')]]
