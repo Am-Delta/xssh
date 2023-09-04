@@ -4093,10 +4093,10 @@ def call_settings(bot, query):
     keyboard = [
         [InlineKeyboardButton("ولت ترون💵", callback_data='wallet'), InlineKeyboardButton("شماره کارت💳", callback_data='Card')],
         [InlineKeyboardButton("پیام استارت📃", callback_data='WSMSG'), InlineKeyboardButton("پیام تعرفه قیمت💰", callback_data='WLMSG')],
-        [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("بکاپ📥", callback_data='Backup')],
+        [InlineKeyboardButton("چکر فیلترینگ🔎", callback_data='FILCH'), InlineKeyboardButton("بکاپ📥", callback_data='Backup')],
         [InlineKeyboardButton("حذف خودکار کاربر🗑", callback_data='AutoDelete'), InlineKeyboardButton("قیمت دلار💲", callback_data='USD')],
-        [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES'), InlineKeyboardButton("چکر فیلترینگ🔎", callback_data='FILCH')],
-        [InlineKeyboardButton("وضعیت خرید", callback_data='BSOPtion'), InlineKeyboardButton("پروکسی", callback_data='Sprx')],
+        [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES'), InlineKeyboardButton("وضعیت خرید🔐", callback_data='BSOPtion')],
+        [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("پروکسی📡", callback_data='Sprx')],
         [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
