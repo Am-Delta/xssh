@@ -2123,6 +2123,7 @@ def call_ULD(bot, query):
 
 @app.on_callback_query(filters.regex('HOST_'))
 def call_hosts(bot, query):
+    query.edit_message_text(text="Wait...")
     rt = query.data
     host = rt.split("HOST_")[1]
     with open("Pannels.txt", 'r') as txt:
