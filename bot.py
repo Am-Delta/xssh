@@ -3996,13 +3996,17 @@ def call_FLCHON(bot, query):
                                             checked_connections.remove(host)
                                         status, content = Session.IP_Check()
                                         if (status is True) and (host not in checked_filtering):
-                                            sleep(10)
                                             # try again
-                                            status, content = Session.IP_Check()
-                                            if (status is True):
-                                                text = "🔴Blocked in some countries: " + host
-                                                checked_filtering.append(host)
-                                                bot.send_message(chat_id, text)
+                                            for i in range(3):
+                                                status, content = Session.IP_Check()
+                                                if (status is True) and (i == 2):
+                                                    text = "🔴Blocked in some countries: " + host
+                                                    checked_filtering.append(host)
+                                                    bot.send_message(chat_id, text)
+                                                    break
+                                                elif status is False:
+                                                    break
+                                                sleep(10)
                                         else:
                                             if "Error" not in content:
                                                 if host in checked_filtering:
