@@ -1881,14 +1881,14 @@ def text_private(bot, message):
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 settings = get_settings()
                 prices = settings['prices']
-                prices.append(int(cache_list[0]))
+                prices.append(cache_list[0])
                 settings['prices'] = prices
                 connections = settings['connections']
-                connections.append(int(cache_list[1]))
+                connections.append(cache_list[1])
                 settings['connections'] = connections
                 days = settings['days']
-                days.append(int(cache_list[2]))
-                settings['days'] = connections
+                days.append(cache_list[2])
+                settings['days'] = days
                 traffic = settings['traffic']
                 traffic.append(int(link))
                 settings['traffic'] = traffic
@@ -4020,7 +4020,7 @@ def call_DPRX(bot, query):
     settings['proxy'] = "None"
     update_settings(settings)
     text = "Done✔️"
-    keyboard.append([InlineKeyboardButton("<<", callback_data='Sprx')])
+    keyboard = [[InlineKeyboardButton("<<", callback_data='Sprx')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
