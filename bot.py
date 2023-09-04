@@ -12,7 +12,7 @@ from pathlib import Path
 from time import time, sleep
 from random import randint, choice
 from pyrogram import Client, filters, enums
-from pyrogram.errors import NotAcceptable, BadRequest
+from pyrogram.errors import NotAcceptable, BadRequest, FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
@@ -4192,5 +4192,8 @@ def image_users(bot, message):
             message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡')
         delete_cache(chat_id)
 
-
-app.run()
+try:
+    app.run()
+except FloodWait as e:
+    print("FloodWait: ", e.value, "s")
+    sleep(e.value)
