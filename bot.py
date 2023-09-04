@@ -3696,7 +3696,7 @@ def call_backup(bot, query):
         backup_status = "OFF ❌"
     else:
         backup_status = "ON ✅"
-    text = '<b>Backup Settings</b>\n\n' + "🔄Status\n\n" + "Backup: " + backup_status + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
+    text = '<b>Backup Settings</b>\n\n(فقط برای ادمینی که این گزینه رو روشن میکنه کار میکنه)' + "\n🔄Status\n\n" + "Backup: " + backup_status + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -4040,7 +4040,7 @@ def call_FILCH(bot, query):
         status = "OFF ❌"
     else:
         status = "ON ✅"
-    text = '<b>Filtering System Checker Settings</b>\n\n' + "🔄Status: " + status
+    text = '<b>Filtering System Checker Settings</b>\n\nهر 5 دقیقه یه بار بررسی میشه و بهت اطلاع میده که کدوم سرور فیلتر شده (فقط برای ادمینی که این گزینه رو روشن میکنه کار میکنه)\n' + "🔄Status: " + status
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
