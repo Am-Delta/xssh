@@ -16,7 +16,7 @@ from pyrogram.errors import NotAcceptable, BadRequest
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-session = "run" + str(randint(0, 50))
+session = "run"
 
 if Path(session + ".session").is_file() is True:
     os.remove(session + ".session")
@@ -50,9 +50,7 @@ owners_port = int(s.getsockname()[1])
 print("Running SSH bot on port ", owners_port)
 
 #database
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, 'ssh.db')
-conn = sqlite3.connect(db_path, check_same_thread=False)
+conn = sqlite3.connect('ssh.db', check_same_thread=False)
 cur = conn.cursor()
 
 
