@@ -270,10 +270,16 @@ def Login_test(username, password, host):
         return False
 
 
-def update_host(link):
+def update_host(data):
     text = "🗒Logs:\n"
-    from_host = (link.split("/transfer from ")[1]).split(" to")[0]
-    data = link.split("to ")[1]
+    if "http://" in data:
+        data = data.split("http://")[1]
+        data = data.replace("/", "")
+    elif "https://" in data:
+        data = data.split("https://")[1]
+        data = data.replace("/", "")
+    from_host = (data.split("transfer from ")[1]).split(" to")[0]
+    data = data.split("to ")[1]
     with open("Pannels.txt", 'a+') as txt:
         if from_host in txt.read():
             text += "The host does not exist."
@@ -904,11 +910,20 @@ def start_edit(bot, message):
     elif "@" not in link:
         message.reply_text("not correct: /edit domain@user:pass")
     else:
+        if os.stat("Pannels.txt").st_size == 0:
+            message.reply_text("There's not any server /add a server")
+            return
         do = False
         try:
             data = link.split("/edit ")[1]
             with open("Pannels.txt", 'a+') as txt:
                 data = link.split("/edit ")[1]
+                if "http://" in data:
+                    data = data.split("http://")[1]
+                    data = data.replace("/", "")
+                elif "https://" in data:
+                    data = data.split("https://")[1]
+                    data = data.replace("/", "")
                 if data in txt.read():
                     host = data.split("@")[0]
                     username = (data.split(":")[0]).split("@")[1]
@@ -953,6 +968,12 @@ def start_add(bot, message):
             data = link.split("/add ")[1]
             with open("Pannels.txt", 'a+') as txt:
                 data = link.split("/add ")[1]
+                if "http://" in data:
+                    data = data.split("http://")[1]
+                    data = data.replace("/", "")
+                elif "https://" in data:
+                    data = data.split("https://")[1]
+                    data = data.replace("/", "")
                 host = data.split("@")[0]
                 username = (data.split(":")[0]).split("@")[1]
                 password = data.split(":")[1]
@@ -978,9 +999,16 @@ def start_remove(bot, message):
     else:
         if os.stat("Pannels.txt").st_size == 0:
             message.reply_text("There's not any server /add a server")
-            raise
+            return
         text = "Done:\n"
-        host = link.split("/remove ")[1]
+        data = link
+        host = data.split("/remove ")[1]
+        if "http://" in host:
+            host = host.split("http://")[1]
+            host = host.replace("/", "")
+        elif "https://" in host:
+            host = host.split("https://")[1]
+            host = host.replace("/", "")
         try:
             session = "ssh/" + host + ".session"
             os.remove(session)
@@ -1018,7 +1046,7 @@ def start_specific(bot, message):
     else:
         if os.stat("Pannels.txt").st_size == 0:
             message.reply_text("There's not any server /add a server")
-            raise
+            return
         try:
             t0 = link.split("&")[1]
             if "http://" in link:
@@ -1027,7 +1055,7 @@ def start_specific(bot, message):
             elif "https://" in link:
                 link = link.split("https://")[1]
                 link = link.replace("/", "")
-            host = link.split("/specific ")[1]
+            host = link.split("specific ")[1]
             hosts = Get_hosts()
             count = 0
             if host in hosts:
@@ -1057,7 +1085,7 @@ def start_change(bot, message):
     else:
         if os.stat("Pannels.txt").st_size == 0:
             message.reply_text("There's not any server /add a server")
-            raise
+            return
         try:
             text = update_host(link)
         except Exception as e:
