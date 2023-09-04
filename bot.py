@@ -15,13 +15,12 @@ from pyrogram import Client, filters, enums
 from pyrogram.errors import NotAcceptable, BadRequest
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-session = "run"
+
+session = "run" + str(randint(0, 50))
 
 if Path(session + ".session").is_file() is True:
-    try:
-        os.remove(session + ".session")
-    except:
-        pass
+    os.remove(session + ".session")
+
 
 with open("data.json", "r") as json_file:
     data_file = json.load(json_file)
@@ -51,7 +50,9 @@ owners_port = int(s.getsockname()[1])
 print("Running SSH bot on port ", owners_port)
 
 #database
-conn = sqlite3.connect('ssh.db', check_same_thread=False)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, 'ssh.db')
+conn = sqlite3.connect(db_path, check_same_thread=False)
 cur = conn.cursor()
 
 
@@ -2316,15 +2317,15 @@ def call_stats(bot, query):
                 try:
                     Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                     info = Session.Short_info()
-                    traffic_data = info.split("Traffic: ")[1].split('👤Clients')[0]
+                    traffic_data = info.split("Storage: ")[1].split('👤Clients')[0]
                     if "GB" in traffic_data.split('Clients Traffic')[0]:
-                        servers_traffic = float(info.split("Traffic: ")[1].split(" GB")[0])
+                        servers_traffic = float(traffic_data.split("Server Traffic: ")[1].split(" GB")[0])
                     else:
-                        servers_traffic = float(info.split("Traffic: ")[1].split(" TB")[0]) * 1024
+                        servers_traffic = float(traffic_data.split("Traffic: ")[1].split(" TB")[0]) * 1024
                     if "GB" in traffic_data.split('Clients Traffic')[1]:
-                        client_traffic = float(info.split("Clients Traffic: ")[1].split(" GB")[0])
+                        client_traffic = float(traffic_data.split("Clients Traffic: ")[1].split(" GB")[0])
                     else:
-                        client_traffic = float(info.split("Clients Traffic: ")[1].split(" TB")[0]) * 1024
+                        client_traffic = float(traffic_data.split("Clients Traffic: ")[1].split(" TB")[0]) * 1024
                     clients_traffic += client_traffic
                     servers_traffic += server_traffic
                     Clients = int(info.split("👤Clients: ")[1].split("\n")[0])
