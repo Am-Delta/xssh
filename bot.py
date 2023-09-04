@@ -30,17 +30,6 @@ with open("data.json", "r") as json_file:
     TOKEN = data_file['Token']
 
 
-seller_id = [12345678]
-folder = 'backup'
-cache = [False]
-backup = [False]
-run_backup = [False]
-Filtering_system = [False]
-run_filtering = [False]
-checked_filtering = []
-checked_connections = []
-
-
 app = Client(session, api_id, api_hash, bot_token=TOKEN)
 
 
@@ -54,6 +43,15 @@ conn = sqlite3.connect('ssh.db', check_same_thread=False)
 cur = conn.cursor()
 
 
+seller_id = []
+folder = 'backup'
+cache = [False]
+backup = [False]
+run_backup = [False]
+Filtering_system = [False]
+run_filtering = [False]
+checked_filtering = []
+checked_connections = []
 old_hosts = []
 cache_list = []
 host_cache = []
@@ -1482,8 +1480,7 @@ def text_private(bot, message):
                     bot.edit_message_text(chat_id, msg, "Error: " + str(e))
                 delete_cache(chat_id)
                 delete_collector(chat_id)
-            except Exception as e:
-                print(e, "Line days")
+            except:
                 message.reply_text("Send the correct number or /cancel")
 
         elif status == "removehost":
@@ -4004,8 +4001,10 @@ def call_FLCHON(bot, query):
                                             bot.send_message(chat_id, text)
                                         else:
                                             if "Error" not in content:
-                                                if host in checked_connections:
+                                                if host in checked_filtering:
                                                     checked_filtering.remove(host)
+                                                    text = "🟢Back online: " + host
+                                                    bot.send_message(chat_id, text)
                                     except:
                                         if host not in checked_connections:
                                             text = "🔴Connection Error: " + host
@@ -4088,6 +4087,15 @@ def call_Sprx(bot, query):
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
+@app.on_callback_query(filters.regex('HOW'))
+def call_HOW(bot, query):
+    keyboard = []
+    text = '<b>How to use?</b>\n\nYou can modify user easily by sending like this (just copy the text that you copied from the panel and sent it to the user):\n\nSSH Host: domain\nUsername : username'
+    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
 @app.on_callback_query(filters.regex('settings'))
 def call_settings(bot, query):
     keyboard = [
@@ -4097,6 +4105,7 @@ def call_settings(bot, query):
         [InlineKeyboardButton("حذف خودکار کاربر🗑", callback_data='AutoDelete'), InlineKeyboardButton("قیمت دلار💲", callback_data='USD')],
         [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES'), InlineKeyboardButton("وضعیت خرید🔐", callback_data='BSOPtion')],
         [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("پروکسی📡", callback_data='Sprx')],
+        [InlineKeyboardButton("راهنما❔", callback_data='HOW')]
         [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
