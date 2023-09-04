@@ -47,4 +47,7 @@ cd /root/bot
 
 #clear
 
+chmod 664 /root/bot/
+chmod 664 /usr/local/lib/
+
 python3 run.py
