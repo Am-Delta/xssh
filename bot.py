@@ -953,10 +953,10 @@ def start_add(bot, message):
             data = link.split("/add ")[1]
             with open("Pannels.txt", 'a+') as txt:
                 data = link.split("/add ")[1]
-                if data not in txt.read():
-                    host = data.split("@")[0]
-                    username = (data.split(":")[0]).split("@")[1]
-                    password = data.split(":")[1]
+                host = data.split("@")[0]
+                username = (data.split(":")[0]).split("@")[1]
+                password = data.split(":")[1]
+                if host not in Get_hosts():
                     if sshx.Login(username, password, host) is False:
                         message.reply_text("Please send the correct Login data")
                     if Login_test(username, password, host) is True:
