@@ -352,7 +352,8 @@ class PANNEL:
                 except:
                     pass
                 counter += 1
-            return f"IPv6: {IPv6}\nIPv4: {IPv4}\n{stats}"
+            responde = (f"IPv6: {IPv6}\nIPv4: {IPv4}\n{stats}").replace("\n\n", "\n")
+            return responde
         except Exception as e:
             return "Error: " + str(e)
 
