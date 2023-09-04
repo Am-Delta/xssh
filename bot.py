@@ -2096,6 +2096,7 @@ def call_HSUGift(bot, query):
 def call_HSUL(bot, query):
     rt = query.data
     host = rt.split("HSUL_")[1]
+    chat_id = query.message.chat.id
     if host in Get_hosts():
         keyboard = [
             [InlineKeyboardButton("✔️ Active", callback_data=f"ULA_{host}")],
