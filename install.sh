@@ -45,6 +45,6 @@ rm -r /root/botCh
 
 cd /root/bot
 
-clear
+#clear
 
 python3 run.py
