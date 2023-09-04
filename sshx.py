@@ -272,6 +272,46 @@ class PANNEL:
             onlines = info[1]
             if "کاربر" in onlines:
                 onlines = onlines.replace("کاربر", "")
+            text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {server_traffic}\nClients Traffic: {clients_usage}\n👤Clients: {str(info[0])}\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(onlines)}"
+            return text
+        except Exception as e:
+            return "Error: " + str(e)
+
+    def Panel_Short_info(self):
+        try:
+            s = self.r.get(self.url + "/p/index.php").text
+            html = HTMLParser(s)
+            server_traffic = 0
+            clients_usage = 0
+            counter = 1
+            cpu = "?"
+            ram = "?"
+            storage = "?"
+            for setr in html.css('small.pull-left'):
+                if counter == 1:
+                    ram = setr.text()
+                elif counter == 2:
+                    cpu = setr.text()
+                elif counter == 3:
+                    storage = setr.text()
+                elif counter == 4:
+                    if "گیگابایت" in setr.text():
+                        server_traffic = str('{:.2f}'.format(float(float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))))) + " GB"
+                    elif "ترابایت" in setr.text():
+                        server_traffic = str('{:.2f}'.format(float(float(((setr.text()).split("ترابایت")[0]).replace(" ", ''))))) + " TB"
+                elif counter == 5:
+                    if "گیگابایت" in setr.text():
+                        clients_usage = str('{:.2f}'.format(float(float(((setr.text()).split("گیگابایت")[0]).replace(" ", ''))))) + " GB"
+                    elif "ترابایت" in setr.text():
+                        clients_usage = str('{:.2f}'.format(float(float(((setr.text()).split("ترابایت")[0]).replace(" ", ''))))) + " TB"
+                    break
+                counter += 1
+            info = []
+            for data in html.css('span.info-box-number'):
+                info.append(data.text())
+            onlines = info[1]
+            if "کاربر" in onlines:
+                onlines = onlines.replace("کاربر", "")
             Bool, status = self.IP_Check()
             stats = self.Stats()
             if "Error" in stats:
