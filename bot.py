@@ -1191,7 +1191,8 @@ def forward(bot, message):
         elif status == "Adminuserbalance":
             keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            try:
+            #try:
+            if True:
                 user_id = message.forward_from.id
                 if check_user_exists_in_clients_table(user_id) is True:
                     name, u, phone, value = get_full_user_data_id(chat_id)
@@ -1205,8 +1206,8 @@ def forward(bot, message):
                     delete_cache(chat_id)
                 else:
                     message.reply_text("🔵 The user does not Exist /cancel it", reply_markup=reply_markup)
-            except:
-                message.reply_text("❌This user is Hidden /cancel it", reply_markup=reply_markup)
+            #except:
+                #message.reply_text("❌This user is Hidden /cancel it", reply_markup=reply_markup)
 
 
 @app.on_message(filters.chat(admin_id) & filters.command('edit'))
@@ -3669,6 +3670,61 @@ def call_TR(bot, query):
         delete_cache(chat_id)
 
 
+@app.on_callback_query(filters.regex('BL_'))
+def call_BL(bot, query):
+    chat_id = query.message.chat.id
+    delete_cache(chat_id)
+    if check_cache(chat_id) is False:
+        name, u, p, old_value = get_full_user_data_id(chat_id)
+        data = query.data
+        data = data.split("BL_")[1]
+        days = int(data.split("-")[0])
+        GB = int(data.split("-")[1].split("#")[0])
+        connection_limit = int(data.split("#")[1].split("&")[0])
+        price = int(data.split("&")[1])
+        if old_value - price > -1:
+            query.answer("موجودی کافی نیست ☹️", show_alert=True)
+            return
+        query.edit_message_text(text="درحال انتخاب سرور...")
+        host = get_random_server()
+        keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        try:
+            USERNAME = "@" + query.message.chat.username
+        except:
+            USERNAME = "None"
+        if host is None:
+            query.edit_message_text(text="درحال ساخت...")
+            user = host.split('.')[0] + "a" + str(randint(1243, 6523))
+            passw = str(randint(214254, 999999))
+            username, password = get_host_username_password(host)
+            try:
+                Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                text = f"🥰مرسی از خریدتون\n\n"
+                text += Session.Create(user, passw, connection_limit, days, GB)
+                if "Error" not in text:
+                    port, udgpw = Session.Ports()
+                    url = f"ssh://{user}:{passw}@{host}:{port}"
+                    photo = QR_Maker(url)
+                    text += "\n\nURL: " + "<pre>" + url + "</pre>"
+                    add_user_db(chat_id, name, USERNAME, user, host)
+                    value = old_value - price
+                    update_user_wallet(chat_id, value)
+                    bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
+                    os.remove(photo)
+                    keyboard = [[InlineKeyboardButton("آموزش اتصال📡", callback_data='help')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
+                else:
+                    query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
+            except:
+                query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
+        else:
+            query.edit_message_text(text="ظرفیت پر شده بعدا امتحان کنین😑", reply_markup=reply_markup)
+            for admin in admin_id:
+                bot.send_message(admin, "Error to creating account for user: Add a host or change the maximum number in the settings imminently")
+
+
 @app.on_callback_query(filters.regex('BU_'))
 def call_BU(bot, query):
     chat_id = query.message.chat.id
@@ -3677,8 +3733,10 @@ def call_BU(bot, query):
         data = data.split("BU_")[1]
         cb_cc = "CC_" + data
         cb_tr = "TR_" + data
+        cb_bl = "BL_" + data
         keyboard = [
-            [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)]
+            [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)],
+            [InlineKeyboardButton("💰کیف پول", callback_data=cb_bl)],
         ]
         keyboard.append([InlineKeyboardButton("<<", callback_data='buy')])
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3842,8 +3900,10 @@ def call_BU(bot, query):
         data = data.split("UPB_")[1]
         cb_cc = "UPC_" + data
         cb_tr = "UPTXR_" + data
+        cb_bl = "UPKIF_" + data
         keyboard = [
-            [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)]
+            [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)],
+            [InlineKeyboardButton("💰کیف پول", callback_data=cb_bl)],
         ]
         keyboard.append([InlineKeyboardButton("<<", callback_data='upgrade')])
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3854,6 +3914,43 @@ def call_BU(bot, query):
     else:
         query.answer("دوباره تلاش کنید", show_alert=True)
         delete_cache(chat_id)
+
+
+
+@app.on_callback_query(filters.regex('UPKIF_'))
+def call_UPKIF(bot, query):
+    chat_id = query.message.chat.id
+    delete_cache(chat_id)
+    if check_cache(chat_id) is False:
+        name, u, p, old_value = get_full_user_data_id(chat_id)
+        data = query.data
+        data = data.split("UPKIF_")[1]
+        days = int(data.split("-")[0])
+        GB = int(data.split("-")[1].split("#")[0])
+        connection_limit = int(data.split("#")[1].split("&")[0])
+        price = int(data.split("&")[1].split(":")[0])
+        user = (data.split("@")[0]).split(":")[1]
+        host = data.split("@")[1]
+        if old_value - price > -1:
+            query.answer("موجودی کافی نیست ☹️", show_alert=True)
+            return
+        keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        try:
+            username, password = get_host_username_password(host)
+            Session = sshx.PANNEL(host, username, password, 'User', user)
+            server_msg = Session.Update(GB, days, connection_limit)
+            text += server_msg
+            if "Error" not in server_msg:
+                value = old_value - price
+                update_user_wallet(chat_id, value)
+                keyboard = [[InlineKeyboardButton("آموزش اتصال📡", callback_data='help')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                bot.send_message(chat_id, f"🥰اکانتتون تمدید شد:\n{user}\n\nبرای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
+            else:
+                query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
+        except:
+            query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('UPTXR_'))
@@ -3948,8 +4045,8 @@ def call_Confirmed_UPGRADE(bot, query):
         connection_limit = int(cache_list[2])
         user = cache_list[4]
         host = cache_list[5]
-        username, password = get_host_username_password(host)
         try:
+            username, password = get_host_username_password(host)
             text = f"🥰مرسی از خریدتون\n\n"
             Session = sshx.PANNEL(host, username, password, 'User', user)
             '''data = Session.User_info()
