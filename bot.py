@@ -237,7 +237,6 @@ def API_0():
 
 def API_1():
     try:
-    if True:
         headers = {
             'Content-type': 'application/json',
             'Accept': 'text/plain',
