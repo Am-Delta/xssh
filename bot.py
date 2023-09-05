@@ -235,7 +235,8 @@ def API_0():
 
 
 def API_1():
-    try:
+    #try:
+    if True:
         headers = {
             'Content-type': 'application/json',
             'Accept': 'text/plain',
@@ -253,8 +254,8 @@ def API_1():
                         return False, 0
         else:
             return False, 0
-    except:
-        return False, 0
+    #except:
+        #return False, 0
 
 
 def API_2():
@@ -1402,7 +1403,7 @@ def start_change(bot, message):
 @app.on_message(filters.chat(admin_id) & filters.command('start'))
 def start_admin(bot, message):
     if botusername == []:
-        botusername.append(app.get_me()["username"])
+        botusername.append(bot.get_me()["username"])
     text = '🔻<b>Tools</b>\n\n/add\n/remove\n/transfer\n/specific\n/edit'
     message.reply_text(text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
@@ -2223,6 +2224,19 @@ def text_private(bot, message):
                 settings['maximum'] = maximum
                 update_settings(settings)
                 keyboard = [[InlineKeyboardButton("<<", callback_data='maximum')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text("Done✔️", reply_markup=reply_markup)
+                delete_cache(chat_id)
+            except:
+                message.reply_text("Only numbers or /cancel")
+
+        elif "invite" == status:
+            try:
+                referral = int(link)
+                settings = get_settings()
+                settings['referral'] = referral
+                update_settings(settings)
+                keyboard = [[InlineKeyboardButton("<<", callback_data='INVS')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
@@ -4224,7 +4238,7 @@ def call_Windows(bot, query):
 def call_referral(bot, query):
     chat_id = query.message.chat.id
     if botusername == []:
-        botusername.append(app.get_me()["username"])
+        botusername.append(bot.get_me()["username"])
     link = "https://t.me/" + botusername[0] + '?start=' + str(chat_id)
     if check_referral_exists(chat_id) is False:
         try:
@@ -4949,6 +4963,31 @@ def call_SNFF(bot, query):
         query.answer("Already OFF", show_alert=True)
 
 
+@app.on_callback_query(filters.regex('INVS'))
+def call_INVS(bot, query):
+    chat_id = query.message.chat.id
+    delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("Edit✏️", callback_data='ENVS')],
+    ]
+    settings = get_settings()
+    text = '<b>Referrals Settings</b>\n\n' + "Current: " + str(settings['referral']) + " Toman"
+    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('ENVS'))
+def call_ENVS(bot, query):
+    chat_id = query.message.chat.id
+    add_cache(chat_id, "invite")
+    text = "OK send only number"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='INVS')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+
 @app.on_callback_query(filters.regex('HOW'))
 def call_HOW(bot, query):
     keyboard = []
@@ -4967,8 +5006,8 @@ def call_settings(bot, query):
         [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES'), InlineKeyboardButton("وضعیت خرید🔐", callback_data='BSOPtion')],
         [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("پروکسی📡", callback_data='Sprx')],
         [InlineKeyboardButton("چکر فیلترینگ🌐", callback_data='FILCH'), InlineKeyboardButton("بکاپ📥", callback_data='Backup')],
+        [InlineKeyboardButton("راهنما❔", callback_data='HOW'), InlineKeyboardButton("دعوت کاربر🎁", callback_data='INVS')],
         [InlineKeyboardButton("چکر و اطلاع رسانی حجم و تاریخ به کاربرℹ️", callback_data='NUSYS')],
-        [InlineKeyboardButton("راهنما❔", callback_data='HOW')],
         [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
