@@ -23,8 +23,6 @@ sudo apt install python3-requests
 y
 sudo apt install python3-termcolor
 y
-sudo apt install python3-Unidecode
-y
 
 mkdir /root/botCh
 
