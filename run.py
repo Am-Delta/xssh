@@ -39,6 +39,34 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+    if settings.get('referral', None) is None:
+        add_dict = {
+            "referral": 5000
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+    try:
+        cur.execute("SELECT * FROM Referrals")
+        records = cur.fetchall()
+    except sqlite3.OperationalError:
+        cur.execute("""CREATE TABLE Referrals (
+                    ID int,
+                    Name text,
+                    Username text,
+                    Referrals text
+                    )""")
+    try:
+        cur.execute("SELECT * FROM Clients")
+        records = cur.fetchall()
+    except sqlite3.OperationalError:
+        cur.execute("""CREATE TABLE Clients (
+                    ID int,
+                    Name text,
+                    Username text,
+                    Phone text,
+                    Balance int
+                    )""")
     conn.commit()
     cur.close()
     conn.close()
