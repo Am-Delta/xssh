@@ -7,3 +7,4 @@ selectolax
 bs4
 requests
 termcolor
+Unidecode
