@@ -43,9 +43,11 @@ print("Running SSH bot on port ", owners_port)
 conn = sqlite3.connect('ssh.db', check_same_thread=False)
 cur = conn.cursor()
 
-
-seller_id = []
 folder = 'backup'
+botusername = app.get_me()["username"]
+for admin in admin_id:
+    app.send_message(admin, "🟢 Online, Send /start")
+    sleep(0.2)
 cache = [False]
 backup = [False]
 run_backup = [False]
@@ -61,6 +63,7 @@ old_hosts = []
 cache_list = []
 host_cache = []
 text_cache = []
+seller_id = []
 
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
@@ -113,7 +116,7 @@ def User_Tools_keys():
         [InlineKeyboardButton("🛒خرید🛒", callback_data='buy')],
         [InlineKeyboardButton("💰تعرفه قیمت ها", callback_data='price'), InlineKeyboardButton("🔄تمدید", callback_data='upgrade')],
         [InlineKeyboardButton("ℹ️اطلاعات سرویس", callback_data='config'), InlineKeyboardButton("📦سرویس های من", callback_data='service')],
-        [InlineKeyboardButton("👥پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘راهنمای نصب و اجرا", callback_data='help')],
+        [InlineKeyboardButton("👥پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘 آموزش", callback_data='help')],
         [InlineKeyboardButton("🆓پروکسی تلگرام", callback_data='FREEPX'), InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral')],
         [InlineKeyboardButton("💰کیف پول", callback_data='UWM')]
     ]
@@ -3489,6 +3492,7 @@ def call_price(bot, query):
 @app.on_callback_query(filters.regex('CUWPD_'))
 def call_CUWPD(bot, query):
     chat_id = query.message.chat.id
+    delete_cache(chat_id)
     if check_cache(chat_id) is False:
         data = query.data
         price = data.split("CUWPD_")[1]
@@ -3520,6 +3524,7 @@ def call_CUWPD(bot, query):
 @app.on_callback_query(filters.regex('TUWPD_'))
 def call_TUWPD(bot, query):
     chat_id = query.message.chat.id
+    delete_cache(chat_id)
     if check_cache(chat_id) is False:
         data = query.data
         price = data.split("TUWPD_")[1]
@@ -3547,7 +3552,6 @@ def call_TUWPD(bot, query):
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
         query.answer("دوباره تلاش کنید", show_alert=True)
-        delete_cache(chat_id)
 
 
 @app.on_callback_query(filters.regex('buy'))
@@ -4976,7 +4980,7 @@ def call_settings(bot, query):
 def admin_voice(bot, message):
     chat_id = message.chat.id
     if check_cache(chat_id) is True:
-        file_id = message.document.file_id
+        file_id = message.voice.file_id
         try:
             caption = message.caption
         except:
@@ -5004,7 +5008,7 @@ def admin_voice(bot, message):
 def admin_video(bot, message):
     chat_id = message.chat.id
     if check_cache(chat_id) is True:
-        file_id = message.document.file_id
+        file_id = message.video.file_id
         try:
             caption = message.caption
         except:
@@ -5063,7 +5067,7 @@ def image_users(bot, message):
         status = get_cache_status(chat_id)
         msg_id = message.id
         if (status == "message") and (chat_id in admin_id):
-            file_id = message.document.file_id
+            file_id = message.photo.file_id
             try:
                 caption = message.caption
             except:
