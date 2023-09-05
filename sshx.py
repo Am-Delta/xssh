@@ -350,6 +350,22 @@ class PANNEL:
         except Exception as e:
             return False, "Error: " + str(e)
 
+    def Online_clients(self):
+        try:
+            s = self.r.get(self.url + "/p/online.php").text
+            html = HTMLParser(s)
+            users = []
+            ips = []
+            data = []
+            for span in html.css('span.font-medium'):
+                data.append(span.text())
+            for i in range(len(data)):
+                users.append(data[i])
+                ips.append(data[i + 1])
+            return "Good", users, ips
+        except Exception as e:
+            return "Error: " + str(e), [], []
+
     def IP_Check(self):
         try:
             s = self.r.get(self.url + "/p/checkip.php").text
