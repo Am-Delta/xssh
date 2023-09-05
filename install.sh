@@ -12,6 +12,15 @@ pip install selectolax
 pip install bs4
 pip install requests
 pip install termcolor
+sudo apt install python3-random2
+y
+sudo apt install python3-qrcode
+y
+sudo apt install python3-bs4
+y
+sudo apt install python3-requests
+y
+sudo apt install python3-termcolor
 
 mkdir /root/botCh
 
