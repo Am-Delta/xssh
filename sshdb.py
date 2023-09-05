@@ -73,6 +73,23 @@ c.execute("""CREATE TABLE Sellers (
             )""")
 
 
+c.execute("""CREATE TABLE Referrals (
+            ID int,
+            Name text,
+            Username text,
+            Referrals text
+            )""")
+
+
+c.execute("""CREATE TABLE Clients (
+            ID int,
+            Name text,
+            Username text,
+            Phone text,
+            Balance int
+            )""")
+
+
 c.execute("""CREATE TABLE Settings (
             ID int,
             Settings text
@@ -94,7 +111,8 @@ settings = {
     "traffic": [50, 100],
     "plus-traffic": [10, 20],
     "plus-prices": [20000, 35000],
-    "proxy": "None"
+    "proxy": "None",
+    "referral": 5000
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
