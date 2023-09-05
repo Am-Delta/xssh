@@ -44,10 +44,6 @@ conn = sqlite3.connect('ssh.db', check_same_thread=False)
 cur = conn.cursor()
 
 folder = 'backup'
-botusername = app.get_me()["username"]
-for admin in admin_id:
-    app.send_message(admin, "🟢 Online, Send /start")
-    sleep(0.2)
 cache = [False]
 backup = [False]
 run_backup = [False]
@@ -64,6 +60,7 @@ cache_list = []
 host_cache = []
 text_cache = []
 seller_id = []
+botusername = []
 
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
@@ -1404,6 +1401,8 @@ def start_change(bot, message):
 
 @app.on_message(filters.chat(admin_id) & filters.command('start'))
 def start_admin(bot, message):
+    if botusername == []:
+        botusername.append(app.get_me()["username"])
     text = '🔻<b>Tools</b>\n\n/add\n/remove\n/transfer\n/specific\n/edit'
     message.reply_text(text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
@@ -4224,7 +4223,9 @@ def call_Windows(bot, query):
 @app.on_callback_query(filters.regex('referral'))
 def call_referral(bot, query):
     chat_id = query.message.chat.id
-    link = "https://t.me/" + botusername + '?start=' + str(chat_id)
+    if botusername == []:
+        botusername.append(app.get_me()["username"])
+    link = "https://t.me/" + botusername[0] + '?start=' + str(chat_id)
     if check_referral_exists(chat_id) is False:
         try:
             username = "@" + query.message.chat.username
