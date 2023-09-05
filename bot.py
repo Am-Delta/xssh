@@ -6,6 +6,7 @@ import json
 import sqlite3
 import socket
 import qrcode
+import requests
 import cryptocompare
 from uuid import uuid4
 from pathlib import Path
@@ -235,7 +236,7 @@ def API_0():
 
 
 def API_1():
-    #try:
+    try:
     if True:
         headers = {
             'Content-type': 'application/json',
@@ -254,8 +255,8 @@ def API_1():
                         return False, 0
         else:
             return False, 0
-    #except:
-        #return False, 0
+    except:
+        return False, 0
 
 
 def API_2():
@@ -1403,7 +1404,7 @@ def start_change(bot, message):
 @app.on_message(filters.chat(admin_id) & filters.command('start'))
 def start_admin(bot, message):
     if botusername == []:
-        botusername.append(bot.get_me()["username"])
+        botusername.append((bot.get_me()).username)
     text = '🔻<b>Tools</b>\n\n/add\n/remove\n/transfer\n/specific\n/edit'
     message.reply_text(text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
@@ -4238,7 +4239,7 @@ def call_Windows(bot, query):
 def call_referral(bot, query):
     chat_id = query.message.chat.id
     if botusername == []:
-        botusername.append(bot.get_me()["username"])
+        botusername.append((bot.get_me()).username)
     link = "https://t.me/" + botusername[0] + '?start=' + str(chat_id)
     if check_referral_exists(chat_id) is False:
         try:
