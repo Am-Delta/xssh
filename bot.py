@@ -113,7 +113,7 @@ def User_Tools_keys():
     keyboard = [
         [InlineKeyboardButton("🛒خرید🛒", callback_data='buy')],
         [InlineKeyboardButton("💰تعرفه قیمت ها", callback_data='price'), InlineKeyboardButton("🔄تمدید", callback_data='upgrade')],
-        [InlineKeyboardButton("ℹ️اطلاعات سرویس", callback_data='config'), InlineKeyboardButton("📦سرویس های من", callback_data='service')],
+        [InlineKeyboardButton("ℹ️افزودن سرویس", callback_data='config'), InlineKeyboardButton("📦سرویس های من", callback_data='service')],
         [InlineKeyboardButton("👥پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘 آموزش", callback_data='help')],
         [InlineKeyboardButton("🆓پروکسی تلگرام", callback_data='FREEPX'), InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral')],
         [InlineKeyboardButton("💰کیف پول", callback_data='UWM')]
@@ -1191,11 +1191,10 @@ def forward(bot, message):
         elif status == "Adminuserbalance":
             keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            #try:
-            if True:
+            try:
                 user_id = message.forward_from.id
                 if check_user_exists_in_clients_table(user_id) is True:
-                    name, u, phone, value = get_full_user_data_id(chat_id)
+                    name, u, phone, value = get_full_user_data_id(user_id)
                     keyboard = [
                         [InlineKeyboardButton("➖کاهش", callback_data=f'MAUB_{str(user_id)}'), InlineKeyboardButton("➕افزایش", callback_data=f'PAUB_{str(user_id)}')],
                         [InlineKeyboardButton("0️⃣صفر کردن موجودی", callback_data=f'ZAUB_{str(user_id)}')],
@@ -1206,8 +1205,8 @@ def forward(bot, message):
                     delete_cache(chat_id)
                 else:
                     message.reply_text("🔵 The user does not Exist /cancel it", reply_markup=reply_markup)
-            #except:
-                #message.reply_text("❌This user is Hidden /cancel it", reply_markup=reply_markup)
+            except:
+                message.reply_text("❌This user is Hidden /cancel it", reply_markup=reply_markup)
 
 
 @app.on_message(filters.chat(admin_id) & filters.command('edit'))
@@ -2403,7 +2402,7 @@ def text_private(bot, message):
             try:
                 user_id = int(link)
                 if check_user_exists_in_clients_table(user_id) is True:
-                    name, u, phone, value = get_full_user_data_id(chat_id)
+                    name, u, phone, value = get_full_user_data_id(user_id)
                     keyboard = [
                         [InlineKeyboardButton("➖کاهش", callback_data=f'MAUB_{str(user_id)}'), InlineKeyboardButton("➕افزایش", callback_data=f'PAUB_{str(user_id)}')],
                         [InlineKeyboardButton("0️⃣صفر کردن موجودی", callback_data=f'ZAUB_{str(user_id)}')],
@@ -3682,7 +3681,7 @@ def call_BL(bot, query):
         GB = int(data.split("-")[1].split("#")[0])
         connection_limit = int(data.split("#")[1].split("&")[0])
         price = int(data.split("&")[1])
-        if old_value - price > -1:
+        if old_value - price < 0:
             query.answer("موجودی کافی نیست ☹️", show_alert=True)
             return
         query.edit_message_text(text="درحال انتخاب سرور...")
@@ -3838,7 +3837,7 @@ def call_upgrade(bot, query):
     keyboard = []
     settings = get_settings()
     if status is False:
-        query.answer("سرویسی پیدا نشد. اگه سرویسی دارین دکمه اطلاعات سرویس بزنین و بفرستین 🙂", show_alert=True)
+        query.answer("سرویسی پیدا نشد. اگه سرویسی دارین دکمه افزودن سرویس بزنین و بفرستین 🙂", show_alert=True)
     else:
         if settings['buy'] == 'on':
             if len(accounts) >= 2:
@@ -3916,7 +3915,6 @@ def call_BU(bot, query):
         delete_cache(chat_id)
 
 
-
 @app.on_callback_query(filters.regex('UPKIF_'))
 def call_UPKIF(bot, query):
     chat_id = query.message.chat.id
@@ -3931,7 +3929,7 @@ def call_UPKIF(bot, query):
         price = int(data.split("&")[1].split(":")[0])
         user = (data.split("@")[0]).split(":")[1]
         host = data.split("@")[1]
-        if old_value - price > -1:
+        if old_value - price < 0:
             query.answer("موجودی کافی نیست ☹️", show_alert=True)
             return
         keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
@@ -4192,7 +4190,7 @@ def call_service(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text=f"انتخاب کنین:", reply_markup=reply_markup)
     else:
-        query.answer("چیزی پیدا نشد. اگه سرویسی دارین دکمه اطلاعات سرویس بزنین و سرویستون بفرستین 🙂", show_alert=True)
+        query.answer("چیزی پیدا نشد. اگه سرویسی دارین دکمه افزودن سرویس بزنین و سرویستون بفرستین 🙂", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('SELFCPA_'))
