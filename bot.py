@@ -2750,7 +2750,7 @@ def call_HSDU(bot, query):
                 text = ""
                 for i in range(len(usernames)):
                     if status[i] != "فعال":
-                        text += f"➖➖\n👤username: {usernames[i]}\n🗝password: {passwords[i]}\nConnection: {connection_limits[i]}\nExpire: {expires[i]}\nTraffics: {traffics[i]}\n🔄Usage: {usages[i]} GB\n\n"
+                        text += f"👤username: {usernames[i]}\nExpire: {expires[i]}\nTraffics: {traffics[i]}\n🔄Usage: {usages[i]} GB\n\n➖"
                         count_inactive_clients += 1
                 t1 = f"\n\n🔴 {str(count_inactive_clients)} Users are inactive"
                 text += t1
@@ -2786,7 +2786,7 @@ def call_HSCU(bot, query):
                 for i in range(len(usernames)):
                     if status[i] == "فعال":
                         if (0 < int(days_left[i]) <= 3) or ((("نامحدود" != traffics[i]) and (usages[i] != "0.0")) and (float(usages[i]) >= (float(traffics[i].split("گیگابایت")[0])) - 2.0)):
-                            text += f"➖➖\n👤username: {usernames[i]}\n🗝password: {passwords[i]}\nConnection: {connection_limits[i]}\nExpire: {expires[i]}\nTraffics: {traffics[i]}\n🔄Usage: {usages[i]} GB\n\n"
+                            text += f"👤username: {usernames[i]}\nExpire: {expires[i]}\nTraffics: {traffics[i]}\n🔄Usage: {usages[i]} GB\n\n➖"
                             count_close_to_disable += 1
                 t1 = f"\n\n⚠️ {str(count_close_to_disable)} Users are close to disable"
                 text += t1
