@@ -46,6 +46,15 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+    if settings.get("card_buy", None) is None:
+        add_dict = {
+            "card_buy": "off",
+            "trx_buy": "on",
+            "crypto_buy": "off"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
     try:
         cur.execute("SELECT * FROM Referrals")
         records = cur.fetchall()
