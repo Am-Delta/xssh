@@ -449,6 +449,10 @@ def trx_price(irr_price):
     return price
 
 
+def randomized_text():
+    return (randint(1, 5)) * "‎"
+
+
 def get_random_server():
     hosts = Get_hosts()
     for host in hosts:
@@ -2722,9 +2726,9 @@ def call_HKR(bot, query):
             response, users = Session.Kill(user)
             if "Error:" not in response:
                 if len(users) >= 1:
-                    query.edit_message_text(text=f"{response}\nChoose another user to 💀Kill:", reply_markup=Reply_Kill(host, users))
+                    query.edit_message_text(text=f"{response}\n{randomized_text()}Choose another user to 💀Kill:", reply_markup=Reply_Kill(host, users))
                 else:
-                    query.edit_message_text(text=f"{response}\nNo one is online", reply_markup=reply_markup)
+                    query.edit_message_text(text=f"{response}\n{randomized_text()}No one is online", reply_markup=reply_markup)
             else:
                 query.edit_message_text(text=response, reply_markup=reply_markup)
         except Exception as e:
