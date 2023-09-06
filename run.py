@@ -86,6 +86,7 @@ def run():
     os.system('nohup python3 session-updater.py &')
     os.system('nohup python3 backup-ssh.py &')
     os.system('nohup python3 bot.py &')
+    os.remove('sshdb.py')
 
 
 def settings():
