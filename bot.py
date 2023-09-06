@@ -2669,7 +2669,7 @@ def call_HSOU(bot, query):
                             bot.send_message(chat_id, text[x:x+4095])
                     else:
                         bot.send_message(chat_id, text)
-                    keyboard = [[InlineKeyboardButton("💀Kill", callback_data="HSKU_")], [InlineKeyboardButton("🔙Back", callback_data="servers")]]
+                    keyboard = [[InlineKeyboardButton("💀Kill", callback_data=f"HSKU_{host}")], [InlineKeyboardButton("🔙Back", callback_data="servers")]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, "Click the below button to see the list and kill a user", reply_markup=reply_markup)
                 else:
