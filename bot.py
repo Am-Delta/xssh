@@ -88,7 +88,7 @@ sellers_id_add_list()
 def Admin_Tools_keys():
     keyboard = [
         [InlineKeyboardButton("✔️چکر", callback_data='checker'), InlineKeyboardButton("📊آمار", callback_data='stats')],
-        [InlineKeyboardButton("🖥اطلاعات سرور", callback_data='servers'), InlineKeyboardButton("⚫️ظرفیت سرورها", callback_data='full')],
+        [InlineKeyboardButton("🖥مدیریت سرور", callback_data='servers'), InlineKeyboardButton("⚫️ظرفیت سرورها", callback_data='full')],
         [InlineKeyboardButton("⛔️تست فیلترینگ", callback_data='Filtering')],
         [InlineKeyboardButton("👤مدیریت اکانت ها", callback_data='Manager')],
         [InlineKeyboardButton("📦ارسال پیام همگانی", callback_data='message'), InlineKeyboardButton("💲فروشنده ها", callback_data='sellers')],
@@ -3536,21 +3536,91 @@ def call_change(bot, query):
         query.answer("Please /cancel it first", show_alert=True)
 
 
+@app.on_callback_query(filters.regex('OFT'))
+def call_OFT(bot, query):
+    settings = get_settings()
+    if settings['trx_buy'] == 'on':
+        settings['trx_buy'] = 'off'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='wallet')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+    else:
+        query.answer("Already OFF", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('ONT'))
+def call_ONT(bot, query):
+    settings = get_settings()
+    if settings['trx_buy'] == 'off':
+        settings['trx_buy'] = 'on'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='wallet')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+    else:
+        query.answer("Already ON", show_alert=True)
+
+
 @app.on_callback_query(filters.regex('wallet'))
 def call_wallet(bot, query):
-    keyboard = [[InlineKeyboardButton("🔧Change", callback_data='ChangeWallet')], [InlineKeyboardButton("<< Back", callback_data='settings')]]
+    keyboard = [
+        [InlineKeyboardButton("🔧Change", callback_data='ChangeWallet')],
+        [InlineKeyboardButton("🔴 Off", callback_data='OFT'), InlineKeyboardButton("🟢 On", callback_data='ONT')],
+        [InlineKeyboardButton("<< Back", callback_data='settings')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     name, username, wallet, crypto = get_wallet_info()
-    text = f"💳Wallet: <pre>{str(wallet)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}"
+    settings = get_settings()
+    if settings['trx_buy'] == "off":
+        status = "🔴 OFF"
+    else:
+        status = "🟢 ON"
+    text = f"💳Wallet: <pre>{str(wallet)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('OFC'))
+def call_OFC(bot, query):
+    settings = get_settings()
+    if settings['card_buy'] == 'on':
+        settings['card_buy'] = 'off'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='Card')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+    else:
+        query.answer("Already OFF", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('ONC'))
+def call_ONC(bot, query):
+    settings = get_settings()
+    if settings['card_buy'] == 'off':
+        settings['card_buy'] = 'on'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='Card')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+    else:
+        query.answer("Already ON", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('Card'))
 def call_card(bot, query):
-    keyboard = [[InlineKeyboardButton("🔧Change", callback_data='Change')], [InlineKeyboardButton("<< Back", callback_data='settings')]]
+    keyboard = [
+        [InlineKeyboardButton("🔧Change", callback_data='Change')],
+        [InlineKeyboardButton("🔴 Off", callback_data='OFC'), InlineKeyboardButton("🟢 On", callback_data='ONC')],
+        [InlineKeyboardButton("<< Back", callback_data='settings')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     name, username, card = get_card_info()
-    text = f"💳Card: <pre>{str(card)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}"
+    settings = get_settings()
+    if settings['card_buy'] == "off":
+        status = "🔴 OFF"
+    else:
+        status = "🟢 ON"
+    text = f"💳Card: <pre>{str(card)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -3659,6 +3729,9 @@ def call_price(bot, query):
 
 @app.on_callback_query(filters.regex('CUWPD_'))
 def call_CUWPD(bot, query):
+    if get_settings()['card_buy'] == "off":
+        query.answer("این روش پرداخت توسط ادمین غیرفعال شده", show_alert=True)
+        return
     chat_id = query.message.chat.id
     delete_cache(chat_id)
     if check_cache(chat_id) is False:
@@ -3691,6 +3764,9 @@ def call_CUWPD(bot, query):
 
 @app.on_callback_query(filters.regex('TUWPD_'))
 def call_TUWPD(bot, query):
+    if get_settings()['trx_buy'] == "off":
+        query.answer("این روش پرداخت توسط ادمین غیرفعال شده", show_alert=True)
+        return
     chat_id = query.message.chat.id
     delete_cache(chat_id)
     if check_cache(chat_id) is False:
@@ -3754,6 +3830,9 @@ def call_buy(bot, query):
 
 @app.on_callback_query(filters.regex('CC_'))
 def call_CC(bot, query):
+    if get_settings()['card_buy'] == "off":
+        query.answer("این روش پرداخت توسط ادمین غیرفعال شده", show_alert=True)
+        return
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         data = query.data
@@ -3789,6 +3868,9 @@ def call_CC(bot, query):
 
 @app.on_callback_query(filters.regex('TR_'))
 def call_TR(bot, query):
+    if get_settings()['trx_buy'] == "off":
+        query.answer("این روش پرداخت توسط ادمین غیرفعال شده", show_alert=True)
+        return
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         data = query.data
@@ -4108,6 +4190,9 @@ def call_UPKIF(bot, query):
 
 @app.on_callback_query(filters.regex('UPTXR_'))
 def call_UPTXR(bot, query):
+    if get_settings()['trx_buy'] == "off":
+        query.answer("این روش پرداخت توسط ادمین غیرفعال شده", show_alert=True)
+        return
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         data = query.data
@@ -4147,6 +4232,9 @@ def call_UPTXR(bot, query):
 
 @app.on_callback_query(filters.regex('UPC_'))
 def call_UPC(bot, query):
+    if get_settings()['card_buy'] == "off":
+        query.answer("این روش پرداخت توسط ادمین غیرفعال شده", show_alert=True)
+        return
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         data = query.data
