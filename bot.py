@@ -121,13 +121,25 @@ def User_Tools_keys():
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
-# 3 Buttons in a table
-'''
-def server_cb_creator(job):
+# 4 & 3 & 2 & 1 Buttons in a table
+'''def server_cb_creator(job):
     hosts = Get_hosts()
     keyboard = []
     if len(hosts) >= 2:
-        if len(hosts) >= 14:
+        if len(hosts) >= 24:
+            if len(hosts) % 4 == 0:
+                for i in range(0, len(hosts) - 1, 4):
+                    keyboard.append([InlineKeyboardButton(hosts[i], callback_data=(job + hosts[i])), InlineKeyboardButton(hosts[i + 1], callback_data=(job + hosts[i + 1])), InlineKeyboardButton(hosts[i + 2], callback_data=(job + hosts[i + 2])), InlineKeyboardButton(hosts[i + 3], callback_data=(job + hosts[i + 3]))])
+            else:
+                for i in range(0, len(hosts) - 3, 4):
+                    keyboard.append([InlineKeyboardButton(hosts[i], callback_data=(job + hosts[i])), InlineKeyboardButton(hosts[i + 1], callback_data=(job + hosts[i + 1])), InlineKeyboardButton(hosts[i + 2], callback_data=(job + hosts[i + 2])), InlineKeyboardButton(hosts[i + 3], callback_data=(job + hosts[i + 3]))])
+                if len(hosts) % 3 == 0:
+                    keyboard.append([InlineKeyboardButton(hosts[-3], callback_data=(job + hosts[-3])), InlineKeyboardButton(hosts[-2], callback_data=(job + hosts[-2])), InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
+                elif len(hosts) % 2 == 0:
+                    keyboard.append([InlineKeyboardButton(hosts[-2], callback_data=(job + hosts[-2])), InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))]) 
+                else:
+                    keyboard.append([InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
+        elif len(hosts) >= 10:
             if len(hosts) % 3 == 0:
                 for i in range(0, len(hosts) - 1, 3):
                     keyboard.append([InlineKeyboardButton(hosts[i], callback_data=(job + hosts[i])), InlineKeyboardButton(hosts[i + 1], callback_data=(job + hosts[i + 1])), InlineKeyboardButton(hosts[i + 2], callback_data=(job + hosts[i + 2]))])
@@ -153,8 +165,52 @@ def server_cb_creator(job):
             keyboard.append([InlineKeyboardButton(hosts[0], callback_data=(job + hosts[0]))])
     keyboard.append([InlineKeyboardButton("<< back", callback_data="back_admin")])
     reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup'''
+
+def Reply_Kill(host, users):
+    keyboard = []
+    job = "HKR_" + host + "$"
+    if len(users) >= 2:
+        if len(users) >= 24:
+            if len(users) % 4 == 0:
+                for i in range(0, len(users) - 1, 4):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2])), InlineKeyboardButton(users[i + 3], callback_data=(job + users[i + 3]))])
+            else:
+                for i in range(0, len(users) - 3, 4):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2])), InlineKeyboardButton(users[i + 3], callback_data=(job + users[i + 3]))])
+                if len(users) % 3 == 0:
+                    keyboard.append([InlineKeyboardButton(users[-3], callback_data=(job + users[-3])), InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+                elif len(users) % 2 == 0:
+                    keyboard.append([InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))]) 
+                else:
+                    keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+        elif len(users) >= 10:
+            if len(users) % 3 == 0:
+                for i in range(0, len(users) - 1, 3):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2]))])
+            else:
+                for i in range(0, len(users) - 2, 3):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2]))])
+                if (len(users) % 2 == 0) or ((len(users) % 2 == 1) and (len(users) % 3 == 2)):
+                    keyboard.append([InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+                else:
+                    keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+        else:
+            if len(users) % 2 == 0:
+                for i in range(0, len(users) - 1, 2):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1]))])
+            else:
+                for i in range(0, len(users) - 1, 2):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1]))])
+                keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+    else:
+        if users == []:
+            pass
+        else:
+            keyboard.append([InlineKeyboardButton(users[0], callback_data=(job + users[0]))])
+    keyboard.append([InlineKeyboardButton("<< back to servers", callback_data="servers")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
-'''
 
 
 def server_cb_creator(job):
@@ -1494,7 +1550,8 @@ def text_private(bot, message):
                     keyboard = [
                         [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
                         [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
-                        [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))]
+                        [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
+                        [InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb)), InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb))],
                     ]
                     if "نامحدود" not in text:
                         keyboard.append([InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))])
@@ -2119,6 +2176,21 @@ def text_private(bot, message):
             except:
                 message.reply_text("Send the correct number or /cancel")
 
+        elif "Kill_" in status:
+            msg = message.reply_text("Wait...", reply_markup=reply_markup).id
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Manager')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            try:
+                user = link
+                host = status.split("Kill_")[1]
+                username, password = get_host_username_password(host)
+                Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+                text, users = Session.Kill(user)
+                bot.edit_message_text(chat_id, msg, text, reply_markup=reply_markup)
+            except Exception as e:
+                bot.edit_message_text(chat_id, msg, "Error: " + str(e), reply_markup=reply_markup)
+            delete_cache(chat_id)
+
         elif "Edit_limit#" in status:
             try:
                 limit = int(link)
@@ -2420,9 +2492,9 @@ def text_private(bot, message):
             try:
                 new_value = int(link)
                 user_id = int(status.split("MBalance_")[1])
-                name, u, phone, old_value = get_full_user_data_id(chat_id)
+                name, u, phone, old_value = get_full_user_data_id(user_id)
                 value = old_value - new_value
-                update_user_wallet(chat_id, value)
+                update_user_wallet(user_id, value)
                 keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("Done✔️", reply_markup=reply_markup)
@@ -2434,9 +2506,9 @@ def text_private(bot, message):
             try:
                 new_value = int(link)
                 user_id = int(status.split("PBalance_")[1])
-                name, u, phone, old_value = get_full_user_data_id(chat_id)
+                name, u, phone, old_value = get_full_user_data_id(user_id)
                 value = old_value + new_value
-                update_user_wallet(chat_id, value)
+                update_user_wallet(user_id, value)
                 keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("Done✔️", reply_markup=reply_markup)
@@ -2597,8 +2669,62 @@ def call_HSOU(bot, query):
                             bot.send_message(chat_id, text[x:x+4095])
                     else:
                         bot.send_message(chat_id, text)
+                    keyboard = [[InlineKeyboardButton("💀Kill", callback_data="HSKU_")], [InlineKeyboardButton("🔙Back", callback_data="servers")]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    bot.send_message(chat_id, "Click the below button to see the list and kill a user", reply_markup=reply_markup)
                 else:
                     bot.send_message(chat_id, "No one is online")
+            else:
+                query.edit_message_text(text=response, reply_markup=reply_markup)
+        except Exception as e:
+            query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
+    else:
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('HSKU_'))
+def call_HSKU(bot, query):
+    rt = query.data
+    host = rt.split("HSKU_")[1]
+    chat_id = query.message.chat.id
+    keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if host in Get_hosts():
+        username, password = get_host_username_password(host)
+        try:
+            Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+            response, users, ips = Session.Online_clients()
+            if "Error:" not in response:
+                if len(users) >= 1:
+                    query.edit_message_text(text="Choose a user to 💀Kill:", reply_markup=Reply_Kill(host, users))
+                else:
+                    query.edit_message_text(text="No one is online", reply_markup=reply_markup)
+            else:
+                query.edit_message_text(text=response, reply_markup=reply_markup)
+        except Exception as e:
+            query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
+    else:
+        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('HKR_'))
+def call_HKR(bot, query):
+    rt = query.data
+    host = (rt.split("HKR_")[1]).split("$")[0]
+    user = rt.split("$")[1]
+    chat_id = query.message.chat.id
+    keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if host in Get_hosts():
+        username, password = get_host_username_password(host)
+        try:
+            Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+            response, users = Session.Kill(user)
+            if "Error:" not in response:
+                if len(users) >= 1:
+                    query.edit_message_text(text=f"{response}\nChoose another user to 💀Kill:", reply_markup=Reply_Kill(host, users))
+                else:
+                    query.edit_message_text(text=f"{response}\nNo one is online", reply_markup=reply_markup)
             else:
                 query.edit_message_text(text=response, reply_markup=reply_markup)
         except Exception as e:
@@ -2982,6 +3108,27 @@ def call_Join(bot, query):
         query.answer("جوین نشدی😑", show_alert=True)
 
 
+@app.on_callback_query(filters.regex('Kill'))
+def call_Kill(bot, query):
+    if check_seller_exist(query.message.chat.id) is False:
+        query.edit_message_text(text="Select a server to Kill the user?", reply_markup=server_cb_creator("KUA_"))
+    else:
+        add_cache(query.message.chat.id, "K-host")
+        query.edit_message_text(text="Send the host or /cancel")
+
+
+@app.on_callback_query(filters.regex('KUA_'))
+def call_KUA(bot, query):
+    rt = query.data
+    host = rt.split("KUA_")[1]
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        add_cache(chat_id, "Kill_" + host)
+        query.edit_message_text(text='Send the user or /cancel')
+    else:
+        query.edit_message_text(text="Please /cancel it first")
+
+
 @app.on_callback_query(filters.regex('disable'))
 def call_disable(bot, query):
     if check_seller_exist(query.message.chat.id) is False:
@@ -2992,7 +3139,7 @@ def call_disable(bot, query):
 
 
 @app.on_callback_query(filters.regex('DIS_'))
-def call_hosts(bot, query):
+def call_DIS(bot, query):
     rt = query.data
     host = rt.split("DIS_")[1]
     chat_id = query.message.chat.id
@@ -3004,7 +3151,7 @@ def call_hosts(bot, query):
 
 
 @app.on_callback_query(filters.regex('ENA_'))
-def call_hosts(bot, query):
+def call_ENA(bot, query):
     rt = query.data
     host = rt.split("ENA_")[1]
     chat_id = query.message.chat.id
@@ -3301,7 +3448,7 @@ def call_IDADMIN(bot, query):
                 [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
                 [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
                 [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
-                [InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))],
+                [InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb)), InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb))],
                 [InlineKeyboardButton("<<", callback_data='back_admin')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3324,7 +3471,7 @@ def call_IDMNU(bot, query):
         chat_id = query.message.chat.id
         status = (data.split("&")[1]).split("_")[0]
         username, password = get_host_username_password(host)
-        if (status != "Update") and (status != "Remove") and (status != "PASSWORD") and (status != "Traffic"):
+        if (status != "Update") and (status != "Remove") and (status != "PASSWORD") and (status != "Traffic") and (status != "Kill"):
             Session = sshx.PANNEL(host, username, password, 'User', user)
         if status == "Active":
             text = Session.Enable()
@@ -3340,6 +3487,10 @@ def call_IDMNU(bot, query):
             add_cache(chat_id, "plus-Traffic")
             text = "Send GB only numbers (0 = unlimited) or /cancel"
             update_collector(chat_id, cache_list, [])
+
+        elif status == "Kill":
+            Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
+            text, users = Session.Kill(user)
 
         elif status == "Remove":
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
@@ -4152,7 +4303,8 @@ def call_Manager(bot, query):
         [InlineKeyboardButton("👤اطلاعات اکانت", callback_data='userinfo'), InlineKeyboardButton("📄اکانت های کاربر", callback_data='userconfigs')],
         [InlineKeyboardButton("🚻ریست ترافیک", callback_data='TrfRes'), InlineKeyboardButton("➕افزایش ترافیک", callback_data='TrfPlus')],
         [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS'), InlineKeyboardButton("👝موجودی کاربر", callback_data='ADUB')],
-        [InlineKeyboardButton("🛠ساخت اکانت یوزر تلگرام", callback_data='create'), InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none')]
+        [InlineKeyboardButton("🛠ساخت اکانت یوزر تلگرام", callback_data='create'), InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none')],
+        [InlineKeyboardButton("💀Kill User", callback_data='Kill')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
