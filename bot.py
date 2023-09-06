@@ -111,11 +111,11 @@ def Seller_Tools_keys():
 
 def User_Tools_keys():
     keyboard = [
-        [InlineKeyboardButton("🛒خرید🛒", callback_data='buy')],
-        [InlineKeyboardButton("💰تعرفه قیمت ها", callback_data='price'), InlineKeyboardButton("🔄تمدید", callback_data='upgrade')],
-        [InlineKeyboardButton("ℹ️افزودن سرویس", callback_data='config'), InlineKeyboardButton("📦سرویس های من", callback_data='service')],
+        [InlineKeyboardButton("🛒 خرید", callback_data='buy')],
+        [InlineKeyboardButton("🏷 تعرفه قیمت ها", callback_data='price'), InlineKeyboardButton("🔄 تمدید", callback_data='upgrade')],
+        [InlineKeyboardButton("➕ افزودن سرویس", callback_data='config'), InlineKeyboardButton("📦 سرویس های من", callback_data='service')],
         [InlineKeyboardButton("👥پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘 آموزش", callback_data='help')],
-        [InlineKeyboardButton("🆓پروکسی تلگرام", callback_data='FREEPX'), InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral')],
+        [InlineKeyboardButton("🆓 پروکسی تلگرام", callback_data='FREEPX'), InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral')],
         [InlineKeyboardButton("💰کیف پول", callback_data='UWM')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -166,6 +166,7 @@ def User_Tools_keys():
     keyboard.append([InlineKeyboardButton("<< back", callback_data="back_admin")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup'''
+
 
 def Reply_Kill(host, users):
     keyboard = []
@@ -4363,7 +4364,7 @@ def call_config(bot, query):
 خب همون پیامی که ادمین براتون فرستاده بود کپی کنین و اینجا بفرستین مثل:
 SSH Host: sub.domain.com
 Port : 22
-Udgpw : 7301-7309
+Udgpw : 7301
 Username : user124
 ...
 
@@ -4409,7 +4410,9 @@ def call_message(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "message")
-        query.edit_message_text(text='Send your message support : (text, voice, video, photo, file with caption or not) or forward /cancel')
+        keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text='Send your message support : (text, voice, video, photo, file with caption or not) or forward', reply_markup=reply_markup)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -4776,9 +4779,9 @@ def call_backup(bot, query):
     chat_id = query.message.chat.id
     delete_cache(chat_id)
     keyboard = [
-        [InlineKeyboardButton("تغییر تایم بکاپ 🕔", callback_data='CTBKup')],
-        [InlineKeyboardButton("خاموش🔴", callback_data='BKupOFF'), InlineKeyboardButton("روشن🟢", callback_data='BKupON')],
-        [InlineKeyboardButton("بکاپ ربات🤖", callback_data='BKupBot')]
+        [InlineKeyboardButton("🕔 تغییر تایم بکاپ ", callback_data='CTBKup')],
+        [InlineKeyboardButton("🔴 خاموش", callback_data='BKupOFF'), InlineKeyboardButton("🟢 روشن", callback_data='BKupON')],
+        [InlineKeyboardButton("🤖 بکاپ ربات", callback_data='BKupBot')]
     ]
     settings = get_settings()
     if backup[0] is False:
@@ -5326,7 +5329,6 @@ def call_ENVS(bot, query):
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
-
 @app.on_callback_query(filters.regex('HOW'))
 def call_HOW(bot, query):
     keyboard = []
@@ -5339,15 +5341,15 @@ def call_HOW(bot, query):
 @app.on_callback_query(filters.regex('settings'))
 def call_settings(bot, query):
     keyboard = [
-        [InlineKeyboardButton("ولت ترون💵", callback_data='wallet'), InlineKeyboardButton("شماره کارت💳", callback_data='Card')],
-        [InlineKeyboardButton("پیام استارت📃", callback_data='WSMSG'), InlineKeyboardButton("پیام تعرفه قیمت💰", callback_data='WLMSG')],
-        [InlineKeyboardButton("حذف خودکار کاربر🗑", callback_data='AutoDelete'), InlineKeyboardButton("قیمت دلار💲", callback_data='USD')],
-        [InlineKeyboardButton("قیمت ها🛒", callback_data='ADMINPRICES'), InlineKeyboardButton("وضعیت خرید🔐", callback_data='BSOPtion')],
-        [InlineKeyboardButton("اسپانسر📢", callback_data='sponser'), InlineKeyboardButton("پروکسی📡", callback_data='Sprx')],
-        [InlineKeyboardButton("چکر فیلترینگ🌐", callback_data='FILCH'), InlineKeyboardButton("بکاپ📥", callback_data='Backup')],
-        [InlineKeyboardButton("راهنما❔", callback_data='HOW'), InlineKeyboardButton("دعوت کاربر🎁", callback_data='INVS')],
-        [InlineKeyboardButton("چکر و اطلاع رسانی حجم و تاریخ به کاربرℹ️", callback_data='NUSYS')],
-        [InlineKeyboardButton("محدودیت تعداد کاربر هر سرور👤", callback_data='maximum')]
+        [InlineKeyboardButton("💵ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳کارت", callback_data='Card')],
+        [InlineKeyboardButton("📃پیام استارت", callback_data='WSMSG'), InlineKeyboardButton("🏷 پیام تعرفه قیمت", callback_data='WLMSG')],
+        [InlineKeyboardButton("🗑حذف خودکار کاربر", callback_data='AutoDelete'), InlineKeyboardButton("💲قیمت دلار", callback_data='USD')],
+        [InlineKeyboardButton("🛒قیمت ها", callback_data='ADMINPRICES'), InlineKeyboardButton("🔐وضعیت خرید", callback_data='BSOPtion')],
+        [InlineKeyboardButton("📢اسپانسر", callback_data='sponser'), InlineKeyboardButton("📡پروکسی", callback_data='Sprx')],
+        [InlineKeyboardButton("🌐چکر فیلترینگ", callback_data='FILCH'), InlineKeyboardButton("📥بکاپ", callback_data='Backup')],
+        [InlineKeyboardButton("❔راهنما", callback_data='HOW'), InlineKeyboardButton("🎁دعوت کاربر", callback_data='INVS')],
+        [InlineKeyboardButton("ℹ️ چکر و اطلاع رسانی حجم و تاریخ به کاربر", callback_data='NUSYS')],
+        [InlineKeyboardButton("👤محدودیت تعداد کاربر در هر سرور", callback_data='maximum')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
