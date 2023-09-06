@@ -359,9 +359,9 @@ class PANNEL:
             data = []
             for span in html.css('span.font-medium'):
                 data.append(span.text())
-            for i in range(len(data)):
-                users.append(data[i])
-                ips.append(data[i + 1])
+            for i in range(1, len(data) + 1, 2):
+                users.append(data[i - 1])
+                ips.append(data[i])
             return "Good", users, ips
         except Exception as e:
             return "Error: " + str(e), [], []
@@ -412,6 +412,24 @@ class PANNEL:
             return responde
         except Exception as e:
             return "Error: " + str(e)
+
+    def Kill(self, user):
+        try:
+            status, users, ips = self.Online_clients()
+            if status == "Good":
+                if user in users:
+                    s = self.r.get(self.url + "/p/online.php?username=" + user)
+                    if s.status_code == 200:
+                        users.remove(user)
+                        return "Killed✅", users
+                    else:
+                        return "Error: " + str(s.status_code), []
+                else:
+                    return "The user is not Online", users
+            else:
+                return status, []
+        except Exception as e:
+            return "Error: " + str(e), []
 
     def Auto_remove(self, days):
         try:
