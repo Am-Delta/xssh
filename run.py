@@ -30,52 +30,16 @@ def db_update():
     p = re.compile('(?<!\\\\)\'')
     s = p.sub('\"', s)
     settings = json.loads(s)
-    if settings.get('proxy', None) is None:
+    if settings.get("mac", None) is None:
         add_dict = {
-            "plus-traffic": [10, 20],
-            "plus-prices": [20000, 35000],
-            "proxy": "None"
+            "windows": "\nلینک دانلود برای ویندوز 🖥\n\n▫️Netmod ( SSH )\nhttps://sourceforge.net/projects/netmodhttp/\n\n ▫️Respite VPN ( SSH )\nhttps://sourceforge.net/projects/respite-vpn/\n ",
+            "ios": "\nلینک دانلود برای گوشی های آیفون 🍏\n⭐️NapsternetV ios 15.0+\nhttps://apps.apple.com/us/app/napsternetv/id1629465476\n\n⚪️HTTP Injector ios 15.0+\nhttps://apps.apple.com/us/app/http-injector/id1659992827\n\n⚪️Streisand ios 14.0 +\nhttps://apps.apple.com/us/app/streisand/id6450534064\n\n⚪️V2box ios 15.0 +\nhttps://apps.apple.com/us/app/v2box-v2ray-client/id6446814690\n ",
+            "android": "\nلینک دانلود برای گوشی های اندروید 🤖\n\n⚪️NapsternetV Google play\nhttps://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv\n\n⚪️HTTP Injector Google play\nhttps://play.google.com/store/apps/details?id=com.evozi.injector&hl=en&gl=US\n\n⚪️HTTP Injector Lite Google play مناسب اندروید پایین 4.3\nhttps://play.google.com/store/apps/details?id=com.evozi.injector.lite\n\n⚪️NetMod Google play\nhttps://play.google.com/store/apps/details?id=com.netmod.syna&hl=en_US\n ",
+            "mac": "\nلینک دانلود برای مک 🍎\n\n⭐️v2box macOS 11.0 +\nhttps://apps.apple.com/us/app/v2box-v2ray-client/id6446814690\n\n⭐️Streisand macOS 11.0 +\nhttps://apps.apple.com/us/app/streisand/id6450534064\n\n▫️SSH proxy macOS 10.9+\nhttps://apps.apple.com/us/app/ssh-proxy/id597790822?mt=12\n "
         }
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
-    if settings.get('referral', None) is None:
-        add_dict = {
-            "referral": 5000
-        }
-        settings.update(add_dict)
-        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
-        conn.commit()
-    if settings.get("card_buy", None) is None:
-        add_dict = {
-            "card_buy": "off",
-            "trx_buy": "on",
-            "crypto_buy": "off"
-        }
-        settings.update(add_dict)
-        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
-        conn.commit()
-    try:
-        cur.execute("SELECT * FROM Referrals")
-        records = cur.fetchall()
-    except sqlite3.OperationalError:
-        cur.execute("""CREATE TABLE Referrals (
-                    ID int,
-                    Name text,
-                    Username text,
-                    Referrals text
-                    )""")
-    try:
-        cur.execute("SELECT * FROM Clients")
-        records = cur.fetchall()
-    except sqlite3.OperationalError:
-        cur.execute("""CREATE TABLE Clients (
-                    ID int,
-                    Name text,
-                    Username text,
-                    Phone text,
-                    Balance int
-                    )""")
     try:
         cur.execute("SELECT * FROM Sales")
         records = cur.fetchall()
