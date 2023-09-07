@@ -90,6 +90,12 @@ c.execute("""CREATE TABLE Clients (
             )""")
 
 
+c.execute("""CREATE TABLE Sales (
+            'date' text,
+            count int,
+            )""")
+
+
 c.execute("""CREATE TABLE Settings (
             ID int,
             Settings text
