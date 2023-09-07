@@ -40,6 +40,13 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+    if settings.get("support", None) is None:
+        add_dict = {
+            "support": "None"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
     try:
         cur.execute("SELECT * FROM Sales")
         records = cur.fetchall()
