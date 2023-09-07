@@ -5271,7 +5271,7 @@ def call_AutoDelete(bot, query):
         [InlineKeyboardButton("Edit✏️", callback_data='EADel')],
     ]
     settings = get_settings()
-    text = '<b>Auto Delete Settings</b>\n\n' + "Current: " + str(settings['auto_delete']) + " Days"
+    text = '<b>Auto Delete Settings</b>\n\n' + 'بر اساس تعداد روز سپری شده ای که شما تعیین میکنین کاربر منقضی که تمدید نکرده رو از سرور پاک میکنه (این آپشن زمانی کار میکنه که دکمه "چکر" رو بزنین یا تو تنظیمات دکمه "چکر و اطلاع رسانی حجم تاریخ به کاربر" روشن باشه)\n\nCurrent: ' + str(settings['auto_delete']) + " Days"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
