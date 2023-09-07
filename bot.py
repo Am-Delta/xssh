@@ -2583,12 +2583,10 @@ def text_private(bot, message):
                         session = "ssh/" + new_host + ".session"
                         if sshx.Login(username, password, new_host) is False:
                             message.reply_text("Please send the correct Login data", reply_markup=reply_markup)
-                            ssc = sshx.Login(username, password, host)
                         if Login_test(username, password, new_host) is True:
                             do = True
                         else:
                             message.reply_text("Wrong Login data", reply_markup=reply_markup)
-                            ssc = sshx.Login(username, password, host)
                     except Exception as e:
                         message.reply_text("Error: " + str(e))
                     if do is True:
