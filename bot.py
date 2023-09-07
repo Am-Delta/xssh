@@ -5745,7 +5745,7 @@ def call_CTI(bot, query):
     text = '<b>IOS🍏</b>\n\n' + "Current: \n\n" + str(settings['ios'])
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
 
 
 @app.on_callback_query(filters.regex('ETI'))
@@ -5772,7 +5772,7 @@ def call_CTA(bot, query):
     text = '<b>Android🤖</b>\n\n' + "Current: \n\n" + str(settings['android'])
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
 
 
 @app.on_callback_query(filters.regex('ETA'))
@@ -5799,7 +5799,7 @@ def call_CTM(bot, query):
     text = '<b>Mac🍎</b>\n\n' + "Current: \n\n" + str(settings['mac'])
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
 
 
 @app.on_callback_query(filters.regex('ETM'))
@@ -5826,7 +5826,7 @@ def call_CTW(bot, query):
     text = '<b>Windows💻</b>\n\n' + "Current: \n\n" + str(settings['windows'])
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
 
 
 @app.on_callback_query(filters.regex('ETW'))
