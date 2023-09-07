@@ -82,7 +82,7 @@ def db_update():
     except sqlite3.OperationalError:
         cur.execute("""CREATE TABLE Sales (
             'date' text,
-            count int,
+            count int
             )""")
     conn.commit()
     cur.close()
