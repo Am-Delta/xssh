@@ -76,6 +76,14 @@ def db_update():
                     Phone text,
                     Balance int
                     )""")
+    try:
+        cur.execute("SELECT * FROM Sales")
+        records = cur.fetchall()
+    except sqlite3.OperationalError:
+        cur.execute("""CREATE TABLE Sales (
+            'date' text,
+            count int,
+            )""")
     conn.commit()
     cur.close()
     conn.close()
