@@ -2592,6 +2592,8 @@ def text_private(bot, message):
                     except Exception as e:
                         message.reply_text("Error: " + str(e))
                     if do is True:
+                        with open("Pannels.txt", "r") as f:
+                            lines = f.readlines()
                         with open("Pannels.txt", "w") as f:
                             for line in lines:
                                 if line.strip("\n") != (host + "@" + username + ":" + password):
@@ -2630,8 +2632,8 @@ def text_private(bot, message):
             keyboard = [[InlineKeyboardButton("<<", callback_data=f'TTRS_{host}')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             if host in hosts:
+                do = False
                 try:
-                    do = False
                     old_username, old_password = get_host_username_password(host)
                     session = "ssh/" + host + ".session"
                     if sshx.Login(username, password, new_host) is False:
@@ -2645,6 +2647,8 @@ def text_private(bot, message):
                 except Exception as e:
                     message.reply_text("Error: " + str(e), reply_markup=reply_markup)
                 if do is True:
+                    with open("Pannels.txt", "r") as f:
+                        lines = f.readlines()
                     with open("Pannels.txt", "w") as f:
                         for line in lines:
                             if line.strip("\n") != (host + "@" + old_username + ":" + old_password):
