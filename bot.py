@@ -1842,7 +1842,9 @@ def text_private(bot, message):
                         Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                         text = Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]))
                         port, udgpw = Session.Ports()
-                        url = f"ssh://{cache_list[1]}:{passw}@{host}:{port}"
+                        Session = sshx.PANNEL(host, username, password, 'User', cache_list[1])
+                        text = Session.User_info()
+                        url = f"ssh://{cache_list[1]}:{passw}@{(text.split("SSH Host : ")[1]).split("\n")[0]}:{port}"
                         photo = QR_Maker(url)
                         text += "\n\nURL: " + "<pre>" + url + "</pre>"
                         bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
@@ -1959,7 +1961,9 @@ def text_private(bot, message):
                     Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                     text = Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]))
                     port, udgpw = Session.Ports()
-                    url = f"ssh://{cache_list[1]}:{passw}@{host}:{port}"
+                    Session = sshx.PANNEL(host, username, password, 'User', cache_list[1])
+                    text = Session.User_info()
+                    url = f"ssh://{cache_list[1]}:{passw}@{(text.split("SSH Host : ")[1]).split("\n")[0]}:{port}"
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<pre>" + url + "</pre>"
                     bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
@@ -4207,11 +4211,13 @@ def call_BL(bot, query):
             username, password = get_host_username_password(host)
             try:
                 Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-                text = f"🥰مرسی از خریدتون\n\n"
-                text += Session.Create(user, passw, connection_limit, days, GB)
+                t0 = "🥰مرسی از خریدتون\n\n"
+                text = t0 + Session.Create(user, passw, connection_limit, days, GB)
                 if "Error" not in text:
                     port, udgpw = Session.Ports()
-                    url = f"ssh://{user}:{passw}@{host}:{port}"
+                    Session = sshx.PANNEL(host, username, password, 'User', user)
+                    text = Session.User_info()
+                    url = f"ssh://{user}:{passw}@{(text.split("SSH Host : ")[1]).split("\n")[0]}:{port}"
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<pre>" + url + "</pre>"
                     add_user_db(chat_id, name, USERNAME, user, host)
@@ -4282,12 +4288,14 @@ def call_Confirmed(bot, query):
             passw = str(randint(214254, 999999))
             username, password = get_host_username_password(host)
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-            text = f"🥰مرسی از خریدتون\n\n"
-            text += Session.Create(user, passw, connection_limit, days, GB)
+            t0 = "🥰مرسی از خریدتون\n\n"
+            text = t0 + Session.Create(user, passw, connection_limit, days, GB)
             if "Error" not in text:
                 port, udgpw = Session.Ports()
+                Session = sshx.PANNEL(host, username, password, 'User', user)
+                text = Session.User_info()
+                url = f"ssh://{user}:{passw}@{(text.split("SSH Host : ")[1]).split("\n")[0]}:{port}"
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
-                url = f"ssh://{user}:{passw}@{host}:{port}"
                 photo = QR_Maker(url)
                 text += "\n\nURL: " + "<pre>" + url + "</pre>"
                 bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
@@ -5937,7 +5945,7 @@ def call_settings(bot, query):
     keyboard = [
         [InlineKeyboardButton("💵 ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳 کارت", callback_data='Card')],
         [InlineKeyboardButton("📃پیام استارت", callback_data='WSMSG'), InlineKeyboardButton("🏷 پیام تعرفه قیمت", callback_data='WLMSG')],
-        [InlineKeyboardButton("❔ بخش آموزش کاربر", callback_data='Tutorials'), InlineKeyboardButton("🫡 آیدی پشتیبانی", callback_data='SID')],
+        [InlineKeyboardButton("❔ بخش آموزش کاربر", callback_data='Tutorials'), InlineKeyboardButton("📩 پیام پشتیبانی", callback_data='SID')],
         [InlineKeyboardButton("🗑حذف خودکار کاربر", callback_data='AutoDelete'), InlineKeyboardButton("💲قیمت دلار", callback_data='USD')],
         [InlineKeyboardButton("🛒قیمت ها", callback_data='ADMINPRICES'), InlineKeyboardButton("🔐وضعیت خرید", callback_data='BSOPtion')],
         [InlineKeyboardButton("📢اسپانسر", callback_data='sponser'), InlineKeyboardButton("📡پروکسی", callback_data='Sprx')],
