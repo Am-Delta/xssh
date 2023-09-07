@@ -92,7 +92,7 @@ c.execute("""CREATE TABLE Clients (
 
 c.execute("""CREATE TABLE Sales (
             'date' text,
-            count int,
+            count int
             )""")
 
 
