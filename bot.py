@@ -2584,7 +2584,7 @@ def text_private(bot, message):
                         if sshx.Login(username, password, new_host) is False:
                             message.reply_text("Please send the correct Login data", reply_markup=reply_markup)
                             ssc = sshx.Login(username, password, host)
-                        if Login_test(username, password, host) is True:
+                        if Login_test(username, password, new_host) is True:
                             do = True
                         else:
                             message.reply_text("Wrong Login data", reply_markup=reply_markup)
@@ -2636,7 +2636,7 @@ def text_private(bot, message):
                 try:
                     old_username, old_password = get_host_username_password(host)
                     session = "ssh/" + host + ".session"
-                    if sshx.Login(username, password, new_host) is False:
+                    if sshx.Login(username, password, host) is False:
                         message.reply_text("Please send the correct Login data")
                         ssc = sshx.Login(old_username, old_password, host)
                     if Login_test(username, password, host) is True:
