@@ -2577,8 +2577,8 @@ def text_private(bot, message):
             reply_markup = InlineKeyboardMarkup(keyboard)
             if host in hosts:
                 if new_host not in hosts:
+                    do = False
                     try:
-                        do = False
                         username, password = get_host_username_password(host)
                         session = "ssh/" + new_host + ".session"
                         if sshx.Login(username, password, new_host) is False:
