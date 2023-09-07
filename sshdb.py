@@ -125,7 +125,8 @@ settings = {
     "windows": "\nلینک دانلود برای ویندوز 🖥\n\n▫️Netmod ( SSH )\nhttps://sourceforge.net/projects/netmodhttp/\n\n ▫️Respite VPN ( SSH )\nhttps://sourceforge.net/projects/respite-vpn/\n ",
     "ios": "\nلینک دانلود برای گوشی های آیفون 🍏\n⭐️NapsternetV ios 15.0+\nhttps://apps.apple.com/us/app/napsternetv/id1629465476\n\n⚪️HTTP Injector ios 15.0+\nhttps://apps.apple.com/us/app/http-injector/id1659992827\n\n⚪️Streisand ios 14.0 +\nhttps://apps.apple.com/us/app/streisand/id6450534064\n\n⚪️V2box ios 15.0 +\nhttps://apps.apple.com/us/app/v2box-v2ray-client/id6446814690\n ",
     "android": "\nلینک دانلود برای گوشی های اندروید 🤖\n\n⚪️NapsternetV Google play\nhttps://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv\n\n⚪️HTTP Injector Google play\nhttps://play.google.com/store/apps/details?id=com.evozi.injector&hl=en&gl=US\n\n⚪️HTTP Injector Lite Google play مناسب اندروید پایین 4.3\nhttps://play.google.com/store/apps/details?id=com.evozi.injector.lite\n\n⚪️NetMod Google play\nhttps://play.google.com/store/apps/details?id=com.netmod.syna&hl=en_US\n ",
-    "mac": "\nلینک دانلود برای مک 🍎\n\n⭐️v2box macOS 11.0 +\nhttps://apps.apple.com/us/app/v2box-v2ray-client/id6446814690\n\n⭐️Streisand macOS 11.0 +\nhttps://apps.apple.com/us/app/streisand/id6450534064\n\n▫️SSH proxy macOS 10.9+\nhttps://apps.apple.com/us/app/ssh-proxy/id597790822?mt=12\n "
+    "mac": "\nلینک دانلود برای مک 🍎\n\n⭐️v2box macOS 11.0 +\nhttps://apps.apple.com/us/app/v2box-v2ray-client/id6446814690\n\n⭐️Streisand macOS 11.0 +\nhttps://apps.apple.com/us/app/streisand/id6450534064\n\n▫️SSH proxy macOS 10.9+\nhttps://apps.apple.com/us/app/ssh-proxy/id597790822?mt=12",
+    "support": "None"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
