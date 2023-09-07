@@ -79,11 +79,13 @@ def Get_user_info(html, uname):
                 status.append(a.text())
     del status[:4]
     usages = []
-    for a in html.css('a.pull-left'):
-        if "/" in a.text():
-            usages.append((a.text()).split(" /")[0])
-        elif ("گیگابایت" in a.text()) or ("نامحدود" in a.text()):
-            usages.append('0.0')
+    for button in html.css('button'):
+        if button.attributes.get("type", None) is not None:
+            if button.attributes['type'] == "button":
+                if "/" in button.text():
+                    usages.append((button.text()).split(" /")[0])
+                elif ("گیگابایت" in button.text()) or ("نامحدود" in button.text()):
+                    usages.append('0.0')
     for username in usernames:
         if username == uname:
             n = usernames.index(uname)
@@ -138,11 +140,13 @@ def Get_list(html):
                 traffics.append(data.text())
             if 'ip' in data.attributes['name']:
                 ips.append(data.text())
-    for a in html.css('a.pull-left'):
-        if "/" in a.text():
-            usages.append((a.text()).split(" /")[0])
-        elif ("گیگابایت" in a.text()) or ("نامحدود" in a.text()):
-            usages.append('0.0')
+    for button in html.css('button'):
+        if button.attributes.get("type", None) is not None:
+            if button.attributes['type'] == "button":
+                if "/" in button.text():
+                    usages.append((button.text()).split(" /")[0])
+                elif ("گیگابایت" in button.text()) or ("نامحدود" in button.text()):
+                    usages.append('0.0')
     for a in html.css('a'):
         href = a.attributes.get("href", None)
         if href is not None:
