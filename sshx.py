@@ -46,6 +46,7 @@ def Get_user_info(html, uname):
     usernames = []
     passwords = []
     traffics = []
+    ips = []
     days_left = []
     for data in html.css('td'):
         if data.attributes.get("name", None) is None:
@@ -68,6 +69,8 @@ def Get_user_info(html, uname):
                 passwords.append(data.text())
             if 'traffic' in data.attributes['name']:
                 traffics.append(data.text())
+            if 'ip' in data.attributes['name']:
+                ips.append(data.text())
     status = []
     for a in html.css('a'):
         href = a.attributes.get("href", None)
@@ -84,10 +87,11 @@ def Get_user_info(html, uname):
     for username in usernames:
         if username == uname:
             n = usernames.index(uname)
-            return passwords[n], traffics[n], int(connection_limits[n]), days_left[n], status[n], usages[n]
+            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days_left[n], status[n], usages[n]
 
 
 def Get_list(html):
+    ips = []
     expires = []
     connection_limits = []
     usernames = []
@@ -132,6 +136,8 @@ def Get_list(html):
                     ports.append(data.text())
             if 'traffic' in data.attributes['name']:
                 traffics.append(data.text())
+            if 'ip' in data.attributes['name']:
+                ips.append(data.text())
     for a in html.css('a.pull-left'):
         if "/" in a.text():
             usages.append((a.text()).split(" /")[0])
@@ -146,7 +152,7 @@ def Get_list(html):
     info = []
     for data in html.css('span.info-box-number'):
         info.append((data.text()).replace(" کاربر", ""))
-    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, server_traffic, int(info[1]), True
+    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, int(info[1]), True
 
 
 def check_premium_spliter(html):
@@ -180,7 +186,7 @@ class PANNEL:
             s = self.r.get(self.url + "/p/index.php").text
             html = HTMLParser(s)
             self.req = self.url + "/p/newuser.php"
-            self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage = Get_user_info(html, uname)
+            self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage = Get_user_info(html, uname)
 
     def Ports(self):
         s = self.r.get(self.url + "/p/setting.php").text
@@ -350,7 +356,7 @@ class PANNEL:
             return Get_list(html)
         except Exception as e:
             print("Error: " + str(e))
-            return [], [], [], [], [], [], [], [], [], [], 0, False
+            return [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
     def Check_Premium(self):
         try:
@@ -674,7 +680,7 @@ class PANNEL:
                 status += "🟢"
             else:
                 status += "🔴"
-            return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {self.uname}\nPassword : {self.passwd}\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+            return f"SSH Host : {self.ip}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {self.uname}\nPassword : {self.passwd}\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
         except Exception as e:
             return "Error: " + str(e)
 
