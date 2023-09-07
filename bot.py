@@ -1685,7 +1685,7 @@ def text_private(bot, message):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                 sleep(0.2)
-                message.reply_text(text='🫡بزودی درخواستتون بررسی میشه')
+                message.reply_text(text='🫡بزودی درخواستتون بررسی میشه', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
                 delete_cache(chat_id)
 
             elif ("USP_" in status):
@@ -2109,7 +2109,7 @@ def text_private(bot, message):
 
         elif status == "message":
             delete_cache(chat_id)
-            message.reply_text("Sending...")
+            msg = message.reply_text("Sending...").id
             fname = "All.txt"
             sent = 0
             with open(fname, 'r') as f:
@@ -2120,6 +2120,7 @@ def text_private(bot, message):
                     except:
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
+            bot.delete_messages(chat_id, msg)
 
         elif status == "answer":
             cache_list, host_cahce = get_collector_cache(chat_id)
@@ -2555,7 +2556,7 @@ def text_private(bot, message):
             if host in Get_hosts():
                 count = 0
                 rec = get_all_users_in_host(host)
-                bot.send_message(chat_id, "Sending...")
+                msg = message.reply_text("Sending...").id
                 for i in range(len(rec)):
                     ID = rec[i][0]
                     Account = rec[i][3]
@@ -2566,6 +2567,7 @@ def text_private(bot, message):
                     except:
                         pass
                 bot.send_message(chat_id, f"Send the specific msg from {host} to {str(count)}/{str(len(rec))} users.")
+                bot.delete_messages(chat_id, msg)
             else:
                 message.reply_text("The host does not exist")
 
@@ -3979,6 +3981,7 @@ def call_TUWPD(bot, query):
 
 
 برای کنسل کردن دکمه  بک بزنید
+قیمت دلار: {str(Toman_USD())}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -4086,6 +4089,7 @@ def call_TR(bot, query):
 
 
 برای کنسل کردن دکمه  بک بزنید
+قیمت دلار: {str(Toman_USD())}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -4214,11 +4218,11 @@ def call_Confirmed(bot, query):
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
                 delete_code_buy(code)
-                query.answer("Details sent to the user", show_alert=True)
+                bot.send_message(query.message.chat.id, "Details sent to the user")
             else:
-                query.answer(f"Error: {text}", show_alert=True)
+                bot.send_message(query.message.chat.id, f"Error: {text}")
         except Exception as e:
-            query.answer(f"Error: {str(e)}", show_alert=True)
+            bot.send_message(query.message.chat.id, f"Error: {str(e)}")
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -4410,6 +4414,7 @@ def call_UPTXR(bot, query):
 
 
 برای کنسل کردن دکمه  بک بزنید
+قیمت دلار: {str(Toman_USD())}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -4495,11 +4500,11 @@ def call_Confirmed_UPGRADE(bot, query):
                 else:
                     bot.send_message(chat_id, f"✅ تمدید شد\n\nUsername : {user}\nSSH Host : {host}")
                 delete_code_buy(code)
-                query.answer("Details sent to the user", show_alert=True)
+                bot.send_message(query.message.chat.id, "Details sent to the user")
             else:
-                query.answer(f"Error: {server_msg}", show_alert=True)
+                bot.send_message(query.message.chat.id, f"Error: {server_msg}")
         except Exception as e:
-            query.answer(f"Error: {str(e)}", show_alert=True)
+            bot.send_message(query.message.chat.id, f"Error: {str(e)}")
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -4823,7 +4828,7 @@ def call_ID(bot, query):
             reply_markup = InlineKeyboardMarkup(keyboard)
             query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
         except:
-            query.answer("⚠️خطا لطفا بعدا تلا کنین", show_alert=True)
+            query.answer("⚠️خطا لطفا بعدا تلاش کنین", show_alert=True)
     else:
         keyboard = [[InlineKeyboardButton("<< Back", callback_data='back')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -5108,7 +5113,7 @@ def call_bkoff(bot, query):
 @app.on_callback_query(filters.regex('BKupBot'))
 def call_bkbot(bot, query):
     chat_id = query.message.chat.id
-    query.edit_message_text(text="Sending...")
+    msg = query.edit_message_text(text="Sending...").id
     files = ["All.txt", "ssh.db", "data.json", "Pannels.txt", "logs.txt", "nohup.out"]
     logs = "Done✔️\n\nLogs:\n\n"
     for file in files:
@@ -5118,6 +5123,7 @@ def call_bkbot(bot, query):
             logs += ("File: " + file + " " + str(e) + "\n")
         sleep(0.5)
     bot.send_message(chat_id, logs)
+    bot.delete_messages(chat_id, msg)
 
 
 @app.on_callback_query(filters.regex('Backup'))
@@ -5715,7 +5721,7 @@ def admin_voice(bot, message):
         status = get_cache_status(chat_id)
         if status == "message":
             delete_cache(chat_id)
-            message.reply_text("Sending...")
+            msg = message.reply_text("Sending...").id
             fname = "All.txt"
             sent = 0
             with open(fname, 'r') as f:
@@ -5729,6 +5735,7 @@ def admin_voice(bot, message):
                     except:
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
+            bot.delete_messages(chat_id, msg)
 
 
 @app.on_message(filters.chat(admin_id) & filters.video)
@@ -5743,7 +5750,7 @@ def admin_video(bot, message):
         status = get_cache_status(chat_id)
         if status == "message":
             delete_cache(chat_id)
-            message.reply_text("Sending...")
+            msg = message.reply_text("Sending...").id
             fname = "All.txt"
             sent = 0
             with open(fname, 'r') as f:
@@ -5757,6 +5764,7 @@ def admin_video(bot, message):
                     except:
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
+            bot.delete_messages(chat_id, msg)
 
 
 @app.on_message(filters.chat(admin_id) & filters.document)
@@ -5771,7 +5779,7 @@ def admin_document(bot, message):
         status = get_cache_status(chat_id)
         if status == "message":
             delete_cache(chat_id)
-            message.reply_text("Sending...")
+            msg = message.reply_text("Sending...").id
             fname = "All.txt"
             sent = 0
             with open(fname, 'r') as f:
@@ -5785,6 +5793,7 @@ def admin_document(bot, message):
                     except:
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
+            bot.delete_messages(chat_id, msg)
 
 
 @app.on_message(filters.private & filters.photo)
@@ -5800,7 +5809,7 @@ def image_users(bot, message):
             except:
                 caption = None
             delete_cache(chat_id)
-            message.reply_text("Sending...")
+            msg = message.reply_text("Sending...").id
             fname = "All.txt"
             sent = 0
             with open(fname, 'r') as f:
@@ -5814,6 +5823,7 @@ def image_users(bot, message):
                     except:
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
+            bot.delete_messages(chat_id, msg)
 
         elif "support" in status:
             n = int(status.split("support ")[1])
@@ -5828,7 +5838,7 @@ def image_users(bot, message):
             reply_markup = InlineKeyboardMarkup(keyboard)
             bot.send_message(admin_id[n], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
             sleep(0.2)
-            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡')
+            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
 
         elif status == "buy":
             name = message.from_user.first_name
@@ -5852,7 +5862,7 @@ def image_users(bot, message):
                 except:
                     pass
             update_code_status(code, "check")
-            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡')
+            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
 
         elif status == "upgrade":
             name = message.from_user.first_name
@@ -5876,7 +5886,7 @@ def image_users(bot, message):
                 except:
                     pass
             update_code_status(code, "checkup")
-            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡')
+            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
         elif status == "userdeposit":
             name = message.from_user.first_name
             try:
@@ -5899,7 +5909,7 @@ def image_users(bot, message):
                 except:
                     pass
             update_code_status(code, "checkdeposit")
-            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡')
+            message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
 
         delete_cache(chat_id)
 
