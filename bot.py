@@ -136,7 +136,7 @@ def User_Tools_keys():
                 if len(hosts) % 3 == 0:
                     keyboard.append([InlineKeyboardButton(hosts[-3], callback_data=(job + hosts[-3])), InlineKeyboardButton(hosts[-2], callback_data=(job + hosts[-2])), InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
                 elif len(hosts) % 2 == 0:
-                    keyboard.append([InlineKeyboardButton(hosts[-2], callback_data=(job + hosts[-2])), InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))]) 
+                    keyboard.append([InlineKeyboardButton(hosts[-2], callback_data=(job + hosts[-2])), InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
                 else:
                     keyboard.append([InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
         elif len(hosts) >= 10:
@@ -182,7 +182,7 @@ def Reply_Kill(host, users):
                 if len(users) % 3 == 0:
                     keyboard.append([InlineKeyboardButton(users[-3], callback_data=(job + users[-3])), InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
                 elif len(users) % 2 == 0:
-                    keyboard.append([InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))]) 
+                    keyboard.append([InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
                 else:
                     keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
         elif len(users) >= 10:
@@ -1177,7 +1177,7 @@ def forward(bot, message):
         status = get_cache_status(chat_id)
         if status == "message":
             delete_cache(chat_id)
-            message.reply_text("Forwarding...")
+            msg = message.reply_text("Forwarding...").id
             msg_id = message.id
             fname = "All.txt"
             sent = 0
@@ -1189,7 +1189,8 @@ def forward(bot, message):
                     except:
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
-        
+            bot.delete_messages(chat_id, msg)
+
         elif status == "forward":
             old_list, host_cahce = get_collector_cache(chat_id)
             cache_list = []
@@ -1212,7 +1213,7 @@ def forward(bot, message):
             delete_cache(chat_id)
             add_cache(chat_id, "connection")
             update_collector(chat_id, cache_list, host_cahce)
-            message.reply_text("send connection limit only number or /cancel")
+            message.reply_text("send connection limit only number (0 = unlimited) or /cancel")
 
         elif status == "userconfigs":
             try:
@@ -1286,11 +1287,11 @@ def forward(bot, message):
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     message.reply_text(f"Current Balance: {str(value)} Toman.", reply_markup=reply_markup)
-                    delete_cache(chat_id)
                 else:
-                    message.reply_text("🔵 The user does not Exist /cancel it", reply_markup=reply_markup)
+                    message.reply_text("🔵 The user does not Exist", reply_markup=reply_markup)
             except:
-                message.reply_text("❌This user is Hidden /cancel it", reply_markup=reply_markup)
+                message.reply_text("❌This user is Hidden", reply_markup=reply_markup)
+            delete_cache(chat_id)
 
 
 @app.on_message(filters.chat(admin_id) & filters.command('edit'))
@@ -1825,6 +1826,7 @@ def text_private(bot, message):
         elif status == "password":
             try:
                 user = link
+                text = ""
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 host = cache_list[0]
                 username, password = get_host_username_password(host)
@@ -2252,6 +2254,42 @@ def text_private(bot, message):
             except:
                 message.reply_text("Only numbers or /cancel")
 
+        elif "ETM" == status:
+            settings = get_settings()
+            settings['mac'] = link
+            update_settings(settings)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text("Done✔️", reply_markup=reply_markup)
+            delete_cache(chat_id)
+
+        elif "ETW" == status:
+            settings = get_settings()
+            settings['windows'] = link
+            update_settings(settings)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text("Done✔️", reply_markup=reply_markup)
+            delete_cache(chat_id)
+
+        elif "ETA" == status:
+            settings = get_settings()
+            settings['android'] = link
+            update_settings(settings)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text("Done✔️", reply_markup=reply_markup)
+            delete_cache(chat_id)
+
+        elif "ETI" == status:
+            settings = get_settings()
+            settings['ios'] = link
+            update_settings(settings)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text("Done✔️", reply_markup=reply_markup)
+            delete_cache(chat_id)
+
         elif "Start_message" == status:
             settings = get_settings()
             settings['start'] = link
@@ -2423,7 +2461,7 @@ def text_private(bot, message):
                 message.reply_text("Send link: https://t.me/proxy?server=... or /cancel")
 
         elif "Connectionmsg_" in status:
-            if len(link) <= 64:
+            if len(link) <= 128:
                 host = status.split("Connectionmsg_")[1]
                 if host in Get_hosts():
                     username, password = get_host_username_password(host)
@@ -2439,7 +2477,7 @@ def text_private(bot, message):
                 message.reply_text(text, reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
-                message.reply_text("The message is too long, send a message less than 64 characters")
+                message.reply_text("The message is too long, send a message less than 128 characters")
 
         elif "AutoRemove_" in status:
             try:
@@ -3220,7 +3258,7 @@ def call_stats(bot, query):
 def call_filtering(bot, query):
     keyboard = [[InlineKeyboardButton("<< back", callback_data="back_admin")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text="Processing Please wait...")
+    query.edit_message_text(text="درحال انجام...")
     start = int(time())
     FS = ""
     logs = ""
@@ -3258,7 +3296,7 @@ def call_filtering(bot, query):
 def call_full(bot, query):
     keyboard = [[InlineKeyboardButton("<< back", callback_data="SMT")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text="Processing Please wait...")
+    query.edit_message_text(text="درحال انجام...")
     start = int(time())
     FS = ""
     logs = ""
@@ -3765,7 +3803,7 @@ def call_wallet(bot, query):
         status = "🔴 OFF"
     else:
         status = "🟢 ON"
-    text = f"💳Wallet: <pre>{str(wallet)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}"
+    text = f"💳Wallet: <pre>{str(wallet)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -3809,7 +3847,7 @@ def call_card(bot, query):
         status = "🔴 OFF"
     else:
         status = "🟢 ON"
-    text = f"💳Card: <pre>{str(card)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}"
+    text = f"💳Card: <pre>{str(card)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -3971,7 +4009,7 @@ def call_TUWPD(bot, query):
         add_code_buy(chat_id, Code, "userdeposit", cache_list)
         price = trx_price(price)
         text = f"""
-مبلغ: 
+مبلغ:
 {price}
 
 به آدرس ترون :
@@ -4079,7 +4117,7 @@ def call_TR(bot, query):
         add_code_buy(chat_id, Code, "add", cache_list)
         price = trx_price(price)
         text = f"""
-مبلغ: 
+مبلغ:
 {price}
 
 به آدرس ترون :
@@ -4404,7 +4442,7 @@ def call_UPTXR(bot, query):
         add_code_buy(chat_id, Code, "upgrade", cache_list)
         price = trx_price(price)
         text = f"""
-مبلغ: 
+مبلغ:
 {price}
 
 به آدرس ترون :
@@ -4560,7 +4598,7 @@ Username : user124
 ...
 
 
-یا آدرس سرور سرویستون بفرستین 
+یا آدرس سرور سرویستون بفرستین
 مثلا:
 sub.domain.com
         """
@@ -4592,7 +4630,7 @@ def call_Manager(bot, query):
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>👤 Account Manager</b>'
+    text = '<b>👤 Account Manager</b>\n\nدکمه اکانت های کاربر:\nمیتونین ببینین یه کاربر چند تا اکانت داره و تغییرات رو اکانتشون اعمال کنین (تمدید, غیر فعال, افزایش ترافیک, تغییر پسورد...)\nبرای اینکار کافیه دکمه رو بزنین و یه پیام از کاربر فوروارد کنین (برای کاربرایی که هیدنن کار نمیکنه)\n\nفرق بین دکمه ساخت اکانت و ساخت اکانت یوزر تلگرام وقتی میخواین برای یه کاربر خارج از تلگرام اکانت بسازین دکمه ساخت اکانت بزنین ولی اگه داخل تلگرام بود میتونین دکمه ساخت اکانت یوزر تلگرام بزنین و وقتی کاربر دکمه سرویس های من بزنه اکانت اونجا نمایش داده میشه'
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -4639,7 +4677,7 @@ def call_DTRS(bot, query):
             delete_host_users_accounts(host)
         bot.send_message(chat_id, text, reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might deleted it from the list before", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('MST'))
@@ -4660,7 +4698,7 @@ def call_MPST(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text='OK, Send your message (text only)', reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might deleted it from the list before", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
+        query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
 
 
 @app.on_callback_query(filters.regex('TST'))
@@ -4692,7 +4730,7 @@ def call_TTRS(bot, query):
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
     else:
-        query.edit_message_text(text="The Server does not exist, You might deleted it from the list before", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
+        query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
 
 
 @app.on_callback_query(filters.regex('EUP_'))
@@ -4708,7 +4746,7 @@ def call_EUP(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text='OK, Send The new username', reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might deleted it from the list before", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
+        query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
 
 
 @app.on_callback_query(filters.regex('EDD_'))
@@ -4724,7 +4762,7 @@ def call_EDD(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text='OK, Send The new domain', reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might deleted it from the list before", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
+        query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
 
 
 @app.on_callback_query(filters.regex('AST'))
@@ -4752,7 +4790,7 @@ def call_SMT(bot, query):
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>🖥 Server Manager</b>'
+    text = '<b>🖥 Server Manager</b>' + "\n\n-دکمه تنظیم و اطلاعات کامل یک سرور:\nمیتونین اطلاعات کامل سرور ببینین و کاربرای آنلاین و غیرفعال و نزدیک به منقضی شدن ببینین. اگه سرور شما لایسنس دار باشه امکانات بیشتری داره\n-دکمه ظرفیت سرورها:\nبهتون میگه رو هر سرور چند کاربر وجود داره"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -4899,32 +4937,28 @@ def call_help(bot, query):
 def call_ios(bot, query):
     keyboard = [[InlineKeyboardButton("<<", callback_data='help')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>لینک دانلود برای گوشی های آیفون 🍏</b>\n\n⭐️<a href="https://apps.apple.com/us/app/napsternetv/id1629465476"><b>NapsternetV ios 15.0+</b></a>\n\n▫️بقیه برنامه ها برای پروتکل SSH\n⚪️<a href="https://apps.apple.com/us/app/http-injector/id1659992827"><b>HTTP Injector ios 15.0+</b></a>\n⚪️<a href="https://apps.apple.com/us/app/streisand/id6450534064"><b>Streisand ios 14.0 +</b></a>\n⚪️<a href="https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690"><b>V2box ios 15.0 +</b></a>\n\n➖➖➖➖➖➖➖➖\n\n🔻آموزش برنامه نپستر پروتکل SSH:\nhttps://t.me/vipinowedu/17\n\n\n🔹برنامه Streisand و V2box هم مثل همین برنامه هست\n'
-    query.edit_message_text(text=text, reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=get_settings()['ios'], reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('Android'))
 def call_Android(bot, query):
     keyboard = [[InlineKeyboardButton("<<", callback_data='help')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>لینک دانلود برای گوشی های اندروید 🤖</b>\n\n⚪️<a href="https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv"><b>NapsternetV Google play</b></a>\n⚫️<a href="https://t.me/vipinowedu/25"><b> در تلگرام NapsternetV فایل نصبی</b></a>\n⚪️<a href="https://play.google.com/store/apps/details?id=com.evozi.injector&hl=en&gl=US"><b>HTTP Injector Google play</b></a>\n⚪️<a href="https://play.google.com/store/apps/details?id=com.evozi.injector.lite"><b>HTTP Injector Lite Google play مناسب اندروید پایین 4.3</b></a>\n⚪️<a href="https://play.google.com/store/apps/details?id=com.netmod.syna&hl=en_US"><b>NetMod Google play</b></a>\n\n➖➖➖➖➖➖➖➖\n\n🔻آموزش برنامه نپستر پروتکل SSH:\nhttps://t.me/vipinowedu/18\n'
-    query.edit_message_text(text=text, reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=get_settings()['android'], reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('Mac'))
 def call_Mac(bot, query):
     keyboard = [[InlineKeyboardButton("<<", callback_data='help')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>لینک دانلود برای مک 🍎</b>\n\nℹ️ برای سیستم عامل های مک برنامه های آیفون استفاده میشه\n\n⭐️<a href="https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690"><b>v2box macOS 11.0 +</b></a>\n⭐️<a href="https://apps.apple.com/us/app/streisand/id6450534064"><b>Streisand macOS 11.0 +</b></a>\n⭐️<a href="https://apps.apple.com/us/app/foxray/id6448898396"><b>Foxray macOS 13.0+</b></a>\n\n▫️<a href="https://apps.apple.com/us/app/ssh-proxy/id597790822?mt=12"><b>SSH proxy macOS 10.9+</b></a>\n\n➖➖➖➖➖➖➖➖\n\n🔻آموزش برنامه V2box پروتکل Vless:\nhttps://t.me/vipinowedu/36\n\nبرنامه Streisand هم مثل همین برنامه هست'
-    query.edit_message_text(text=text, reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=get_settings()['mac'], reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('Windows'))
 def call_Windows(bot, query):
     keyboard = [[InlineKeyboardButton("<<", callback_data='help')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>لینک دانلود برای ویندوز 🖥</b>\n\nℹ️ وارد لینک زیر بشین کلمه آبی چینی بالا رو بزنین\nصفحه که با ز شد آخر صفحه برین اینو دانلود کنین:\nv2rayN-With-Core.zip\n \n▫️<a href="https://github.com/2dust/v2rayN/releases"><b>V2rayN</b></a>\nبرای ویندوز 10 به پایین اینم دانلود شه:\n🔹<a href="https://download.visualstudio.microsoft.com/download/pr/513d13b7-b456-45af-828b-b7b7981ff462/edf44a743b78f8b54a2cec97ce888346/windowsdesktop-runtime-6.0.15-win-x64.exe"><b>Microsoft .NET 6.0 Desktop Runtime</b></a>\n\n▫️<a href="https://sourceforge.net/projects/netmodhttp/"><b>Netmod ( SSH )</b></a>\n▪️<a href="https://t.me/vipinowedu/52"><b>فایل نصبی Netmod</b></a>\n▫️<a href="https://sourceforge.net/projects/respite-vpn/"><b>Respite VPN ( SSH )</b></a>\n\n\n➖➖➖➖➖➖➖➖\n\n🔻آموزش برنامه Netmod پروتکل SSH:\nhttps://t.me/vipinowedu/53'
-    query.edit_message_text(text=text, reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+    query.edit_message_text(text=get_settings()['windows'], reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('referral'))
@@ -5203,7 +5237,7 @@ def call_sponser(bot, query):
         [InlineKeyboardButton("Delete✖️", callback_data='Delship')],
     ]
     settings = get_settings()
-    text = '<b>Sponser Settings</b>\n\n' + "Current: " + settings['sponser']
+    text = '<b>Sponser Settings</b>\n\n' + "Current: " + settings['sponser'] + "\n\nجوین اجباری کانال حتما باید اول ربات ادمین چنل یا گروه پابلیک باشه و بعد دکمه ادیت بزنین و آیدی رو بفرستین"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5263,11 +5297,11 @@ def call_USD(bot, query):
     ]
     status, value = GET_USD()
     if status is True:
-        value = str(value) + " Toman"
+        value = str(value) + " تومن"
     else:
         value = "API Error: iran websites blocked by the server, change the rules"
     settings = get_settings()
-    text = '<b>USD Settings</b>\n\n' + "Default: " + str(settings['usd']) + " Toman\n" + "Current price: " + value
+    text = '<b>USD Settings</b>\n\n' + "پیش فرض: " + str(settings['usd']) + " تومن\n" + "الان: " + value
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5291,7 +5325,7 @@ def call_maximum(bot, query):
         [InlineKeyboardButton("Edit✏️", callback_data='EMXM')],
     ]
     settings = get_settings()
-    text = '<b>Maximum Settings</b>\n\n' + "Current: " + str(settings['maximum']) + " Clients"
+    text = '<b>Maximum Settings</b>\n\n' + "کاربرد این گزینه : وقتی شما مثلا عدد 50  کاربر تنظیم میکنین برای هر سرور... وقتی که فروش فعال باشه و کاربر اکانت بخره. سرور وقتی رسید به 50 تا کاربر دیگه اکانت نمیسازه و میره از سرور بعدی میسازه ولی وقتی که هیچ سرور دیگه ای نباشه یا همه سرورا رسیده باشن به 50 کاربر شما باید سرور جدید به ربات اضافه کنین یا مقدارو تغییر بدین هر موقع که خواستین و این هم برای گزینه برای دکمه ظرفیت سرور ها کاربرد داره و میگه که کدوم سرورا رسیدن به 50 تا اکانت. برای تغییر مقدار دکمه ادیت بزنین\n\nCurrent: " + str(settings['maximum']) + " Clients"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5321,7 +5355,7 @@ def call_BSOPtion(bot, query):
     keyboard = [
         [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'EBS_{cb}')],
     ]
-    text = '<b>Shop Settings</b>\n\n' + "Current: " + settings['buy'] + " " + emoji
+    text = '<b>Shop Settings</b>\n\n' + "میتونین با خاموش و روشن کردن این گزینه خرید یا تمدید غیرفعال یا فعال کنین" + "\n\nCurrent: " + settings['buy'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5542,7 +5576,7 @@ def call_Sprx(bot, query):
             [InlineKeyboardButton("Edit✏️", callback_data='APRX')],
             [InlineKeyboardButton("Delete✖️", callback_data='DPRX')],
         ]
-    text = '<b>Proxy Settings</b>\n\n' + "Current: \n" + settings['proxy']
+    text = '<b>Proxy Settings</b>\n\n' + "میتونین پروکسی خودتون تو ربات اد کنین و کاربرا بتونن استفاده کنن از این آپشن \n\nCurrent: \n" + settings['proxy']
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5559,7 +5593,7 @@ def call_NUSYS(bot, query):
     else:
         status = "ON ✅"
     tp = """هر 30 دقیقه یه بار بررسی میشه و به کاربرای که نزدیکه حجم یا تاریخ اکانتشون تموم بشه اطلاع میده
-این دکمه مشابه دکمه چکر هست ولی دکمه چکر فقط یه بار اطلاع رسانی میکنه 
+این دکمه مشابه دکمه چکر هست ولی دکمه چکر فقط یه بار اطلاع رسانی میکنه
 هر بار که رباتو آپدیت شد باید دوباره روشن کنین"""
     text = '<b>Notify System Checker Settings</b>\n\n' + tp + "\n\n🔄Status: " + status + "\n📃Notified: " + str(len(checked_id))
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
@@ -5665,7 +5699,7 @@ def call_INVS(bot, query):
         [InlineKeyboardButton("Edit✏️", callback_data='ENVS')],
     ]
     settings = get_settings()
-    text = '<b>Referrals Settings</b>\n\n' + "Current: " + str(settings['referral']) + " Toman"
+    text = '<b>Referrals Settings</b>\n\n' + "با دعوت هر یه نفر به ربات با لینک توسط یه کاربر یه مبلغی به کیف پولش اضافه میشه . دکمه ادیت بزنین و مبلغ مورد نظرتون به تومن بفرستین\n\nCurrent: " + str(settings['referral']) + " تومن"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5674,6 +5708,8 @@ def call_INVS(bot, query):
 @app.on_callback_query(filters.regex('ENVS'))
 def call_ENVS(bot, query):
     chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
     add_cache(chat_id, "invite")
     text = "OK send only number"
     keyboard = [[InlineKeyboardButton("<<", callback_data='INVS')]]
@@ -5681,10 +5717,134 @@ def call_ENVS(bot, query):
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
+@app.on_callback_query(filters.regex('Tutorials'))
+def call_Tutorials(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("IOS🍏", callback_data='CTI'), InlineKeyboardButton("Android🤖", callback_data='CTA')],
+        [InlineKeyboardButton("Mac🍎", callback_data='CTM'), InlineKeyboardButton("Windows💻", callback_data='CTW')]
+    ]
+    settings = get_settings()
+    text = '<b>Tutorials Settings</b>\n\n' + "یکی از گزینه هارو انتخاب کنین"
+    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('CTI'))
+def call_CTI(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("Edit✏️", callback_data='ETI')],
+    ]
+    settings = get_settings()
+    text = '<b>IOS🍏</b>\n\n' + "Current: \n\n" + str(settings['ios'])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('ETI'))
+def call_ETI(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "ETI")
+    text = "OK send the text"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='CTI')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('CTA'))
+def call_CTA(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("Edit✏️", callback_data='ETA')],
+    ]
+    settings = get_settings()
+    text = '<b>Android🤖</b>\n\n' + "Current: \n\n" + str(settings['android'])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('ETA'))
+def call_ETA(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "ETA")
+    text = "OK send the text"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='CTA')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('CTM'))
+def call_CTM(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("Edit✏️", callback_data='ETM')],
+    ]
+    settings = get_settings()
+    text = '<b>Mac🍎</b>\n\n' + "Current: \n\n" + str(settings['mac'])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('ETM'))
+def call_ETM(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "ETM")
+    text = "OK send the text"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='CTM')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('CTW'))
+def call_CTW(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("Edit✏️", callback_data='ETW')],
+    ]
+    settings = get_settings()
+    text = '<b>Windows💻</b>\n\n' + "Current: \n\n" + str(settings['windows'])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('ETW'))
+def call_ETW(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "ETW")
+    text = "OK send the text"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='CTW')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
 @app.on_callback_query(filters.regex('HOW'))
 def call_HOW(bot, query):
     keyboard = []
-    text = '<b>How to use?</b>\n\nYou can modify user easily by sending like this (just copy the text that you copied from the panel and sent it to the user):\n\nSSH Host: domain\nUsername : username'
+    text = '<b>How to use?</b>\n\nبرای اینکه یه کاربر سریعتر مدیریت کنین کافیه کپی کانفیگی که داخل پنل زده بودین و به کاربر فرستادینو مستقیم به ربات بفرستین:\n\nSSH Host: domain\nUsername : username\n\n\nبرای درست کردن لیست قیمت کافیه دکمه قیمت ها رو بزنین\n\n'
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5693,19 +5853,20 @@ def call_HOW(bot, query):
 @app.on_callback_query(filters.regex('settings'))
 def call_settings(bot, query):
     keyboard = [
-        [InlineKeyboardButton("💵ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳کارت", callback_data='Card')],
+        [InlineKeyboardButton("💵 ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳 کارت", callback_data='Card')],
         [InlineKeyboardButton("📃پیام استارت", callback_data='WSMSG'), InlineKeyboardButton("🏷 پیام تعرفه قیمت", callback_data='WLMSG')],
         [InlineKeyboardButton("🗑حذف خودکار کاربر", callback_data='AutoDelete'), InlineKeyboardButton("💲قیمت دلار", callback_data='USD')],
         [InlineKeyboardButton("🛒قیمت ها", callback_data='ADMINPRICES'), InlineKeyboardButton("🔐وضعیت خرید", callback_data='BSOPtion')],
         [InlineKeyboardButton("📢اسپانسر", callback_data='sponser'), InlineKeyboardButton("📡پروکسی", callback_data='Sprx')],
         [InlineKeyboardButton("🌐چکر فیلترینگ", callback_data='FILCH'), InlineKeyboardButton("📥بکاپ", callback_data='Backup')],
-        [InlineKeyboardButton("❔راهنما", callback_data='HOW'), InlineKeyboardButton("🎁دعوت کاربر", callback_data='INVS')],
+        [InlineKeyboardButton("🆘راهنما", callback_data='HOW'), InlineKeyboardButton("🎁دعوت کاربر", callback_data='INVS')],
+        [InlineKeyboardButton("❔ بخش آموزش کاربر", callback_data='Tutorials')]
         [InlineKeyboardButton("ℹ️ چکر و اطلاع رسانی حجم و تاریخ به کاربر", callback_data='NUSYS')],
         [InlineKeyboardButton("👤محدودیت تعداد کاربر در هر سرور", callback_data='maximum')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>تنظیمات🖥</b>'
+    text = '<b>تنظیمات 🔧</b>'
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
