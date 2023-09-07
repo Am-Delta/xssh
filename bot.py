@@ -4682,7 +4682,7 @@ def call_TTRS(bot, query):
             reply_markup = InlineKeyboardMarkup(keyboard)
             text = f"Current ⬇️\n\n🖥 Host: {host}\nUser: {username}\nPassword: {password}\n\n🔄 Status: {status}"
             query.edit_message_text(text=text, reply_markup=reply_markup)
-        except Exception as e::
+        except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
     else:
         query.edit_message_text(text="The Server does not exist, You might deleted it from the list before", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
