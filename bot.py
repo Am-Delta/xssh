@@ -65,9 +65,9 @@ botusername = []
 
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
-
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
 headers = {
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+    "user-agent": user_agent
 }
 
 
@@ -275,6 +275,38 @@ def checker_notify(ids):
         return True
     else:
         return False
+
+
+def check_host_api(host):
+    try:
+        node1 = "ir1.node.check-host.net"
+        node2 = "ir3.node.check-host.net"
+        node3 = "de1.node.check-host.net"
+        url = f"https://check-host.net/check-ping?host={host}&node={node1}&node={node2}&node={node3}"
+        headers = {
+            'accept': 'application/json',
+            'user-agent': user_agent
+        }
+        r = requests.get(url, headers=headers)
+        if r.status_code == 200:
+            request_id = json.loads(r.text)['request_id']
+            sleep(20)
+            data = requests.get("https://check-host.net/check-result/" + request_id, headers=headers)
+            if data.status_code == 200:
+                results = json.loads(data.text)
+                print(results)
+                for result in results[node1][0]:
+                    if result[0] == "OK":
+                        return False
+                for result in results[node2][0]:
+                    if result[0] == "OK":
+                        return False
+                for result in results[node3][0]:
+                    if result[0] == "OK":
+                        return True
+    except:
+        return True
+    return True
 
 
 def API_0():
@@ -2290,6 +2322,15 @@ def text_private(bot, message):
             message.reply_text("Done✔️", reply_markup=reply_markup)
             delete_cache(chat_id)
 
+        elif "EAID" == status:
+            settings = get_settings()
+            settings['support'] = link
+            update_settings(settings)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text("Done✔️", reply_markup=reply_markup)
+            delete_cache(chat_id)
+
         elif "Start_message" == status:
             settings = get_settings()
             settings['start'] = link
@@ -2975,7 +3016,7 @@ def call_HSDU(bot, query):
         username, password = get_host_username_password(host)
         try:
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-            expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, server_traffic, online_c, done = Session.info()
+            expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, online_c, done = Session.info()
             if done is True:
                 count_inactive_clients = 0
                 text = ""
@@ -3010,7 +3051,7 @@ def call_HSCU(bot, query):
         username, password = get_host_username_password(host)
         try:
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-            expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, server_traffic, online_c, done = Session.info()
+            expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, online_c, done = Session.info()
             if done is True:
                 count_close_to_disable = 0
                 text = ""
@@ -3101,7 +3142,7 @@ def call_checker(bot, query):
             password = data.split(":")[1]
             try:
                 Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-                expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, server_traffic, online_c, done = Session.info()
+                expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, online_c, done = Session.info()
                 DB_usernames = get_db(host)
                 for DB_username in DB_usernames:
                     if DB_username not in usernames:
@@ -3274,8 +3315,9 @@ def call_filtering(bot, query):
                 Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                 status, server_msg = Session.IP_Check()
                 if status is True:
-                    blocked_servers += 1
-                    FS += (f"🔴Offline: {host}\n")
+                    if check_host_api(host) is True:
+                        blocked_servers += 1
+                        FS += (f"🔴Offline: {host}\n")
                 else:
                     if "Error" in server_msg:
                         checked_servers -= 1
@@ -4256,7 +4298,7 @@ def call_Confirmed(bot, query):
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
                 delete_code_buy(code)
-                bot.send_message(query.message.chat.id, "Details sent to the user")
+                bot.send_message(query.message.chat.id, "Details sent to the user", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
                 bot.send_message(query.message.chat.id, f"Error: {text}")
         except Exception as e:
@@ -4538,7 +4580,7 @@ def call_Confirmed_UPGRADE(bot, query):
                 else:
                     bot.send_message(chat_id, f"✅ تمدید شد\n\nUsername : {user}\nSSH Host : {host}")
                 delete_code_buy(code)
-                bot.send_message(query.message.chat.id, "Details sent to the user")
+                bot.send_message(query.message.chat.id, "Details sent to the user", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
                 bot.send_message(query.message.chat.id, f"Error: {server_msg}")
         except Exception as e:
@@ -4892,9 +4934,12 @@ def call_support(bot, query):
             keyboard.append([InlineKeyboardButton(f"پشتیبانی {str(i + 1)}", callback_data=("SUPRT_" + str(randomize[i])))])
         keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="🫡یکی از گزینه هارو انتخاب کنین", reply_markup=reply_markup)
-    else:
-        query.edit_message_text(text="لطفا /cancel را بفرستید ")
+        settings = get_settings()
+        if settings['support'] == "None":
+            sm = ""
+        else:
+            sm = settings['support']
+        query.edit_message_text(text=f"{sm}\n\n🫡یکی از گزینه هارو انتخاب کنین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('SUPRT_'))
@@ -5487,10 +5532,11 @@ def call_FLCHON(bot, query):
                                             for i in range(2):
                                                 status, content = Session.IP_Check()
                                                 if (status is True) and (i == 1):
-                                                    text = "🔴Blocked in some countries: " + host
-                                                    checked_filtering.append(host)
-                                                    bot.send_message(chat_id, text)
-                                                    break
+                                                    if check_host_api(host) is True:
+                                                        text = "🔴Blocked in IRAN: " + host
+                                                        checked_filtering.append(host)
+                                                        bot.send_message(chat_id, text)
+                                                        break
                                                 elif status is False:
                                                     break
                                                 sleep(20)
@@ -5633,7 +5679,7 @@ def call_SNON(bot, query):
                                 if do is True:
                                     try:
                                         Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
-                                        expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, server_traffic, online_c, done = Session.info()
+                                        expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, online_c, done = Session.info()
                                         if done is True:
                                             DB_usernames = get_db(host)
                                             for DB_username in DB_usernames:
@@ -5717,6 +5763,43 @@ def call_ENVS(bot, query):
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
+@app.on_callback_query(filters.regex('SID'))
+def call_SID(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("Edit✏️", callback_data='EAID'), InlineKeyboardButton("Delete✖️", callback_data='DAID')],
+    ]
+    settings = get_settings()
+    text = '<b>Support Settings</b>\n\n' + "میتونین یه پیام پشتیبانی رو قرار بدین و وقتی کاربر دکمه پشتیبانی رو بزنه پیامی که تنظیم کردین نمایش داده بشه \n\nCurrent: " + get_settings()['support']
+    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('DAID'))
+def call_DAID(bot, query):
+    settings = get_settings()
+    settings['support'] = "None"
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('EAID'))
+def call_EAID(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "EAID")
+    text = "OK send the text"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
 @app.on_callback_query(filters.regex('Tutorials'))
 def call_Tutorials(bot, query):
     chat_id = query.message.chat.id
@@ -5726,7 +5809,6 @@ def call_Tutorials(bot, query):
         [InlineKeyboardButton("IOS🍏", callback_data='CTI'), InlineKeyboardButton("Android🤖", callback_data='CTA')],
         [InlineKeyboardButton("Mac🍎", callback_data='CTM'), InlineKeyboardButton("Windows💻", callback_data='CTW')]
     ]
-    settings = get_settings()
     text = '<b>Tutorials Settings</b>\n\n' + "یکی از گزینه هارو انتخاب کنین"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -5855,12 +5937,12 @@ def call_settings(bot, query):
     keyboard = [
         [InlineKeyboardButton("💵 ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳 کارت", callback_data='Card')],
         [InlineKeyboardButton("📃پیام استارت", callback_data='WSMSG'), InlineKeyboardButton("🏷 پیام تعرفه قیمت", callback_data='WLMSG')],
+        [InlineKeyboardButton("❔ بخش آموزش کاربر", callback_data='Tutorials'), InlineKeyboardButton("🫡 آیدی پشتیبانی", callback_data='SID')],
         [InlineKeyboardButton("🗑حذف خودکار کاربر", callback_data='AutoDelete'), InlineKeyboardButton("💲قیمت دلار", callback_data='USD')],
         [InlineKeyboardButton("🛒قیمت ها", callback_data='ADMINPRICES'), InlineKeyboardButton("🔐وضعیت خرید", callback_data='BSOPtion')],
         [InlineKeyboardButton("📢اسپانسر", callback_data='sponser'), InlineKeyboardButton("📡پروکسی", callback_data='Sprx')],
         [InlineKeyboardButton("🌐چکر فیلترینگ", callback_data='FILCH'), InlineKeyboardButton("📥بکاپ", callback_data='Backup')],
         [InlineKeyboardButton("🆘راهنما", callback_data='HOW'), InlineKeyboardButton("🎁دعوت کاربر", callback_data='INVS')],
-        [InlineKeyboardButton("❔ بخش آموزش کاربر", callback_data='Tutorials')],
         [InlineKeyboardButton("ℹ️ چکر و اطلاع رسانی حجم و تاریخ به کاربر", callback_data='NUSYS')],
         [InlineKeyboardButton("👤محدودیت تعداد کاربر در هر سرور", callback_data='maximum')]
     ]
