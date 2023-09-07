@@ -48,13 +48,18 @@ def Get_user_info(html, uname):
     traffics = []
     days_left = []
     for data in html.css('td'):
-        if 'روز' in data.text():
-            if 'گذشته' in data.text():
-                days_left.append('-' + (data.text()).split("روز")[0])
-            else:
-                days_left.append((data.text()).split("روز")[0])
-        alt = data.attributes.get("name", None)
-        if alt is not None:
+        if data.attributes.get("name", None) is None:
+            if 'روز' in data.text():
+                if 'گذشته' in data.text():
+                    days_left.append('-' + (data.text()).split("روز")[0])
+                else:
+                    days_left.append((data.text()).split("روز")[0])
+            elif "نامحدود" == data.text():
+                if '<td>نامحدود</td>' == data.html:
+                    days_left.append("99999")
+            elif "فعال نشده" in data.text():
+                days_left.append("-1")
+        else:
             if 'multilogin' in data.attributes['name']:
                 connection_limits.append(data.text())
             if 'username' in data.attributes['name']:
