@@ -1844,7 +1844,8 @@ def text_private(bot, message):
                         port, udgpw = Session.Ports()
                         Session = sshx.PANNEL(host, username, password, 'User', cache_list[1])
                         text = Session.User_info()
-                        url = f"ssh://{cache_list[1]}:{passw}@{(text.split('SSH Host : ')[1]).split('\n')[0]}:{port}"
+                        HOST = (text.split("SSH Host : ")[1]).split("\n")[0]
+                        url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}'
                         photo = QR_Maker(url)
                         text += "\n\nURL: " + "<pre>" + url + "</pre>"
                         bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
@@ -1963,7 +1964,8 @@ def text_private(bot, message):
                     port, udgpw = Session.Ports()
                     Session = sshx.PANNEL(host, username, password, 'User', cache_list[1])
                     text = Session.User_info()
-                    url = f"ssh://{cache_list[1]}:{passw}@{(text.split('SSH Host : ')[1]).split('\n')[0]}:{port}"
+                    HOST = (text.split("SSH Host : ")[1]).split("\n")[0]
+                    url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}'
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<pre>" + url + "</pre>"
                     bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
@@ -4217,7 +4219,8 @@ def call_BL(bot, query):
                     port, udgpw = Session.Ports()
                     Session = sshx.PANNEL(host, username, password, 'User', user)
                     text = Session.User_info()
-                    url = f"ssh://{user}:{passw}@{(text.split('SSH Host : ')[1]).split('\n')[0]}:{port}"
+                    HOST = (text.split("SSH Host : ")[1]).split("\n")[0]
+                    url = f"ssh://{user}:{passw}@{HOST}:{port}"
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<pre>" + url + "</pre>"
                     add_user_db(chat_id, name, USERNAME, user, host)
@@ -4294,7 +4297,8 @@ def call_Confirmed(bot, query):
                 port, udgpw = Session.Ports()
                 Session = sshx.PANNEL(host, username, password, 'User', user)
                 text = Session.User_info()
-                url = f"ssh://{user}:{passw}@{(text.split('SSH Host : ')[1]).split('\n')[0]}:{port}"
+                HOST = (text.split("SSH Host : ")[1]).split("\n")[0]
+                url = f"ssh://{user}:{passw}@{HOST}:{port}"
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 photo = QR_Maker(url)
                 text += "\n\nURL: " + "<pre>" + url + "</pre>"
