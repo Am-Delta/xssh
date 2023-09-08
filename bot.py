@@ -4209,7 +4209,7 @@ def call_BL(bot, query):
             USERNAME = "@" + query.message.chat.username
         except:
             USERNAME = "None"
-        if host is None:
+        if host is not None:
             query.edit_message_text(text="درحال ساخت...")
             user = host.split('.')[0] + "a" + str(randint(1243, 6523))
             passw = str(randint(214254, 999999))
