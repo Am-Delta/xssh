@@ -3506,7 +3506,7 @@ def call_CTRPLUS(bot, query):
         cache_list.append(domain)
         add_collector(chat_id, "plus", cache_list, [])
         add_cache(chat_id, "plus")
-       query.edit_message_text(text="نام کاربری؟")
+        query.edit_message_text(text="نام کاربری؟")
     else:
         query.edit_message_text(text="Please /cancel it first")
 
