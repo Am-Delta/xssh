@@ -294,7 +294,6 @@ def check_host_api(host):
             data = requests.get("https://check-host.net/check-result/" + request_id, headers=headers)
             if data.status_code == 200:
                 results = json.loads(data.text)
-                print(results)
                 for result in results[node1][0]:
                     if result[0] == "OK":
                         return False
@@ -1245,7 +1244,7 @@ def forward(bot, message):
             delete_cache(chat_id)
             add_cache(chat_id, "connection")
             update_collector(chat_id, cache_list, host_cahce)
-            message.reply_text("send connection limit only number (0 = unlimited) or /cancel")
+            message.reply_text("تعداد محدودیت کانکشن بفرستین (0 = نامحدود) or /cancel")
 
         elif status == "userconfigs":
             try:
@@ -1275,11 +1274,11 @@ def forward(bot, message):
                 else:
                     keyboard.append([InlineKeyboardButton("<< Back", callback_data='back_admin')])
                     reply_markup = InlineKeyboardMarkup(keyboard)
-                    message.reply_text("Not found❌", reply_markup=reply_markup)
+                    message.reply_text("پیدا نشد❌", reply_markup=reply_markup)
             else:
                 keyboard.append([InlineKeyboardButton("<< Back", callback_data='back_admin')])
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                message.reply_text("Not found❌", reply_markup=reply_markup)
+                message.reply_text("پیدا نشد❌", reply_markup=reply_markup)
             delete_cache(chat_id)
 
         elif status == "add_seller":
@@ -1297,13 +1296,14 @@ def forward(bot, message):
                     delete_collector(chat_id)
                     add_collector(chat_id, "limit_seller", cache_list, [])
                     add_cache(chat_id, "limit_seller")
-                    message.reply_text("Ok now send a limit. only numbers\n\n0 = unlimited\n10 = 10 clients seller can create")
+                    message.reply_text("تعداد محدودیت به عدد بفرستین\n\n0 = نامحدود\n10 = 10 کاربر میتونه فروشنده بسازه")
                 else:
-                    message.reply_text("🔵 This Seller is Exist", reply_markup=reply_markup)
+                    message.reply_text("🔵 این فروشنده وجود داره", reply_markup=reply_markup)
                     delete_cache(chat_id)
                     delete_collector(chat_id)
             except:
-                message.reply_text("❌This user is Hidden /cancel it", reply_markup=reply_markup)
+                message.reply_text("❌فوروارد این کاربر هیدن هست", reply_markup=reply_markup)
+                delete_cache(chat_id)
 
         elif status == "Adminuserbalance":
             keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
@@ -1318,11 +1318,11 @@ def forward(bot, message):
                         [InlineKeyboardButton("<<", callback_data='back_admin')]
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
-                    message.reply_text(f"Current Balance: {str(value)} Toman.", reply_markup=reply_markup)
+                    message.reply_text(f"موجودی: {str(value)} تومن.", reply_markup=reply_markup)
                 else:
-                    message.reply_text("🔵 The user does not Exist", reply_markup=reply_markup)
+                    message.reply_text("🔵 کاربر وجود نداره", reply_markup=reply_markup)
             except:
-                message.reply_text("❌This user is Hidden", reply_markup=reply_markup)
+                message.reply_text("❌فوروارد این کاربر هیدن هست", reply_markup=reply_markup)
             delete_cache(chat_id)
 
 
@@ -1527,6 +1527,10 @@ def start_admin(bot, message):
     if botusername == []:
         botusername.append((bot.get_me()).username)
     text = '🔻<b>Tools</b>'
+    chat_id = message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+        delete_collector(chat_id)
     message.reply_text(text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
@@ -1714,7 +1718,7 @@ def text_private(bot, message):
                 except:
                     username = 'Null'
                 text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username
-                keyboard = [[InlineKeyboardButton("Answer to " + name, callback_data='ANS_' + str(chat_id))]]
+                keyboard = [[InlineKeyboardButton("پاسخ به " + name, callback_data='ANS_' + str(chat_id))]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                 sleep(0.2)
@@ -1773,13 +1777,13 @@ def text_private(bot, message):
         if status == "name_none":
             if len(link) <= 16:
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
+                message.reply_text("حجمو بفرستین فقط بصورت عدد مثلا 10 گیگ (0 = نامحدود) یا /cancel")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "GB_none")
                 update_collector(chat_id, cache_list, host_cahce)
             else:
-                message.reply_text("The name is too long, send between 1-16 characters")
+                message.reply_text("نام کاربری خیلی طولانیه حداقل بین 1 تا 16 کاراکتر باشه")
 
         elif status == "GB_none":
             try:
@@ -1789,29 +1793,27 @@ def text_private(bot, message):
                 delete_cache(chat_id)
                 add_cache(chat_id, "connection_none")
                 update_collector(chat_id, cache_list, host_cahce)
-                message.reply_text("send connection limit only number or /cancel")
+                message.reply_text("تعداد محدودیت کانکشن بفرستین (0 = نامحدود)")
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "connection_none":
             try:
                 int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("OK. send days only number or /cancel")
+                message.reply_text("خب حالا تعداد روز بفرستین")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "days_none")
                 update_collector(chat_id, cache_list, host_cahce)
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "days_none":
             try:
                 days = int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 if check_seller_exist(chat_id) is True:
-                    if days < 30:
-                        raise
                     days = str(days)
                     connection_limit = str(cache_list[-1])
                     traffic = str(cache_list[2])
@@ -1821,7 +1823,7 @@ def text_private(bot, message):
                         username = "@" + message.from_user.username
                     except:
                         username = 'Null'
-                    t1 = f"💲Seller💲\nخرید \ndays: {days}\nGB: {traffic}\nConnection: {connection_limit}"
+                    t1 = f"💲فروشنده💲\nخرید \ndays: {days}\nGB: {traffic}\nConnection: {connection_limit}"
                     text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
                     cb = "Confirmed_" + code
                     no = "NO❌_" + code
@@ -1831,7 +1833,7 @@ def text_private(bot, message):
                         bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                     cache_list = [days, traffic, connection_limit, '90', name, chat_id, username]
                     add_code_buy(chat_id, code, "check", cache_list)
-                    message.reply_text("Admins checking ASAP.")
+                    message.reply_text("ادمین ها بزودی درخواستتون بررسی میکنن.")
 
                 else:
                     msg = message.reply_text("Wait...").id
@@ -1856,7 +1858,7 @@ def text_private(bot, message):
                 delete_cache(chat_id)
                 delete_collector(chat_id)
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "password":
             try:
@@ -1869,7 +1871,7 @@ def text_private(bot, message):
                     Session = sshx.PANNEL(host, username, password, 'User', user)
                     text = Session.User_info()
                     if "Error" not in text:
-                        message.reply_text("Send The new password or /cancel")
+                        message.reply_text("پسورد جدیدو بفرستین")
                         cache_list.append(link)
                         delete_cache(chat_id)
                         add_cache(chat_id, "CPassword")
@@ -1901,9 +1903,9 @@ def text_private(bot, message):
                     delete_cache(chat_id)
                     delete_collector(chat_id)
                 elif len(passw) <= 3:
-                    message.reply_text("The password is too Short, send between 4-16 characters")
+                    message.reply_text("پسورد خیلی کوتاهه! بین 4 تا 16 کاراکتر بفرستین")
                 else:
-                    message.reply_text("The password is too Long, send between 4-16 characters")
+                    message.reply_text("پسورد خیلی طولانیه! بین 4 تا 16 کاراکتر بفرستین")
             except Exception as e:
                 message.reply_text(f"Error: {str(e)}")
                 delete_cache(chat_id)
@@ -1912,40 +1914,40 @@ def text_private(bot, message):
         elif status == "name":
             if len(link) <= 16:
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
+                message.reply_text("حجمو بفرستین فقط بصورت عدد مثلا 10 گیگ (0 = نامحدود) یا /cancel")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "GB")
                 update_collector(chat_id, cache_list, host_cahce)
             else:
-                message.reply_text("The name is too long, send between 1-16 characters")
+                message.reply_text("نام کاربری خیلی طولانیه حداقل بین 1 تا 16 کاراکتر باشه")
 
         elif status == "GB":
             try:
                 int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("OK. Forward a message from the user or /cancel")
+                message.reply_text("خب یه پیام از کاربر فوروارد کنین")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "forward")
                 update_collector(chat_id, cache_list, host_cahce)
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == 'forward':
-            message.reply_text("Forward a message from the user or /cancel")
+            message.reply_text("یه پیام از کاربر مورد نظر فوروارد کن یا /cancel")
 
         elif status == "connection":
             try:
                 int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("OK. send days only number or /cancel")
+                message.reply_text("خب حالا تعداد روز بفرستین")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "days")
                 update_collector(chat_id, cache_list, host_cahce)
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "days":
             try:
@@ -1977,16 +1979,16 @@ def text_private(bot, message):
                 delete_cache(chat_id)
                 delete_collector(chat_id)
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "removehost":
             hosts = Get_hosts()
             if link in hosts:
                 delete_cache(chat_id)
                 add_cache(chat_id, "remove_" + link)
-                message.reply_text('Send the user or /cancel')
+                message.reply_text('نام کاربری رو بفرست')
             else:
-                message.reply_text("The host does not exist send the correct address or /cancel")
+                message.reply_text("این آدرس پنل وجود نداره, آدرس درستو بفرستین ")
 
         elif "remove_" in status:
             msg = message.reply_text("Wait...").id
@@ -2009,9 +2011,9 @@ def text_private(bot, message):
             if link in hosts:
                 delete_cache(chat_id)
                 add_cache(chat_id, "update_" + link)
-                message.reply_text('Send the user or /cancel')
+                message.reply_text('نام کاربری رو بفرست')
             else:
-                message.reply_text("The host does not exist send the correct address or /cancel")
+                message.reply_text("این آدرس پنل وجود نداره, آدرس درستو بفرستین ")
 
         elif "update_" in status:
             user = link
@@ -2020,32 +2022,32 @@ def text_private(bot, message):
             cache_list = [host, user]
             delete_cache(chat_id)
             add_cache(chat_id, "GB-update")
-            message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
+            message.reply_text("حجمو به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)")
             update_collector(chat_id, cache_list, [])
 
         elif status == "GB-update":
             try:
                 int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("send connection limit only number or /cancel")
+                message.reply_text("خب حالا تعداد روز بفرستین")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "connection-update")
                 update_collector(chat_id, cache_list, [])
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "connection-update":
             try:
                 int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("Send Days only numbers or /cancel")
+                message.reply_text("خب حالا تعداد روز بفرستین")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "days-update")
                 update_collector(chat_id, cache_list, [])
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "days-update":
             try:
@@ -2063,7 +2065,7 @@ def text_private(bot, message):
                         username = "@" + message.from_user.username
                     except:
                         username = 'Null'
-                    t1 = f"💲Seller💲\nتمدید\ndays: {days}\nGB: {traffic}\nConnection: {connection_limit}"
+                    t1 = f"💲فروشنده💲\nتمدید\ndays: {days}\nGB: {traffic}\nConnection: {connection_limit}"
                     text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
                     cb = "ConfirmUPGRADE_" + code
                     no = "NO❌_" + code
@@ -2073,7 +2075,7 @@ def text_private(bot, message):
                         bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                     cache_list = [days, traffic, connection_limit, '90', user, host]
                     add_code_buy(chat_id, code, "checkup", cache_list)
-                    message.reply_text("Admins checking ASAP.")
+                    message.reply_text("ادمین ها بزودی درخواستتون بررسی میکنن.")
                 else:
                     msg = message.reply_text("Wait...").id
                     username, password = get_host_username_password(host)
@@ -2087,7 +2089,7 @@ def text_private(bot, message):
                     delete_cache(chat_id)
                     delete_collector(chat_id)
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "plus":
             user = link
@@ -2095,7 +2097,7 @@ def text_private(bot, message):
             cache_list.append(user)
             delete_cache(chat_id)
             add_cache(chat_id, "plus-Traffic")
-            message.reply_text("Send GB only numbers (0 = unlimited) or /cancel")
+            message.reply_text("حجمو به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)")
             update_collector(chat_id, cache_list, [])
 
         elif status == "plus-Traffic":
@@ -2115,16 +2117,16 @@ def text_private(bot, message):
                 delete_cache(chat_id)
                 delete_collector(chat_id)
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "infohost":
             hosts = Get_hosts()
             if link in hosts:
                 delete_cache(chat_id)
                 add_cache(chat_id, "userinfo_" + link)
-                message.reply_text('Send the user or /cancel')
+                message.reply_text('نام کاربری رو بفرستین')
             else:
-                message.reply_text("The host does not exist send the correct address or /cancel")
+                message.reply_text("این آدرس پنل وجود نداره, آدرس درستو بفرستین ")
 
         elif "userinfo_" in status:
             msg = message.reply_text("Wait...").id
@@ -2159,7 +2161,7 @@ def text_private(bot, message):
                         sent += 1
                     except:
                         continue
-            bot.send_message(chat_id, f"sent to {str(sent)} users")
+            bot.send_message(chat_id, f"به {str(sent)} کاربر فرستاده شدد")
             bot.delete_messages(chat_id, msg)
 
         elif status == "answer":
@@ -2168,9 +2170,9 @@ def text_private(bot, message):
                 keyboard = [[InlineKeyboardButton("✍️ پاسخ", callback_data=('SUPRT_' + str(chat_id)))]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 bot.send_message(int(cache_list[0]), link, reply_markup=reply_markup)
-                message.reply_text("Sent")
+                message.reply_text("پیامت فرستاده شد")
             except:
-                message.reply_text("The user blocked the bot")
+                message.reply_text("کاربر رباتو بلاک کرده")
             delete_cache(chat_id)
             delete_collector(chat_id)
 
@@ -2182,7 +2184,7 @@ def text_private(bot, message):
                 username = 'Null'
             update_wallet(name, username, link)
             delete_cache(chat_id)
-            message.reply_text("Changed .")
+            message.reply_text("Done✔️", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='wallet')]]))
 
         elif status == "change":
             try:
@@ -2194,9 +2196,9 @@ def text_private(bot, message):
                     username = 'Null'
                 update_card(name, username, card)
                 delete_cache(chat_id)
-                message.reply_text("Changed.")
+                message.reply_text("Done✔️", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='wallet')]]))
             except:
-                message.reply_text("Send only number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif (status == "enahost") or (status == "dishost"):
             hosts = Get_hosts()
@@ -2206,9 +2208,9 @@ def text_private(bot, message):
                     add_cache(chat_id, "disable_" + link)
                 else:
                     add_cache(chat_id, "enable_" + link)
-                message.reply_text('Send the user or /cancel')
+                message.reply_text('نام کاربری رو بفرستین')
             else:
-                message.reply_text("The host does not exist send the correct address or /cancel")
+                message.reply_text("این آدرس پنل وجود نداره, آدرس درستو بفرستین ")
 
         elif ("disable_" in status) or ("enable_" in status):
             msg = message.reply_text("Wait...").id
@@ -2228,11 +2230,12 @@ def text_private(bot, message):
                     uname = uname.split("</pre>")[0].split("<pre>")[1]
                 Session = sshx.PANNEL(host, username, password, 'User', uname)
                 if "disable" in status:
-                    bot.edit_message_text(chat_id, msg, Session.Disable())
+                    message.reply_text("Done✔️", )
+                    bot.edit_message_text(chat_id, msg, Session.Disable(), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='Manager')]]))
                 else:
-                    bot.edit_message_text(chat_id, msg, Session.Enable())
+                    bot.edit_message_text(chat_id, msg, Session.Enable(), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='Manager')]]))
             except Exception as e:
-                bot.edit_message_text(chat_id, msg, "Error: " + str(e))
+                bot.edit_message_text(chat_id, msg, "Error: " + str(e), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='Manager')]]))
             delete_cache(chat_id)
 
         elif status == "limit_seller":
@@ -2247,7 +2250,7 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 sellers_id_add_list()
             except:
-                message.reply_text("Send the correct number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "Kill_" in status:
             msg = message.reply_text("Wait...", reply_markup=reply_markup).id
@@ -2274,7 +2277,7 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "backup_timer" == status:
             try:
@@ -2288,9 +2291,9 @@ def text_private(bot, message):
                     message.reply_text("Done✔️", reply_markup=reply_markup)
                     delete_cache(chat_id)
                 else:
-                    message.reply_text("The number is too high send between 1-72 or /cancel")
+                    message.reply_text("مقدار خیلی بالاست بین 1 تا 72 بفرستین")
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "ETM" == status:
             settings = get_settings()
@@ -2368,18 +2371,18 @@ def text_private(bot, message):
                     delete_cache(chat_id)
 
                 except NotAcceptable:
-                    message.reply_text("🔴Error: The bot not added to the channel or group")
+                    message.reply_text("🔴Error: ربات تو کانال یا گروه اد نشده")
                     delete_cache(chat_id)
 
                 except BadRequest as e:
                     if "USER_NOT_PARTICIPANT" in str(e):
-                        message.reply_text("🔴Error: Your not in the channel or group")
+                        message.reply_text("🔴Error: توی چنل یا گروه نیستی")
                     else:
-                        message.reply_text("🔴Error: The channel or group deos not exist.")
+                        message.reply_text("🔴Error: گروه یا چنلی که فرستادی وجود نداره")
                     delete_cache(chat_id)
 
             else:
-                message.reply_text("Send the correct form: @channel")
+                message.reply_text("فرم درست بفرستین مثل: @channel")
 
         elif "AutoDelete" == status:
             try:
@@ -2392,7 +2395,7 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "USD" == status:
             try:
@@ -2405,7 +2408,7 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "maximum" == status:
             try:
@@ -2418,7 +2421,7 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "invite" == status:
             try:
@@ -2431,43 +2434,43 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "A_price" == status:
             try:
                 price = int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("Send Connection limit only numbers or /cancel")
+                message.reply_text("Sتعداد محدودیت اتصال کاربر به عدد بفرستین")
                 cache_list.append(price)
                 delete_cache(chat_id)
                 add_cache(chat_id, "A_connections")
                 update_collector(chat_id, cache_list, host_cahce)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "A_connections" == status:
             try:
                 connections = int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("Send days only numbers or /cancel")
+                message.reply_text("تعداد روز بفرستین")
                 cache_list.append(connections)
                 delete_cache(chat_id)
                 add_cache(chat_id, "A_days")
                 update_collector(chat_id, cache_list, host_cahce)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "A_days" == status:
             try:
                 days = int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("Send traffic only numbers (0 = unlimited) or /cancel")
+                message.reply_text("مقدار ترافیک به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)")
                 cache_list.append(days)
                 delete_cache(chat_id)
                 add_cache(chat_id, "A_traffic")
                 update_collector(chat_id, cache_list, host_cahce)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "A_traffic" == status:
             try:
@@ -2493,7 +2496,7 @@ def text_private(bot, message):
                 delete_cache(chat_id)
                 delete_collector(chat_id)
             except:
-                message.reply_text("Only numbers or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "proxy" == status:
             if "t.me/proxy?" in link:
@@ -2505,7 +2508,7 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
-                message.reply_text("Send link: https://t.me/proxy?server=... or /cancel")
+                message.reply_text("اینطوری پروکسیو بفرستین:\n https://t.me/proxy?server=... or /cancel")
 
         elif "Connectionmsg_" in status:
             if len(link) <= 128:
@@ -2518,13 +2521,13 @@ def text_private(bot, message):
                     except Exception as e:
                         text = "Error: " + str(e)
                 else:
-                    text = "The server does not exist, You might deleted before"
+                    text = "سرور پیدا نشد"
                 keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text(text, reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
-                message.reply_text("The message is too long, send a message less than 128 characters")
+                message.reply_text("پیام خیلی طولانیه حداکثر 128 کاراکتر")
 
         elif "AutoRemove_" in status:
             try:
@@ -2538,13 +2541,13 @@ def text_private(bot, message):
                     except Exception as e:
                         text = "Error: " + str(e)
                 else:
-                    text = "The server does not exist, You might deleted before"
+                    text = "سرور پیدا نشد"
                 keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text(text, reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Send only number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "Gift_" in status:
             try:
@@ -2558,13 +2561,13 @@ def text_private(bot, message):
                     except Exception as e:
                         text = "Error: " + str(e)
                 else:
-                    text = "The server does not exist, You might deleted before"
+                    text = "سرور پیدا نشد"
                 keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text(text, reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Send only number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "Reset_" in status:
             try:
@@ -2578,10 +2581,10 @@ def text_private(bot, message):
                     except Exception as e:
                         text = "Error: " + str(e)
                 else:
-                    text = "The server does not exist, You might deleted before"
+                    text = "سرور پیدا نشد"
             except Exception as e:
                 text = "Error: " + str(e)
-            keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
+            keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             message.reply_text(text, reply_markup=reply_markup)
             delete_cache(chat_id)
@@ -2599,12 +2602,12 @@ def text_private(bot, message):
                         [InlineKeyboardButton("<<", callback_data='back_admin')]
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
-                    message.reply_text(f"Current Balance: {str(value)} Toman.", reply_markup=reply_markup)
+                    message.reply_text(f"موجودی: {str(value)} تومن", reply_markup=reply_markup)
                     delete_cache(chat_id)
                 else:
-                    message.reply_text("🔵 The user does not Exist /cancel it", reply_markup=reply_markup)
+                    message.reply_text("🔵 این کاربر وجود نداره", reply_markup=reply_markup)
             except:
-                message.reply_text("❌Send the user id or /cancel it")
+                message.reply_text("❌آیدی عددی کاربر یا یه پیام از کاربر فوروارد کنین")
 
         elif "MBalance_" in status:
             try:
@@ -2613,12 +2616,12 @@ def text_private(bot, message):
                 name, u, phone, old_value = get_full_user_data_id(user_id)
                 value = old_value - new_value
                 update_user_wallet(user_id, value)
-                keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
+                keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Send only number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "PBalance_" in status:
             try:
@@ -2627,12 +2630,12 @@ def text_private(bot, message):
                 name, u, phone, old_value = get_full_user_data_id(user_id)
                 value = old_value + new_value
                 update_user_wallet(user_id, value)
-                keyboard = [[InlineKeyboardButton("<< Menu", callback_data='back_admin')]]
+                keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("Done✔️", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
-                message.reply_text("Send only number or /cancel")
+                message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "MPST_" in status:
             delete_cache(chat_id)
@@ -2654,7 +2657,7 @@ def text_private(bot, message):
                 bot.send_message(chat_id, f"Send the specific msg from {host} to {str(count)}/{str(len(rec))} users.")
                 bot.delete_messages(chat_id, msg)
             else:
-                message.reply_text("The host does not exist")
+                message.reply_text("این سرور وجود نداره")
 
         elif "EDD_" in status:
             host = status.split("EDD_")[1]
@@ -2669,11 +2672,11 @@ def text_private(bot, message):
                         username, password = get_host_username_password(host)
                         session = "ssh/" + new_host + ".session"
                         if sshx.Login(username, password, new_host) is False:
-                            message.reply_text("Please send the correct Login data", reply_markup=reply_markup)
+                            message.reply_text("❌اطلاعات درستو بفرستین", reply_markup=reply_markup)
                         if Login_test(username, password, new_host) is True:
                             do = True
                         else:
-                            message.reply_text("Wrong Login data", reply_markup=reply_markup)
+                            message.reply_text("❌اطلاعات ورود غلطه", reply_markup=reply_markup)
                     except Exception as e:
                         message.reply_text("Error: " + str(e))
                     if do is True:
@@ -2691,9 +2694,9 @@ def text_private(bot, message):
                         if Path(session).is_file() is True:
                             os.remove(session)
                 else:
-                    message.reply_text("The host that you sent does exist in list.", reply_markup=reply_markup)
+                    message.reply_text("سروری که فرستادی توی لیست وجود داره", reply_markup=reply_markup)
             else:
-                message.reply_text("The host does not exist", reply_markup=reply_markup)
+                message.reply_text("سرور پیدا نشد", reply_markup=reply_markup)
             delete_cache(chat_id)
 
         elif "EUP_" in status:
@@ -2704,9 +2707,9 @@ def text_private(bot, message):
                 delete_cache(chat_id)
                 add_collector(chat_id, "EUP", cache_list, [])
                 add_cache(chat_id, "EDUSPA")
-                message.reply_text("OK, now send the password")
+                message.reply_text("پسورد بفرستین")
             else:
-                message.reply_text("The host does not exist")
+                message.reply_text("سرور وجود نداره")
                 delete_cache(chat_id)
 
         elif status == "EDUSPA":
@@ -2722,12 +2725,12 @@ def text_private(bot, message):
                     old_username, old_password = get_host_username_password(host)
                     session = "ssh/" + host + ".session"
                     if sshx.Login(username, password, host) is False:
-                        message.reply_text("Please send the correct Login data")
+                        message.reply_text("❌اطلاعات درستو بفرستین", reply_markup=reply_markup)
                         ssc = sshx.Login(old_username, old_password, host)
                     if Login_test(username, password, host) is True:
                         do = True
                     else:
-                        message.reply_text("Wrong Login data", reply_markup=reply_markup)
+                        message.reply_text("❌اطلاعات ورود غلطه", reply_markup=reply_markup)
                         ssc = sshx.Login(old_username, old_password, host)
                 except Exception as e:
                     message.reply_text("Error: " + str(e), reply_markup=reply_markup)
@@ -2745,7 +2748,7 @@ def text_private(bot, message):
                     if Path(session).is_file() is True:
                         os.remove(session)
             else:
-                message.reply_text("The host does not exist", reply_markup=reply_markup)
+                message.reply_text("سرور پیدا نشد", reply_markup=reply_markup)
             delete_collector(chat_id)
             delete_cache(chat_id)
 
@@ -2757,13 +2760,13 @@ def text_private(bot, message):
                 delete_cache(chat_id)
                 add_collector(chat_id, "addserver", cache_list, [])
                 add_cache(chat_id, "serveruser")
-                message.reply_text("OK, now send the username")
+                message.reply_text("نام کاربری سرور وارد کنین")
             else:
-                message.reply_text("This host does exist send another")
+                message.reply_text("این سرور وجود داره یه سرور دیگه بفرست")
 
         elif status == "serveruser":
             cache_list, host_cahce = get_collector_cache(chat_id)
-            message.reply_text("And send the password")
+            message.reply_text("پسورد ؟")
             cache_list.append(link)
             delete_cache(chat_id)
             add_cache(chat_id, "serverpass")
@@ -2779,13 +2782,13 @@ def text_private(bot, message):
             try:
                 with open("Pannels.txt", 'a+') as txt:
                     if sshx.Login(username, password, host) is False:
-                        message.reply_text("Please send the correct Login data", reply_markup=reply_markup)
+                        message.reply_text("❌اطلاعات درستو بفرستین", reply_markup=reply_markup)
                     if Login_test(username, password, host) is True:
                         data = host + "@" + username + ":" + password
                         txt.writelines(data + "\n")
-                        message.reply_text("Added", reply_markup=reply_markup)
+                        message.reply_text("✅ سرور اضافه شد", reply_markup=reply_markup)
                     else:
-                        message.reply_text("Wrong Login data", reply_markup=reply_markup)
+                        message.reply_text("❌اطلاعات ورود غلطه", reply_markup=reply_markup)
                         session = "ssh/" + host + ".session"
                         if Path(session).is_file() is True:
                             os.remove(session)
@@ -2827,11 +2830,11 @@ def call_HSMSC(bot, query):
         if check_cache(chat_id) is True:
             delete_cache(chat_id)
         add_cache(chat_id, "Connectionmsg_" + host)
-        bot.send_message(chat_id, "OK, send your message")
+        bot.send_message(chat_id, "پیامتون بفرستین")
     else:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HSAR_'))
@@ -2843,11 +2846,11 @@ def call_HSAR(bot, query):
         if check_cache(chat_id) is True:
             delete_cache(chat_id)
         add_cache(chat_id, "AutoRemove_" + host)
-        bot.send_message(chat_id, "OK, send only number (day)")
+        bot.send_message(chat_id, "خب تعداد روز به عدد بفرستین")
     else:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HSUGift_'))
@@ -2859,11 +2862,11 @@ def call_HSUGift(bot, query):
         if check_cache(chat_id) is True:
             delete_cache(chat_id)
         add_cache(chat_id, "Gift_" + host)
-        bot.send_message(chat_id, "OK, send only number (day)")
+        bot.send_message(chat_id, "خب تعداد روز به عدد بفرستین")
     else:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HSUL_'))
@@ -2877,11 +2880,11 @@ def call_HSUL(bot, query):
             [InlineKeyboardButton("✖️ Disable", callback_data=f"ULD_{host}")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        bot.send_message(chat_id, f"Limit, server: {host}\nselect:", reply_markup=reply_markup)
+        bot.send_message(chat_id, f"محدودیت, server: {host}\nselect:", reply_markup=reply_markup)
     else:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('ULA_'))
@@ -2901,7 +2904,7 @@ def call_ULA(bot, query):
     else:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('ULD_'))
@@ -2921,7 +2924,7 @@ def call_ULD(bot, query):
     else:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HSOU_'))
@@ -2937,7 +2940,7 @@ def call_HSOU(bot, query):
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
             response, users, ips = Session.Online_clients()
             if "Error:" not in response:
-                text = f"🟢 {str(len(users))} Users are online\n\n"
+                text = f"🟢 {str(len(users))} کاربر آنلاین\n\n"
                 if len(users) >= 1:
                     for i in range(len(users)):
                         text += f"{str(i + 1)}. {users[i]}  {ips[i]}\n"
@@ -2949,15 +2952,15 @@ def call_HSOU(bot, query):
                         bot.send_message(chat_id, text)
                     keyboard = [[InlineKeyboardButton("💀Kill", callback_data=f"HSKU_{host}")], [InlineKeyboardButton("🔙Back", callback_data="servers")]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
-                    bot.send_message(chat_id, "Click the below button to see the list and kill a user", reply_markup=reply_markup)
+                    bot.send_message(chat_id, "برای کیل یوزر دکمه پایینو کلیک کنین:", reply_markup=reply_markup)
                 else:
-                    bot.send_message(chat_id, "No one is online")
+                    bot.send_message(chat_id, "هیچکسی آنلاین نیست")
             else:
                 query.edit_message_text(text=response, reply_markup=reply_markup)
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HSKU_'))
@@ -2976,13 +2979,13 @@ def call_HSKU(bot, query):
                 if len(users) >= 1:
                     query.edit_message_text(text="Choose a user to 💀Kill:", reply_markup=Reply_Kill(host, users))
                 else:
-                    query.edit_message_text(text="No one is online", reply_markup=reply_markup)
+                    query.edit_message_text(text="هیچکسی آنلاین نیست", reply_markup=reply_markup)
             else:
                 query.edit_message_text(text=response, reply_markup=reply_markup)
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HKR_'))
@@ -3002,13 +3005,13 @@ def call_HKR(bot, query):
                 if len(users) >= 1:
                     query.edit_message_text(text=f"{response}\n{randomized_text()}Choose another user to 💀Kill:", reply_markup=Reply_Kill(host, users))
                 else:
-                    query.edit_message_text(text=f"{response}\n{randomized_text()}No one is online", reply_markup=reply_markup)
+                    query.edit_message_text(text=f"{response}\n{randomized_text()}هیچکسی آنلاین نیست", reply_markup=reply_markup)
             else:
                 query.edit_message_text(text=response, reply_markup=reply_markup)
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HSDU_'))
@@ -3030,7 +3033,7 @@ def call_HSDU(bot, query):
                     if status[i] != "فعال":
                         text += f"👤username: {usernames[i]}\nExpire: {expires[i]}\nTraffics: {traffics[i]}\n🔄Usage: {usages[i]} GB\n\n➖"
                         count_inactive_clients += 1
-                t1 = f"\n\n🔴 {str(count_inactive_clients)} Users are inactive"
+                t1 = f"\n\n🔴 {str(count_inactive_clients)} کاربر غیرفعال"
                 text += t1
                 if len(text) > 4095:
                     for x in range(0, len(text), 4095):
@@ -3043,7 +3046,7 @@ def call_HSDU(bot, query):
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HSCU_'))
@@ -3066,7 +3069,7 @@ def call_HSCU(bot, query):
                         if (0 < int(days_left[i]) <= 3) or ((("نامحدود" != traffics[i]) and (usages[i] != "0.0")) and (float(usages[i]) >= (float(traffics[i].split("گیگابایت")[0])) - 2.0)):
                             text += f"👤username: {usernames[i]}\nExpire: {expires[i]}\nTraffics: {traffics[i]}\n🔄Usage: {usages[i]} GB\n\n➖"
                             count_close_to_disable += 1
-                t1 = f"\n\n⚠️ {str(count_close_to_disable)} Users are close to disable"
+                t1 = f"\n\n⚠️ {str(count_close_to_disable)} کاربر نزدیک اتمام"
                 text += t1
                 if len(text) > 4095:
                     for x in range(0, len(text), 4095):
@@ -3079,7 +3082,7 @@ def call_HSCU(bot, query):
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
     else:
-        query.edit_message_text(text="The Server does not exist, You might delete it from the list", reply_markup=reply_markup)
+        query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('HOST_'))
@@ -3126,13 +3129,13 @@ def call_checker(bot, query):
     keyboard = [[InlineKeyboardButton("🔙Back", callback_data="back_admin")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     if cache[0] is True:
-        query.edit_message_text(text="Please wait another process is running...", reply_markup=reply_markup)
-        raise
+        query.edit_message_text(text="لطفا صبر کنین یه عملیات دیگه درحال انجامه...", reply_markup=reply_markup)
+        return
     settings = get_settings()
     maximum = settings['maximum']
     cache.clear()
     cache.append(True)
-    query.edit_message_text(text="Processing Please wait this operation takes too much time...")
+    query.edit_message_text(text="درحال انجام... ممکنه طول بکشه")
     chat_id = query.message.chat.id
     start = int(time())
     count_servers, checked_servers, online_servers, offline_servers, full_servers, count_clients, count_active_clients, count_inactive_clients, close_to_disabled, count_online_clients, count_deleted_clients, servers_traffic, notify, allowed_connections, remain_clients = (0,)*15
@@ -3233,7 +3236,7 @@ def call_stats(bot, query):
     if check_seller_exist(chat_id) is False:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="back_admin"), InlineKeyboardButton("⚫️Full Servers", callback_data='full')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="Processing Please wait this operation takes too much time but not very long time as checker...")
+        query.edit_message_text(text="درحال انجام... ممکنه طول بکشه")
         start = int(time())
         logs = ""
         sellers = get_all_sellers()
@@ -3297,7 +3300,7 @@ def call_stats(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
         ID, Name, Username, Limit = get_seller_info(chat_id)
-        text = "🏷Your sales: " + str(len(accounts)) + "\n🔻Limit: " + str(Limit)
+        text = "🏷تعداد فروش: " + str(len(accounts)) + "\n🔻محدودیت: " + str(Limit)
         query.edit_message_text(text=text, reply_markup=reply_markup)
 
 
@@ -3390,10 +3393,10 @@ def call_Join(bot, query):
 @app.on_callback_query(filters.regex('Kill'))
 def call_Kill(bot, query):
     if check_seller_exist(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a server to Kill the user?", reply_markup=server_cb_creator("KUA_"))
+        query.edit_message_text(text="سرور مورد نظر برای کیل یوزر انتخاب کنین", reply_markup=server_cb_creator("KUA_"))
     else:
         add_cache(query.message.chat.id, "K-host")
-        query.edit_message_text(text="Send the host or /cancel")
+        query.edit_message_text(text="آدرس سرورو بفرست")
 
 
 @app.on_callback_query(filters.regex('KUA_'))
@@ -3403,7 +3406,7 @@ def call_KUA(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "Kill_" + host)
-        query.edit_message_text(text='Send the user or /cancel')
+        query.edit_message_text(text='نام کاربری رو بفرستین')
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3411,10 +3414,10 @@ def call_KUA(bot, query):
 @app.on_callback_query(filters.regex('disable'))
 def call_disable(bot, query):
     if check_seller_exist(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a server to get the user? ", reply_markup=server_cb_creator("DIS_"))
+        query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("DIS_"))
     else:
         add_cache(query.message.chat.id, "dishost")
-        query.edit_message_text(text="Send the host or /cancel")
+        query.edit_message_text(text="آدرس سرورو بفرست")
 
 
 @app.on_callback_query(filters.regex('DIS_'))
@@ -3424,7 +3427,7 @@ def call_DIS(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "disable_" + host)
-        query.edit_message_text(text='Send the user or /cancel')
+        query.edit_message_text(text='نام کاربری رو بفرستین')
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3436,7 +3439,7 @@ def call_ENA(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "enable_" + host)
-        query.edit_message_text(text='Send the user or /cancel')
+        query.edit_message_text(text='نام کاربری رو بفرستین')
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3444,10 +3447,10 @@ def call_ENA(bot, query):
 @app.on_callback_query(filters.regex('enable'))
 def call_enable(bot, query):
     if check_seller_exist(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a server to get the user? ", reply_markup=server_cb_creator("ENA_"))
+        query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("ENA_"))
     else:
         add_cache(query.message.chat.id, "enahost")
-        query.edit_message_text(text="Send the host or /cancel")
+        query.edit_message_text(text="آدرس سرورو بفرست")
 
 
 @app.on_callback_query(filters.regex('CAPASS_'))
@@ -3460,7 +3463,7 @@ def call_CAPASS(bot, query):
         cache_list.append(domain)
         add_collector(chat_id, "password", cache_list, [])
         add_cache(chat_id, "password")
-        query.edit_message_text(text="Send The User or /cancel")
+        query.edit_message_text(text="نام کاربری؟")
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3468,7 +3471,7 @@ def call_CAPASS(bot, query):
 @app.on_callback_query(filters.regex('ADPASS'))
 def call_ADPASS(bot, query):
     if check_cache(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a Server to Change password of an account:", reply_markup=server_cb_creator("CAPASS_"))
+        query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("CAPASS_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3480,7 +3483,7 @@ def call_RTRF(bot, query):
         data = query.data
         domain = data.split("RTRF_")[1]
         add_cache(chat_id, "Reset_" + domain)
-        query.edit_message_text(text="Send The User or /cancel")
+        query.edit_message_text(text="نام کاربری؟")
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3488,7 +3491,7 @@ def call_RTRF(bot, query):
 @app.on_callback_query(filters.regex('TrfRes'))
 def call_TrfRes(bot, query):
     if check_cache(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a Server to Reset traffic of an account:", reply_markup=server_cb_creator("RTRF_"))
+        query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("RTRF_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3503,7 +3506,7 @@ def call_CTRPLUS(bot, query):
         cache_list.append(domain)
         add_collector(chat_id, "plus", cache_list, [])
         add_cache(chat_id, "plus")
-        query.edit_message_text(text="Send The User or /cancel")
+       query.edit_message_text(text="نام کاربری؟")
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3511,7 +3514,7 @@ def call_CTRPLUS(bot, query):
 @app.on_callback_query(filters.regex('TrfPlus'))
 def call_TrfPlus(bot, query):
     if check_cache(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a Server to update traffic of an account:", reply_markup=server_cb_creator("CTRPLUS_"))
+        query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("CTRPLUS_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3530,9 +3533,9 @@ def call_DM(bot, query):
             add_collector(chat_id, "domain", cache_list, [])
             delete_cache(chat_id)
             add_cache(chat_id, "name")
-            query.edit_message_text(text="Send Name or /cancel")
+            query.edit_message_text(text="یه نام کاربری بفرستین")
         else:
-            query.answer(f"⚠️This server reached the Maximum of {str(maximum)} Clients. select another server", show_alert=True)
+            query.answer(f"⚠️این سرور به {str(maximum)} کاربر رسیده. یه سرور دیگه انتخاب کنین یا تو تنظیمات تغییر بدید", show_alert=True)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3540,7 +3543,7 @@ def call_DM(bot, query):
 @app.on_callback_query(filters.regex('create'))
 def call_create(bot, query):
     if check_cache(query.message.chat.id) is False:
-        query.edit_message_text(text="Select a Server to create an account:", reply_markup=server_cb_creator("DM_"))
+        query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("DM_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3559,9 +3562,9 @@ def call_DMNONE(bot, query):
             add_collector(chat_id, "domain_none", cache_list, [])
             delete_cache(chat_id)
             add_cache(chat_id, "name_none")
-            query.edit_message_text(text="Send Name or /cancel")
+            query.edit_message_text(text="یه نام کاربری بفرستین")
         else:
-            query.answer(f"⚠️This server reached the Maximum of {str(maximum)} Clients. select another server", show_alert=True)
+            query.answer(f"⚠️این سرور به {str(maximum)} کاربر رسیده. یه سرور دیگه انتخاب کنین یا تو تنظیمات تغییر بدید", show_alert=True)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3571,7 +3574,7 @@ def call_create(bot, query):
     chat_id = query.message.chat.id
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
-            query.edit_message_text(text="Select a Server to create an account:", reply_markup=server_cb_creator("DMNONE_"))
+            query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("DMNONE_"))
         else:
             ID, Name, Username, Limit = get_seller_info(chat_id)
             accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
@@ -3581,7 +3584,7 @@ def call_create(bot, query):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 query.edit_message_text(text="Select: ", reply_markup=reply_markup)
             else:
-                query.answer(f"⚠️You reached the Maximum of {str(Limit)} Clients limit. Contact to the support", show_alert=True)
+                query.answer(f"⚠️شما به محدودیت  {str(Limit)} ساخت اکانت رسیدین. ", show_alert=True)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3598,9 +3601,9 @@ def call_SCC(bot, query):
         add_collector(chat_id, "domain_none", cache_list, [])
         delete_cache(chat_id)
         add_cache(chat_id, "name_none")
-        query.edit_message_text(text=f"Selected Server: {host}\nSend Name or /cancel")
+        query.edit_message_text(text=f"Selected Server: {host}\nنام کاربریو بفرستین")
     else:
-        query.answer("All servers are Full❕", show_alert=True)
+        query.answer("سرور ها همگی پر هستن❕ میتونین از تنظیمات تغییر بدین مقدارو", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('UP_'))
@@ -3610,7 +3613,7 @@ def call_up(bot, query):
         data = query.data
         host = data.split("UP_")[1]
         add_cache(chat_id, "update_" + host)
-        query.edit_message_text(text='Send the user or /cancel')
+        query.edit_message_text(text='نام کاربریو بفرستین')
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3619,10 +3622,10 @@ def call_up(bot, query):
 def call_update(bot, query):
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
-            query.edit_message_text(text="Select a Server to update an account:", reply_markup=server_cb_creator("UP_"))
+            query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("UP_"))
         else:
             add_cache(query.message.chat.id, "updatehost")
-            query.edit_message_text(text="Send the host or /cancel")
+            query.edit_message_text(text="آدرس سرور بفرستین")
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3634,7 +3637,7 @@ def call_RM(bot, query):
         data = query.data
         host = data.split("RM_")[1]
         add_cache(chat_id, "remove_" + host)
-        query.edit_message_text(text='Send the user or /cancel')
+        query.edit_message_text(text='نام کاربریو بفرستین')
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3643,10 +3646,10 @@ def call_RM(bot, query):
 def call_remove(bot, query):
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
-            query.edit_message_text(text="Select a Server to remove an account:", reply_markup=server_cb_creator("RM_"))
+            query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("RM_"))
         else:
             add_cache(query.message.chat.id, "removehost")
-            query.edit_message_text(text="Send the host or /cancel")
+            query.edit_message_text(text="آدرس سرور بفرستین")
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3658,7 +3661,7 @@ def call_UI(bot, query):
         data = query.data
         host = data.split("UI_")[1]
         add_cache(chat_id, "userinfo_" + host)
-        query.edit_message_text(text='Send the user or /cancel')
+        query.edit_message_text(text='نام کاربریو بفرستین')
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3667,10 +3670,10 @@ def call_UI(bot, query):
 def call_userinfo(bot, query):
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
-            query.edit_message_text(text="Select a Server to get info of an account:", reply_markup=server_cb_creator("UI_"))
+            query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("UI_"))
         else:
             add_cache(query.message.chat.id, "infohost")
-            query.edit_message_text(text="Send the host or /cancel")
+            query.edit_message_text(text="آدرس سرور بفرستین")
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3682,7 +3685,7 @@ def call_userconfigs(bot, query):
         add_cache(chat_id, "userconfigs")
         keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text='OK forward a message from the user or back. (if user is hidden not works)', reply_markup=reply_markup)
+        query.edit_message_text(text='خب یه پیام از کاربر فوروارد کنین. (اگه کاربر هیدن باشه کار نمیکنه)', reply_markup=reply_markup)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -3764,7 +3767,7 @@ def call_IDMNU(bot, query):
             cache_list = [host, user]
             delete_cache(chat_id)
             add_cache(chat_id, "plus-Traffic")
-            text = "Send GB only numbers (0 = unlimited) or /cancel"
+            text = "حجمو به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)"
             update_collector(chat_id, cache_list, [])
 
         elif status == "Kill":
@@ -3782,7 +3785,7 @@ def call_IDMNU(bot, query):
             cache_list = [host, user]
             delete_cache(chat_id)
             add_cache(chat_id, "CPassword")
-            text = "OK send a password or /cancel"
+            text = "پسورد جدیدو بفرست"
             update_collector(chat_id, cache_list, [])
 
         elif status == "Update":
@@ -3790,7 +3793,7 @@ def call_IDMNU(bot, query):
             cache_list = [host, user]
             delete_cache(chat_id)
             add_cache(chat_id, "GB-update")
-            text = "Send GB only numbers (0 = unlimited) or /cancel"
+            text = "حجمو به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)"
             update_collector(chat_id, cache_list, [])
         keyboard = [[InlineKeyboardButton("<<", callback_data=('IDADMIN_' + cb))]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3806,7 +3809,7 @@ def call_change(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "change_wallet")
-        query.edit_message_text(text="OK send the new card only number")
+        query.edit_message_text(text="آدرس ولت ترون بفرست")
     else:
         query.answer("Please /cancel it first", show_alert=True)
 
@@ -3851,7 +3854,7 @@ def call_wallet(bot, query):
         status = "🔴 OFF"
     else:
         status = "🟢 ON"
-    text = f"💳Wallet: <pre>{str(wallet)}</pre>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
+    text = f"💳Wallet: <pre>{str(wallet)}</pre>\n\n👤آخرین ادمینی که اطلاعات ادیت کرد \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -3904,7 +3907,7 @@ def call_change(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "change")
-        query.edit_message_text(text="OK send the new card only number")
+        query.edit_message_text(text="خب شماره کارتتون بفرستین (فقط شماره کارت)")
     else:
         query.answer("Please /cancel it first", show_alert=True)
 
@@ -3917,7 +3920,7 @@ def call_ANS(bot, query):
         cache_list = [data.split("ANS_")[1]]
         add_collector(chat_id, "answer", cache_list, [])
         add_cache(chat_id, "answer")
-        bot.send_message(chat_id, "Send your message or /cancel")
+        bot.send_message(chat_id, "پیامتون بفرستین  یا ")
     else:
         bot.send_message(chat_id, "Please /cancel it first")
 
@@ -3954,7 +3957,7 @@ def call_SLM(bot, query):
     ID, Name, Username, Limit = get_seller_info(chat_id)
     text = f"ID: {str(chat_id)}\nName: {Name}\nUsername: @{Username}\n\n🏷sales: {str(len(accounts))}\n🔻Limit: {Limit}"
     keyboard = [
-        [InlineKeyboardButton("🗑Remove", callback_data=('RLS_' + str(chat_id))), InlineKeyboardButton("✏️Edit limit", callback_data=("ELS_" + str(chat_id)))],
+        [InlineKeyboardButton("🗑حذف ", callback_data=('RLS_' + str(chat_id))), InlineKeyboardButton("✏️تغییر محدودیت", callback_data=("ELS_" + str(chat_id)))],
         [InlineKeyboardButton("<<", callback_data='sellers')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3967,7 +3970,7 @@ def call_ADDSELLER(bot, query):
     add_cache(query.message.chat.id, "add_seller")
     keyboard = [[InlineKeyboardButton("<<", callback_data='sellers')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text="OK, Forward a message from the seller. The seller must not be Hidden.", reply_markup=reply_markup)
+    query.edit_message_text(text="یه پیام از فروشنده فوروارد کنین اگه پروفایل هیدن باشه کار نمیکنه.", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('sellers'))
@@ -3987,8 +3990,8 @@ def call_sellers(bot, query):
                 keyboard.append([InlineKeyboardButton(sellers[-1][1], callback_data=("SLM_" + str(sellers[-1][0])))])
         elif len(sellers) == 1:
             keyboard.append([InlineKeyboardButton(sellers[0][1], callback_data=("SLM_" + str(sellers[0][0])))])
-    keyboard.append([InlineKeyboardButton("➕ Add Seller", callback_data='ADDSELLER')])
-    keyboard.append([InlineKeyboardButton("<< Back", callback_data='back_admin')])
+    keyboard.append([InlineKeyboardButton("➕ افزودن فروشنده", callback_data='ADDSELLER')])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text="🔻Select: ", reply_markup=reply_markup)
 
@@ -3996,7 +3999,7 @@ def call_sellers(bot, query):
 @app.on_callback_query(filters.regex('price'))
 def call_price(bot, query):
     keyboard = []
-    keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     text = (get_settings())['list']
     query.edit_message_text(text=text, reply_markup=reply_markup)
@@ -4310,7 +4313,7 @@ def call_Confirmed(bot, query):
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
                 delete_code_buy(code)
-                bot.send_message(query.message.chat.id, "Details sent to the user", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
+                bot.send_message(query.message.chat.id, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
                 bot.send_message(query.message.chat.id, f"Error: {text}")
         except Exception as e:
@@ -4336,7 +4339,7 @@ def call_NO(bot, query):
         chat_id, cache_list = get_code_buy_data(code)
         bot.send_message(chat_id, "خریدتون تایید نشد☹️ اگه ما اشتباه میکنیم پیام بدین به پشتیبانی 🙂")
         delete_code_buy(code)
-        query.answer("Details sent to the user", show_alert=True)
+        query.answer("اطلاعات به کاربر ارسال شد", show_alert=True)
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -4592,7 +4595,7 @@ def call_Confirmed_UPGRADE(bot, query):
                 else:
                     bot.send_message(chat_id, f"✅ تمدید شد\n\nUsername : {user}\nSSH Host : {host}")
                 delete_code_buy(code)
-                bot.send_message(query.message.chat.id, "Details sent to the user", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
+                bot.send_message(query.message.chat.id, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
                 bot.send_message(query.message.chat.id, f"Error: {server_msg}")
         except Exception as e:
@@ -4625,7 +4628,7 @@ def call_Confirmed_deposit(bot, query):
             reply_markup = InlineKeyboardMarkup(keyboard)
             bot.send_message(chat_id, "کیف پولتون با موفقیت شارژ شد ✔️🥰", reply_markup=reply_markup)
             delete_code_buy(code)
-            query.answer("Details sent to the user", show_alert=True)
+            query.answer("اطلاعات به کاربر ارسال شد", show_alert=True)
         except Exception as e:
             query.answer(f"Error: {str(e)}", show_alert=True)
     else:
@@ -4666,7 +4669,7 @@ def call_ADUB(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "Adminuserbalance")
-        query.edit_message_text(text='OK, Send user id or forward a message from the user or /cancel')
+        query.edit_message_text(text='خب آیدی عددی کاربر یا یه پیام ازش فوروارد کن ')
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -4690,7 +4693,7 @@ def call_Manager(bot, query):
 
 @app.on_callback_query(filters.regex('RST'))
 def call_rst(bot, query):
-    query.edit_message_text(text="Select to remove the server? (this option also remove the users accounts from the bot database) ", reply_markup=server_cb_creator("DTRS_"))
+    query.edit_message_text(text="سرور مورد نظرو انتخاب کنین )این بخش اکانت های کاربر از ربات حذف میکنه و هم سرور از لیست ربات)", reply_markup=server_cb_creator("DTRS_"))
 
 
 @app.on_callback_query(filters.regex('DTRS_'))
@@ -4736,7 +4739,7 @@ def call_DTRS(bot, query):
 
 @app.on_callback_query(filters.regex('MST'))
 def call_MST(bot, query):
-    query.edit_message_text(text="Select to edit the server?", reply_markup=server_cb_creator("MPST_"))
+    query.edit_message_text(text="سرور مورد نظرتون انتخاب کنین", reply_markup=server_cb_creator("MPST_"))
 
 
 @app.on_callback_query(filters.regex('MPST_'))
@@ -4750,14 +4753,14 @@ def call_MPST(bot, query):
         add_cache(chat_id, rt)
         keyboard = [[InlineKeyboardButton("<<", callback_data='SMT')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text='OK, Send your message (text only)', reply_markup=reply_markup)
+        query.edit_message_text(text='پیامتون بفرستین (فقط بصورت تکست)', reply_markup=reply_markup)
     else:
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
 
 
 @app.on_callback_query(filters.regex('TST'))
 def call_TST(bot, query):
-    query.edit_message_text(text="Select to edit the server?", reply_markup=server_cb_creator("TTRS_"))
+    query.edit_message_text(text="سرور مورد نظرتون انتخاب کنین:", reply_markup=server_cb_creator("TTRS_"))
 
 
 @app.on_callback_query(filters.regex('TTRS_'))
@@ -4798,7 +4801,7 @@ def call_EUP(bot, query):
         add_cache(chat_id, rt)
         keyboard = [[InlineKeyboardButton("<<", callback_data=f'TTRS_{host}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text='OK, Send The new username', reply_markup=reply_markup)
+        query.edit_message_text(text='نام کاربری بفرستین', reply_markup=reply_markup)
     else:
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
 
@@ -4814,7 +4817,7 @@ def call_EDD(bot, query):
         add_cache(chat_id, rt)
         keyboard = [[InlineKeyboardButton("<<", callback_data=f'TTRS_{host}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text='OK, Send The new domain', reply_markup=reply_markup)
+        query.edit_message_text(text='آدرس سرور جدید بفرستین', reply_markup=reply_markup)
     else:
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
 
@@ -4827,7 +4830,7 @@ def call_AST(bot, query):
     add_cache(chat_id, "AST")
     keyboard = [[InlineKeyboardButton("<<", callback_data='SMT')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text='OK, Send The domain', reply_markup=reply_markup)
+    query.edit_message_text(text='آدرس سرور بفرستین', reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('SMT'))
@@ -4855,7 +4858,7 @@ def call_message(bot, query):
         add_cache(chat_id, "message")
         keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text='Send your message support : (text, voice, video, photo, file with caption or not) or forward', reply_markup=reply_markup)
+        query.edit_message_text(text='پیامتون بفرستین (تکست, وویس, فیلم, عکس, فایل با کپشن یا بدون کپشن) و یا میتونین فوروارد کنین', reply_markup=reply_markup)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -5062,7 +5065,7 @@ def call_MAUB(bot, query):
         delete_cache(chat_id)
     data = query.data
     user_id = int(data.split("_")[1])
-    text = "Send a number or /cancel"
+    text = "یه عدد بفرست یا  /cancel"
     add_cache(chat_id, "MBalance_" + str(user_id))
     query.edit_message_text(text=text)
 
@@ -5074,7 +5077,7 @@ def call_MAUB(bot, query):
         delete_cache(chat_id)
     data = query.data
     user_id = int(data.split("_")[1])
-    text = "Send a number or /cancel"
+    text = "یه عدد بفرست یا  /cancel"
     add_cache(chat_id, "PBalance_" + str(user_id))
     query.edit_message_text(text=text)
 
@@ -5125,7 +5128,7 @@ def call_bktimer(bot, query):
 @app.on_callback_query(filters.regex('BKupON'))
 def call_bkon(bot, query):
     if os.stat("Pannels.txt").st_size == 0:
-        query.edit_message_text(text="There's not any server, add a server", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
+        query.edit_message_text(text="هیچ سروری وجود نداره, یه سرور اد کنین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
     else:
         if True:
             if backup[0] is False:
@@ -5196,7 +5199,7 @@ def call_bkoff(bot, query):
         run_backup.append(False)
         keyboard = [[InlineKeyboardButton("<<", callback_data='Backup')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="Stopped.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+        query.edit_message_text(text="متوقف شد.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
         query.answer("Already OFF", show_alert=True)
 
@@ -5255,7 +5258,7 @@ def call_WSMSG(bot, query):
 def call_ESMSG(bot, query):
     chat_id = query.message.chat.id
     add_cache(chat_id, "Start_message")
-    text = "OK send the text"
+    text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='WSMSG')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5279,7 +5282,7 @@ def call_WLMSG(bot, query):
 def call_ELMSG(bot, query):
     chat_id = query.message.chat.id
     add_cache(chat_id, "Price_message")
-    text = "OK send the text"
+    text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='WLMSG')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5314,7 +5317,7 @@ def call_Delship(bot, query):
 def call_ESship(bot, query):
     chat_id = query.message.chat.id
     add_cache(chat_id, "Sponser")
-    text = "OK add the bot in the channel or group then send the username like @channel"
+    text = "ربات تو گروه یا چنلتون ادمین کنین, حتما باید پابلیک باشه, آیدی چنل یا گروه به این صورت بفرست: @channel"
     keyboard = [[InlineKeyboardButton("<<", callback_data='sponser')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5458,7 +5461,7 @@ def call_AAPR(bot, query):
     add_collector(chat_id, "domain_none", [], [])
     delete_cache(chat_id)
     add_cache(chat_id, "A_price")
-    text = "OK send the price only number, Like: 50000 (it means 50000 Toman) or /cancel"
+    text = "خب قیمت مورد نظرو بصورت عدد بفرست مثلا : 50000 تومن "
     query.edit_message_text(text=text, parse_mode=enums.ParseMode.HTML)
 
 
@@ -5466,7 +5469,7 @@ def call_AAPR(bot, query):
 def call_DAPR(bot, query):
     settings = get_settings()
     if len(settings['traffic']) == 0:
-        query.answer("There's not anything, add new one", show_alert=True)
+        query.answer("هیچی وجود نداره, تعرفه جدید اد کنین", show_alert=True)
     else:
         keyboard = []
         for i in range(len(settings['prices'])):
@@ -5508,7 +5511,7 @@ def call_DSELP(bot, query):
 @app.on_callback_query(filters.regex('FLCHON'))
 def call_FLCHON(bot, query):
     if os.stat("Pannels.txt").st_size == 0:
-        query.edit_message_text(text="There's not any server, add a server", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
+        query.edit_message_text(text="هیچ سروری وجود نداره, یه سرور اد کنین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
     else:
         if True:
             if Filtering_system[0] is False:
@@ -5579,7 +5582,7 @@ def call_FLCHOFF(bot, query):
         run_filtering.append(False)
         keyboard = [[InlineKeyboardButton("<<", callback_data='FILCH')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="Stopped.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+        query.edit_message_text(text="متوقف شد.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
         query.answer("Already OFF", show_alert=True)
 
@@ -5605,7 +5608,7 @@ def call_APRX(bot, query):
     chat_id = query.message.chat.id
     delete_cache(chat_id)
     add_cache(chat_id, "proxy")
-    text = "OK send the proxy"
+    text = "پروکسی رو بفرست"
     keyboard = [[InlineKeyboardButton("<<", callback_data='Sprx')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5662,7 +5665,7 @@ def call_NUSYS(bot, query):
 @app.on_callback_query(filters.regex('SNON'))
 def call_SNON(bot, query):
     if os.stat("Pannels.txt").st_size == 0:
-        query.edit_message_text(text="There's not any server, add a server", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
+        query.edit_message_text(text="هیچ سروری وجود نداره, یه سرور اد کنین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
     else:
         if True:
             if notify_system[0] is False:
@@ -5744,7 +5747,7 @@ def call_SNFF(bot, query):
         checked_users.clear()
         keyboard = [[InlineKeyboardButton("<<", callback_data='NUSYS')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="Stopped.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+        query.edit_message_text(text="متوقف شد.", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
         query.answer("Already OFF", show_alert=True)
 
@@ -5769,7 +5772,7 @@ def call_ENVS(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "invite")
-    text = "OK send only number"
+    text = "عدد مورد نظرتو بفرست:r"
     keyboard = [[InlineKeyboardButton("<<", callback_data='INVS')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5806,7 +5809,7 @@ def call_EAID(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "EAID")
-    text = "OK send the text"
+    text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5848,7 +5851,7 @@ def call_ETI(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETI")
-    text = "OK send the text"
+    text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='CTI')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5875,7 +5878,7 @@ def call_ETA(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETA")
-    text = "OK send the text"
+    text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='CTA')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5902,7 +5905,7 @@ def call_ETM(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETM")
-    text = "OK send the text"
+    text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='CTM')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -5929,7 +5932,7 @@ def call_ETW(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETW")
-    text = "OK send the text"
+    text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='CTW')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -6089,7 +6092,7 @@ def image_users(bot, message):
             except:
                 username = 'Null'
             text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username
-            keyboard = [[InlineKeyboardButton("Answer to " + name, callback_data='ANS_' + str(chat_id))]]
+            keyboard = [[InlineKeyboardButton("پاسخ به " + name, callback_data='ANS_' + str(chat_id))]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             bot.send_message(admin_id[n], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
             sleep(0.2)
@@ -6105,7 +6108,7 @@ def image_users(bot, message):
             delete_all_buy(chat_id, "add")
             add_code_buy(chat_id, code, "add", cache_list)
             t1 = f"days: {cache_list[0]}\nGB: {cache_list[1]}\nConnection: {cache_list[2]}\nprice: {cache_list[3]} Toman"
-            text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
+            text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\nاطلاعات خرید اکانت\n" + t1
             cb = "Confirmed_" + code
             no = "NO❌_" + code
             keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
@@ -6129,7 +6132,7 @@ def image_users(bot, message):
             delete_all_buy(chat_id, "upgrade")
             add_code_buy(chat_id, code, "upgrade", cache_list)
             t1 = f"🔄تمدید\ndays: {cache_list[0]}\nGB: {cache_list[1]}\nConnection: {cache_list[2]}\nprice: {cache_list[3]} Toman\nHost: {cache_list[5]}\nUser: {cache_list[4]}"
-            text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
+            text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\nاطلاعات تمدید:\n" + t1
             cb = "ConfirmUPGRADE_" + code
             no = "NO❌_" + code
             keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
@@ -6152,7 +6155,7 @@ def image_users(bot, message):
             delete_all_buy(chat_id, "userdeposit")
             add_code_buy(chat_id, code, "userdeposit", cache_list)
             t1 = f"💰افزایش موجودی کیف پول\n\nPrice: {cache_list[0]}"
-            text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
+            text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\nاطلاعات خرید:\n" + t1
             cb = "ConfirmDeposit_" + code
             no = "NO❌_" + code
             keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
