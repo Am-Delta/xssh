@@ -41,7 +41,7 @@ mv /root/bot/data.json /root/
 rm -r /root/bot
 
 #git clone "https://github.com/Am-Delta/bot.git" /root/bot/
-git clone "https://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@github.com/Am-Delta/bot.git" /root/bot/
+git clone "https://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@github.com/Am-Delta/bot.git" /root/bot/
 
 mv /root/botCh/Pannels.txt /root/bot
 mv /root/botCh/backup /root/bot
