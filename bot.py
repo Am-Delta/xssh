@@ -31,7 +31,6 @@ with open("data.json", "r") as json_file:
     api_hash = data_file['api_hash']
     TOKEN = data_file['Token']
 
-
 app = Client(session, api_id, api_hash, bot_token=TOKEN)
 
 
@@ -62,6 +61,7 @@ host_cache = []
 text_cache = []
 seller_id = []
 botusername = []
+process_codes = []
 
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
@@ -127,18 +127,20 @@ def User_Tools_keys():
     keyboard = []
     if len(hosts) >= 2:
         if len(hosts) >= 24:
-            if len(hosts) % 4 == 0:
-                for i in range(0, len(hosts) - 1, 4):
-                    keyboard.append([InlineKeyboardButton(hosts[i], callback_data=(job + hosts[i])), InlineKeyboardButton(hosts[i + 1], callback_data=(job + hosts[i + 1])), InlineKeyboardButton(hosts[i + 2], callback_data=(job + hosts[i + 2])), InlineKeyboardButton(hosts[i + 3], callback_data=(job + hosts[i + 3]))])
+            if len(users) % 4 == 0:
+                for i in range(0, len(users) - 1, 4):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2])), InlineKeyboardButton(users[i + 3], callback_data=(job + users[i + 3]))])
             else:
-                for i in range(0, len(hosts) - 3, 4):
-                    keyboard.append([InlineKeyboardButton(hosts[i], callback_data=(job + hosts[i])), InlineKeyboardButton(hosts[i + 1], callback_data=(job + hosts[i + 1])), InlineKeyboardButton(hosts[i + 2], callback_data=(job + hosts[i + 2])), InlineKeyboardButton(hosts[i + 3], callback_data=(job + hosts[i + 3]))])
-                if len(hosts) % 3 == 0:
-                    keyboard.append([InlineKeyboardButton(hosts[-3], callback_data=(job + hosts[-3])), InlineKeyboardButton(hosts[-2], callback_data=(job + hosts[-2])), InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
-                elif len(hosts) % 2 == 0:
-                    keyboard.append([InlineKeyboardButton(hosts[-2], callback_data=(job + hosts[-2])), InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
+                for i in range(0, len(users) - 3, 4):
+                    keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2])), InlineKeyboardButton(users[i + 3], callback_data=(job + users[i + 3]))])
+                if ((len(hosts) % 4 == 3) and (len(hosts) % 2 == 1) and (len(hosts) % 3 == 2)) or ((len(hosts) % 4 == 3) and (len(hosts) % 2 == 1) and (len(hosts) % 3 == 0)) or ((len(hosts) % 4 == 3) and (len(hosts) % 2 == 1) and (len(hosts) % 3 == 1)):
+                    keyboard.append([InlineKeyboardButton(users[-3], callback_data=(job + users[-3])), InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+                elif (len(hosts) % 4 == 2) and (len(hosts) % 2 == 0):
+                    keyboard.append([InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+                elif (len(hosts) % 4 == 1 and len(hosts) % 3 == 2) or (len(hosts) % 4 == 1 and (len(hosts) % 3 == 0)):
+                    keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
                 else:
-                    keyboard.append([InlineKeyboardButton(hosts[-1], callback_data=(job + hosts[-1]))])
+                    keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
         elif len(hosts) >= 10:
             if len(hosts) % 3 == 0:
                 for i in range(0, len(hosts) - 1, 3):
@@ -172,17 +174,19 @@ def Reply_Kill(host, users):
     keyboard = []
     job = "HKR_" + host + "$"
     if len(users) >= 2:
-        if len(users) >= 24:
+        if len(users) >= 19:
             if len(users) % 4 == 0:
                 for i in range(0, len(users) - 1, 4):
                     keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2])), InlineKeyboardButton(users[i + 3], callback_data=(job + users[i + 3]))])
             else:
                 for i in range(0, len(users) - 3, 4):
                     keyboard.append([InlineKeyboardButton(users[i], callback_data=(job + users[i])), InlineKeyboardButton(users[i + 1], callback_data=(job + users[i + 1])), InlineKeyboardButton(users[i + 2], callback_data=(job + users[i + 2])), InlineKeyboardButton(users[i + 3], callback_data=(job + users[i + 3]))])
-                if len(users) % 3 == 0:
+                if ((len(users) % 4 == 3) and (len(users) % 2 == 1) and (len(users) % 3 == 2)) or ((len(users) % 4 == 3) and (len(users) % 2 == 1) and (len(users) % 3 == 0)) or ((len(users) % 4 == 3) and (len(users) % 2 == 1) and (len(users) % 3 == 1)):
                     keyboard.append([InlineKeyboardButton(users[-3], callback_data=(job + users[-3])), InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
-                elif len(users) % 2 == 0:
+                elif (len(users) % 4 == 2) and (len(users) % 2 == 0):
                     keyboard.append([InlineKeyboardButton(users[-2], callback_data=(job + users[-2])), InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
+                elif (len(users) % 4 == 1 and len(users) % 3 == 2) or (len(users) % 4 == 1 and (len(users) % 3 == 0)):
+                    keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
                 else:
                     keyboard.append([InlineKeyboardButton(users[-1], callback_data=(job + users[-1]))])
         elif len(users) >= 10:
@@ -314,7 +318,10 @@ def API_0():
         if r.status_code == 200:
             price = int(json.loads(r.text)['usd'])
             if len(str(price)) >= 5:
-                return True, price
+                if price == 49000:
+                    return False, 0
+                else:
+                    return True, price
             else:
                 return False, 0
         else:
@@ -2149,6 +2156,33 @@ def text_private(bot, message):
             delete_cache(chat_id)
             bot.edit_message_text(chat_id, msg, text)
 
+        elif status == "userconfigs":
+            try:
+                user_id = int(link)
+                keyboard = []
+                accounts, hosts, status = get_all_accounts_by_chat_id(user_id)
+                if status is True:
+                    if len(accounts) >= 2:
+                        if len(accounts) % 2 == 0:
+                            for i in range(0, len(accounts) - 1, 2):
+                                keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("IDADMIN_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("IDADMIN_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                        else:
+                            for i in range(0, len(accounts) - 1, 2):
+                                keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("IDADMIN_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("IDADMIN_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                            keyboard.append([InlineKeyboardButton(accounts[-1], callback_data=("IDADMIN_" + hosts[-1] + "$" + accounts[-1]))])
+                    else:
+                        keyboard.append([InlineKeyboardButton(accounts[0], callback_data=("IDADMIN_" + hosts[0] + "$" + accounts[0]))])
+                    keyboard.append([InlineKeyboardButton("<< Back", callback_data='back_admin')])
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    message.reply_text(f"Founded by id \n\nChoose: ", reply_markup=reply_markup)
+                else:
+                    keyboard.append([InlineKeyboardButton("<< Back", callback_data='back_admin')])
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    message.reply_text("پیدا نشد❌", reply_markup=reply_markup)
+                delete_cache(chat_id)
+            except:
+                message.reply_text("send only user ID or forward a message not username or anything else", reply_markup=reply_markup)
+
         elif status == "message":
             delete_cache(chat_id)
             msg = message.reply_text("Sending...").id
@@ -2755,12 +2789,18 @@ def text_private(bot, message):
         elif status == "AST":
             host = link
             if host not in Get_hosts():
+                if host in checked_filtering:
+                    checked_filtering.remove(host)
+                    wss = "⚠️Warning you're adding a blocked domain."
+                else:
+                    wss = ""
+                    message.reply_text()
                 cache_list = []
                 cache_list.append(host)
                 delete_cache(chat_id)
                 add_collector(chat_id, "addserver", cache_list, [])
                 add_cache(chat_id, "serveruser")
-                message.reply_text("نام کاربری سرور وارد کنین")
+                message.reply_text(f"نام کاربری سرور وارد کنین\n{wss}")
             else:
                 message.reply_text("این سرور وجود داره یه سرور دیگه بفرست")
 
@@ -3383,7 +3423,7 @@ def call_full(bot, query):
 @app.on_callback_query(filters.regex('JOIN'))
 def call_Join(bot, query):
     try:
-        chat_member = bot.get_chat_member(channel, query.message.chat.id)
+        chat_member = bot.get_chat_member(get_settings()['sponser'], query.message.chat.id)
         text = '🔻<b>🥰خوش اومدین</b>'
         query.edit_message_text(text, reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
     except:
@@ -3501,7 +3541,7 @@ def call_CTRPLUS(bot, query):
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         data = query.data
-        domain = data.split("CAPASS_")[1]
+        domain = data.split("CTRPLUS_")[1]
         cache_list = []
         cache_list.append(domain)
         add_collector(chat_id, "plus", cache_list, [])
@@ -3681,13 +3721,12 @@ def call_userinfo(bot, query):
 @app.on_callback_query(filters.regex('userconfigs'))
 def call_userconfigs(bot, query):
     chat_id = query.message.chat.id
-    if check_cache(chat_id) is False:
-        add_cache(chat_id, "userconfigs")
-        keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text='خب یه پیام از کاربر فوروارد کنین. (اگه کاربر هیدن باشه کار نمیکنه)', reply_markup=reply_markup)
-    else:
-        query.edit_message_text(text="Please /cancel it first")
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "userconfigs")
+    keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text='خب یه پیام از کاربر فوروارد کنین. (اگه کاربر هیدن باشه کار نمیکنه) or User ID', reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('MIOU_'))
@@ -4290,19 +4329,21 @@ def call_Confirmed(bot, query):
             host = get_random_server()
             if host is None:
                 query.answer(f"Error: Add a host", show_alert=True)
+                return
             user = host.split('.')[0] + "a" + str(randint(1243, 6523))
             passw = str(randint(214254, 999999))
             username, password = get_host_username_password(host)
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
             t0 = "🥰مرسی از خریدتون\n\n"
+            process_codes.append(code)
             text = t0 + Session.Create(user, passw, connection_limit, days, GB)
             if "Error" not in text:
+                add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 port, udgpw = Session.Ports()
                 Session = sshx.PANNEL(host, username, password, 'User', user)
                 text = Session.User_info()
                 HOST = (text.split("SSH Host : ")[1]).split("\n")[0]
                 url = f"ssh://{user}:{passw}@{HOST}:{port}"
-                add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 photo = QR_Maker(url)
                 text += "\n\nURL: " + "<pre>" + url + "</pre>"
                 bot.send_photo(chat_id, open(photo, 'rb'), text, parse_mode=enums.ParseMode.HTML)
@@ -4313,6 +4354,7 @@ def call_Confirmed(bot, query):
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
                 delete_code_buy(code)
+                process_codes.remove(code)
                 bot.send_message(query.message.chat.id, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
                 bot.send_message(query.message.chat.id, f"Error: {text}")
@@ -4584,6 +4626,7 @@ def call_Confirmed_UPGRADE(bot, query):
                     days += old_days
             except:
                 pass'''
+            process_codes.append(code)
             server_msg = Session.Update(GB, days, connection_limit)
             text += server_msg
             if "Error" not in server_msg:
@@ -4595,6 +4638,7 @@ def call_Confirmed_UPGRADE(bot, query):
                 else:
                     bot.send_message(chat_id, f"✅ تمدید شد\n\nUsername : {user}\nSSH Host : {host}")
                 delete_code_buy(code)
+                process_codes.remove(code)
                 bot.send_message(query.message.chat.id, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
                 bot.send_message(query.message.chat.id, f"Error: {server_msg}")
@@ -5561,6 +5605,12 @@ def call_FLCHON(bot, query):
                                                     checked_filtering.remove(host)
                                                     text = "🟢Back online: " + host
                                                     bot.send_message(chat_id, text)
+                                            else:
+                                                if host not in checked_connections:
+                                                    text = "🔴Connection Error: " + host + "\nLog:\n" + content
+                                                    checked_connections.append(host)
+                                                    for admin in admin_id:
+                                                        bot.send_message(admin, text)
                                     except:
                                         if host not in checked_connections:
                                             text = "🔴Connection Error: " + host
