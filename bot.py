@@ -2025,6 +2025,10 @@ def text_private(bot, message):
         elif "update_" in status:
             user = link
             host = status.split("update_")[1]
+            if check_seller_exist(chat_id) is True:
+                if check_exist_user(host, user) is False:
+                    message.reply_text('There is not any user with this username, check capital or small letters or /cancel\nکاربری با این نام کاربری وجود نداره چک کنید حروف بزرگ و کوچیکو')
+                    return
             add_collector(chat_id, "update", [], [])
             cache_list = [host, user]
             delete_cache(chat_id)
@@ -2036,7 +2040,7 @@ def text_private(bot, message):
             try:
                 int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("خب حالا تعداد روز بفرستین")
+                message.reply_text("خب حالا تعداد کانکشن بفرستین")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "connection-update")
@@ -2072,7 +2076,7 @@ def text_private(bot, message):
                         username = "@" + message.from_user.username
                     except:
                         username = 'Null'
-                    t1 = f"💲فروشنده💲\nتمدید\ndays: {days}\nGB: {traffic}\nConnection: {connection_limit}"
+                    t1 = f"💲فروشنده💲\nتمدید\ndays: {days}\nGB: {traffic}\nConnection: {connection_limit}\nHost: {host}\nUser: {user}"
                     text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
                     cb = "ConfirmUPGRADE_" + code
                     no = "NO❌_" + code
@@ -3169,7 +3173,7 @@ def call_checker(bot, query):
     keyboard = [[InlineKeyboardButton("🔙Back", callback_data="back_admin")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     if cache[0] is True:
-        query.edit_message_text(text="لطفا صبر کنین یه عملیات دیگه درحال انجامه...", reply_markup=reply_markup)
+        query.edit_message_text(text="Processing Please wait this operation takes so much time..", reply_markup=reply_markup)
         return
     settings = get_settings()
     maximum = settings['maximum']
@@ -3221,39 +3225,40 @@ def call_checker(bot, query):
                                     if check_exist_user(host, usernames[i]) is True:
                                         ID, Name, Username = get_all_user_data(host, usernames[i])
                                         NTX = f"❌اکانت: {usernames[i]}به علت گذشت چند روز و نشدن تمدید حذف شد"
-                                        bot.send_message(ID, NTX)
                                         delete_user(host, usernames[i])
+                                        if checker_notify(str(ID)) is True:
+                                            try:
+                                                bot.send_message(ID, NTX)
+                                            except:
+                                                pass
                             else:
                                 count_inactive_clients += 1
                         else:
                             count_active_clients += 1
-                            try:
-                                if (0 < int(days_left[i]) <= 3) or ((("نامحدود" != traffics[i]) and (usages[i] != "0.0")) and (float(usages[i]) >= (float(traffics[i].split("گیگابایت")[0])) - 2.0)):
-                                    if check_exist_user(host, usernames[i]) is True:
-                                        ID, Name, Username = get_all_user_data(host, usernames[i])
-                                        if checker_notify(str(ID)) is True:
-                                            try:
-                                                CB = "MIOU_" + host + "$" + usernames[i]
-                                                Keyboard = [[InlineKeyboardButton("ℹ️اطلاعات بیشتر", callback_data=CB)]]
-                                                Reply_markup = InlineKeyboardMarkup(Keyboard)
-                                                if (traffics[i] == "نامحدود") and (usages[i] != "0.0"):
-                                                    otherN = ""
-                                                else:
-                                                    otherN = " و " + traffics[i]
-                                                NTX = f"⚠️اخطار\nاکانت:\n{usernames[i]}\n\n فقط {str(int(days_left[i]))} روز {otherN} مونده."
-                                                bot.send_message(ID, NTX, reply_markup=Reply_markup)
-                                                notify += 1
-                                            except:
-                                                pass
-                                    close_to_disabled += 1
-                            except:
-                                pass
+                            if (0 < int(days_left[i]) <= 3) or ((("نامحدود" != traffics[i]) and (usages[i] != "0.0")) and (float(usages[i]) >= (float(traffics[i].split("گیگابایت")[0])) - 2.0)):
+                                if check_exist_user(host, usernames[i]) is True:
+                                    ID, Name, Username = get_all_user_data(host, usernames[i])
+                                    if checker_notify(str(ID)) is True:
+                                        try:
+                                            CB = "MIOU_" + host + "$" + usernames[i]
+                                            Keyboard = [[InlineKeyboardButton("ℹ️اطلاعات بیشتر", callback_data=CB)]]
+                                            Reply_markup = InlineKeyboardMarkup(Keyboard)
+                                            if (traffics[i] == "نامحدود") and (usages[i] != "0.0"):
+                                                otherN = ""
+                                            else:
+                                                otherN = " و " + traffics[i]
+                                            NTX = f"⚠️اخطار\nاکانت:\n{usernames[i]}\n\n فقط {str(int(days_left[i]))} روز {otherN} مونده."
+                                            bot.send_message(ID, NTX, reply_markup=Reply_markup)
+                                            notify += 1
+                                        except:
+                                            pass
+                                close_to_disabled += 1
                     if "❌" in text:
                         bot.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
                     checked_servers += 1
             except Exception as e:
                 offline_servers += 1
-                logs += f"⭕️ Connection Error: {host}"
+                logs += f"\n⭕️ Connection Error: {host}"
     count_clients -= count_deleted_clients
     remain_clients += count_deleted_clients
     if len(str(int(servers_traffic))) >= 3:
@@ -5756,8 +5761,12 @@ def call_SNON(bot, query):
                                                         if check_exist_user(host, usernames[i]) is True:
                                                             ID, Name, Username = get_all_user_data(host, usernames[i])
                                                             NTX = f"❌اکانت: {usernames[i]}به علت گذشت چند روز و نشدن تمدید حذف شد"
-                                                            bot.send_message(ID, NTX)
                                                             delete_user(host, usernames[i])
+                                                            if checker_notify(str(ID)) is True:
+                                                                try:
+                                                                    bot.send_message(ID, NTX)
+                                                                except:
+                                                                    pass
                                             else:
                                                 if (0 < int(days_left[i]) <= 3) or ((("نامحدود" != traffics[i]) and (usages[i] != "0.0")) and (float(usages[i]) >= (float(traffics[i].split("گیگابایت")[0])) - 2.0)):
                                                     if check_exist_user(host, usernames[i]) is True:
