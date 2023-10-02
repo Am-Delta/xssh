@@ -2916,7 +2916,6 @@ def text_private(bot, message):
                     wss = "⚠️Warning you're adding a blocked domain."
                 else:
                     wss = ""
-                    message.reply_text()
                 cache_list = []
                 cache_list.append(host)
                 delete_cache(chat_id)
