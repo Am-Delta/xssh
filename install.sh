@@ -13,11 +13,6 @@ pip install bs4
 pip install requests
 pip install termcolor
 pip install Unidecode
-sudo apt install python3-random2
-sudo apt install python3-qrcode
-sudo apt install python3-bs4
-sudo apt install python3-requests
-sudo apt install python3-termcolor
 
 mkdir /root/botCh
 
