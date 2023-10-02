@@ -41,6 +41,11 @@ Ubuntu 18+
 
 > Manuall installation 
 install python and packages then Run run.py
+- Winodows 7, 10, 2016, 2019, 2022
+- Debian 10+
+- CentOS 8+
+- Fedora 36+
+- Arch Linux
 
 ## Features
 
@@ -70,11 +75,4 @@ TRX: TAuhCY9PbmKw7gKgjKqkqQHmazNKUXHR26
 ## Screenshots Admin Tools
 
 ![Screenshot](https://i.ibb.co/nzsh4t5/Screenshot-2023-10-02-165554.png)![Screenshot2](https://i.ibb.co/G9F9YMs/Screenshot-2023-10-02-165608.png)![Screenshot](https://i.ibb.co/QmCQfQC/Screenshot-2023-10-02-165632.png)
-
-
-- Winodows 7, 10, 2016, 2019, 2022
-- Debian 10+
-- CentOS 8+
-- Fedora 36+
-- Arch Linux
 
