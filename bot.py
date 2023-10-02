@@ -5414,7 +5414,6 @@ def call_test(bot, query):
                 username, password = get_host_username_password(host)
                 Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                 t0 = "🥰مرسی از خریدتون\n\n"
-                process_codes.append(code)
                 GB = float(str("{:.2f}".format(float((settings['test-traffic'] / 1024)))))
                 text = t0 + Session.Create(user, passw, 1, 1, GB)
                 if "Error" not in text:
@@ -5438,7 +5437,6 @@ def call_test(bot, query):
                         keyboard = [[InlineKeyboardButton("آموزش اتصال📡", callback_data='help')]]
                         reply_markup = InlineKeyboardMarkup(keyboard)
                         bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
-                    process_codes.remove(code)
                 else:
                     bot.send_message(chat_id, f"Error: {text}")
             except Exception as e:
