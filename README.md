@@ -39,8 +39,8 @@ Channel: https://t.me/delta_bcc
 Ubuntu 18+
 
 
-> Manuall installation 
-install python and packages then Run run.py
+> Manuall installation , 
+install python and packages then Run run.py & session-updater.py
 - Winodows 7, 10, 2016, 2019, 2022
 - Debian 10+
 - CentOS 8+
