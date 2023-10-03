@@ -1867,8 +1867,11 @@ def text_private(bot, message):
                 message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "days_none":
-            if True:
-                days = int(link)
+            try:
+                try:
+                    days = int(link)
+                except:
+                    message.reply_text("فقط میتونی عدد بفرستی")
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 if check_seller_exist(chat_id) is True:
                     days = str(days)
@@ -1917,7 +1920,8 @@ def text_private(bot, message):
                         bot.edit_message_text(chat_id, msg, "Error: " + str(e))
                 delete_cache(chat_id)
                 delete_collector(chat_id)
-            else:
+            except Exception as e:
+                print(e)
                 message.reply_text("فقط میتونی عدد بفرستی")
 
         elif status == "password":
