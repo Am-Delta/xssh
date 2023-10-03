@@ -268,8 +268,8 @@ def checker(ids):
     txt = open("All.txt", "r")
     if ids not in txt.read():
         txt = open("All.txt", "a")
-        txt.writelines("\n")
         txt.writelines(ids)
+        txt.writelines("\n")
         txt.close()
 
 
