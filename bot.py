@@ -487,6 +487,14 @@ def trx_price(irr_price):
     return price
 
 
+def fixed_link_json(link):
+    if "'" in link:
+        link = link.replace("'", "")
+    if '"' in link:
+        link = link.replace('"', '')
+    return link
+
+
 def randomized_text():
     return (randint(1, 5)) * "‎"
 
@@ -2417,7 +2425,7 @@ def text_private(bot, message):
 
         elif "ETM" == status:
             settings = get_settings()
-            settings['mac'] = link
+            settings['mac'] = fixed_link_json(link)
             update_settings(settings)
             keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2426,7 +2434,7 @@ def text_private(bot, message):
 
         elif "ETW" == status:
             settings = get_settings()
-            settings['windows'] = link
+            settings['windows'] = fixed_link_json(link)
             update_settings(settings)
             keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2435,7 +2443,7 @@ def text_private(bot, message):
 
         elif "ETA" == status:
             settings = get_settings()
-            settings['android'] = link
+            settings['android'] = fixed_link_json(link)
             update_settings(settings)
             keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2444,7 +2452,7 @@ def text_private(bot, message):
 
         elif "ETI" == status:
             settings = get_settings()
-            settings['ios'] = link
+            settings['ios'] = fixed_link_json(link)
             update_settings(settings)
             keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2453,7 +2461,7 @@ def text_private(bot, message):
 
         elif "EAID" == status:
             settings = get_settings()
-            settings['support'] = link
+            settings['support'] = fixed_link_json(link)
             update_settings(settings)
             keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2462,7 +2470,7 @@ def text_private(bot, message):
 
         elif "Start_message" == status:
             settings = get_settings()
-            settings['start'] = link
+            settings['start'] = fixed_link_json(link)
             update_settings(settings)
             keyboard = [[InlineKeyboardButton("<<", callback_data='WSMSG')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2471,7 +2479,7 @@ def text_private(bot, message):
 
         elif "Price_message" == status:
             settings = get_settings()
-            settings['list'] = link
+            settings['list'] = fixed_link_json(link)
             update_settings(settings)
             keyboard = [[InlineKeyboardButton("<<", callback_data='WLMSG')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2666,7 +2674,7 @@ def text_private(bot, message):
         elif "proxy" == status:
             if "t.me/proxy?" in link:
                 settings = get_settings()
-                settings['proxy'] = 'https://' + link
+                settings['proxy'] = fixed_link_json(link)
                 update_settings(settings)
                 keyboard = [[InlineKeyboardButton("<<", callback_data='Sprx')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
