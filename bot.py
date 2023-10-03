@@ -1876,6 +1876,7 @@ def text_private(bot, message):
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 if check_seller_exist(chat_id) is True:
                     days = str(days)
+                    #user = cache_list[1]
                     connection_limit = str(cache_list[-1])
                     traffic = str(cache_list[2])
                     code = uuid4().hex[0:10]
@@ -2980,31 +2981,34 @@ def text_private(bot, message):
             delete_cache(chat_id)
 
 
-@app.on_callback_query(filters.regex('back_admin'))
-def call_back(bot, query):
-    text = '🔻<b>We\'re back</b>'
-    query.edit_message_text(text=text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
-
-
-@app.on_callback_query(filters.regex('back_seller'))
-def call_back_seller(bot, query):
-    delete_cache(query.message.chat.id)
-    query.edit_message_text(text="We're back to the menu", reply_markup=Seller_Tools_keys())
-
-
 @app.on_callback_query(filters.regex('back'))
 def call_back(bot, query):
+    chat_id = query.message.chat.id
+    delete_cache(chat_id)
     text = '🔻<b>خب برگشتیم</b>'
-    query.edit_message_text(text=text, reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+    if chat_id in admin_id:
+        query.edit_message_text(text=text, reply_markup=Admin_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+    elif chat_id in seller_id:
+        query.edit_message_text(text=text, reply_markup=Seller_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+    else:
+        query.edit_message_text(text=text, reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('servers'))
 def call_servers(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     query.edit_message_text(text="Select? ", reply_markup=server_cb_creator("HOST_"))
 
 
 @app.on_callback_query(filters.regex('HSMSC_'))
 def call_HSMSC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSMSC_")[1]
     chat_id = query.message.chat.id
@@ -3021,6 +3025,10 @@ def call_HSMSC(bot, query):
 
 @app.on_callback_query(filters.regex('HSAR_'))
 def call_HSAR(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSAR_")[1]
     chat_id = query.message.chat.id
@@ -3037,6 +3045,10 @@ def call_HSAR(bot, query):
 
 @app.on_callback_query(filters.regex('HSUGift_'))
 def call_HSUGift(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSUGift_")[1]
     chat_id = query.message.chat.id
@@ -3053,6 +3065,10 @@ def call_HSUGift(bot, query):
 
 @app.on_callback_query(filters.regex('HSUL_'))
 def call_HSUL(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSUL_")[1]
     chat_id = query.message.chat.id
@@ -3071,6 +3087,10 @@ def call_HSUL(bot, query):
 
 @app.on_callback_query(filters.regex('ULA_'))
 def call_ULA(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("ULA_")[1]
     if host in Get_hosts():
@@ -3091,6 +3111,10 @@ def call_ULA(bot, query):
 
 @app.on_callback_query(filters.regex('ULD_'))
 def call_ULD(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("ULD_")[1]
     if host in Get_hosts():
@@ -3111,6 +3135,10 @@ def call_ULD(bot, query):
 
 @app.on_callback_query(filters.regex('HSOU_'))
 def call_HSOU(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSOU_")[1]
     chat_id = query.message.chat.id
@@ -3147,6 +3175,10 @@ def call_HSOU(bot, query):
 
 @app.on_callback_query(filters.regex('HSKU_'))
 def call_HSKU(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSKU_")[1]
     chat_id = query.message.chat.id
@@ -3172,6 +3204,10 @@ def call_HSKU(bot, query):
 
 @app.on_callback_query(filters.regex('HKR_'))
 def call_HKR(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = (rt.split("HKR_")[1]).split("$")[0]
     user = rt.split("$")[1]
@@ -3198,6 +3234,10 @@ def call_HKR(bot, query):
 
 @app.on_callback_query(filters.regex('HSDU_'))
 def call_HSDU(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSDU_")[1]
     chat_id = query.message.chat.id
@@ -3233,6 +3273,10 @@ def call_HSDU(bot, query):
 
 @app.on_callback_query(filters.regex('HSCU_'))
 def call_HSCU(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("HSCU_")[1]
     chat_id = query.message.chat.id
@@ -3269,6 +3313,10 @@ def call_HSCU(bot, query):
 
 @app.on_callback_query(filters.regex('HOST_'))
 def call_hosts(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     query.edit_message_text(text="Wait...")
     rt = query.data
     host = rt.split("HOST_")[1]
@@ -3308,6 +3356,10 @@ def call_hosts(bot, query):
 
 @app.on_callback_query(filters.regex('checker'))
 def call_checker(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [[InlineKeyboardButton("🔙Back", callback_data="back_admin")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     if cache[0] is True:
@@ -3416,6 +3468,10 @@ def call_checker(bot, query):
 @app.on_callback_query(filters.regex('stats'))
 def call_stats(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
+    chat_id = query.message.chat.id
     if check_seller_exist(chat_id) is False:
         keyboard = [[InlineKeyboardButton("🔙Back", callback_data="back_admin"), InlineKeyboardButton("⚫️Full Servers", callback_data='full')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3489,6 +3545,10 @@ def call_stats(bot, query):
 
 @app.on_callback_query(filters.regex('Filtering'))
 def call_filtering(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [[InlineKeyboardButton("<< back", callback_data="back_admin")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text="درحال انجام...")
@@ -3528,6 +3588,10 @@ def call_filtering(bot, query):
 
 @app.on_callback_query(filters.regex('full'))
 def call_full(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [[InlineKeyboardButton("<< back", callback_data="SMT")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text="درحال انجام...")
@@ -3565,28 +3629,44 @@ def call_full(bot, query):
 
 @app.on_callback_query(filters.regex('JOIN'))
 def call_Join(bot, query):
-    try:
-        chat_member = bot.get_chat_member(get_settings()['sponser'], query.message.chat.id)
-        text = '🔻<b>🥰خوش اومدین</b>'
-        query.edit_message_text(text, reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
-    except:
-        query.answer("جوین نشدی😑", show_alert=True)
+    if (get_settings())['sponser'] == "None":
+        query.edit_message_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+    else:
+        try:
+            chat_member = bot.get_chat_member((get_settings())['sponser'], query.message.chat.id)
+            query.edit_message_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+
+        except NotAcceptable:
+            query.edit_message_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+
+        except BadRequest as e:
+            if "USER_NOT_PARTICIPANT" in str(e):
+                query.answer("جوین نشدی😑", show_alert=True)
+            else:
+                query.edit_message_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('Kill'))
 def call_Kill(bot, query):
-    if check_seller_exist(query.message.chat.id) is False:
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_seller_exist(chat_id) is False:
         query.edit_message_text(text="سرور مورد نظر برای کیل یوزر انتخاب کنین", reply_markup=server_cb_creator("KUA_"))
     else:
-        add_cache(query.message.chat.id, "K-host")
+        add_cache(chat_id, "K-host")
         query.edit_message_text(text="آدرس سرورو بفرست")
 
 
 @app.on_callback_query(filters.regex('KUA_'))
 def call_KUA(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("KUA_")[1]
-    chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "Kill_" + host)
         query.edit_message_text(text='نام کاربری رو بفرستین')
@@ -3596,6 +3676,10 @@ def call_KUA(bot, query):
 
 @app.on_callback_query(filters.regex('disable'))
 def call_disable(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
     if check_seller_exist(query.message.chat.id) is False:
         query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("DIS_"))
     else:
@@ -3605,9 +3689,12 @@ def call_disable(bot, query):
 
 @app.on_callback_query(filters.regex('DIS_'))
 def call_DIS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("DIS_")[1]
-    chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "disable_" + host)
         query.edit_message_text(text='نام کاربری رو بفرستین')
@@ -3617,6 +3704,10 @@ def call_DIS(bot, query):
 
 @app.on_callback_query(filters.regex('ENA_'))
 def call_ENA(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("ENA_")[1]
     chat_id = query.message.chat.id
@@ -3629,6 +3720,10 @@ def call_ENA(bot, query):
 
 @app.on_callback_query(filters.regex('enable'))
 def call_enable(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
     if check_seller_exist(query.message.chat.id) is False:
         query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("ENA_"))
     else:
@@ -3639,6 +3734,9 @@ def call_enable(bot, query):
 @app.on_callback_query(filters.regex('CAPASS_'))
 def call_CAPASS(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         domain = data.split("CAPASS_")[1]
@@ -3653,6 +3751,10 @@ def call_CAPASS(bot, query):
 
 @app.on_callback_query(filters.regex('ADPASS'))
 def call_ADPASS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("CAPASS_"))
     else:
@@ -3662,6 +3764,9 @@ def call_ADPASS(bot, query):
 @app.on_callback_query(filters.regex('RTRF_'))
 def call_RTRF(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         domain = data.split("RTRF_")[1]
@@ -3673,6 +3778,10 @@ def call_RTRF(bot, query):
 
 @app.on_callback_query(filters.regex('TrfRes'))
 def call_TrfRes(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("RTRF_"))
     else:
@@ -3682,6 +3791,9 @@ def call_TrfRes(bot, query):
 @app.on_callback_query(filters.regex('CTRPLUS_'))
 def call_CTRPLUS(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         domain = data.split("CTRPLUS_")[1]
@@ -3696,6 +3808,10 @@ def call_CTRPLUS(bot, query):
 
 @app.on_callback_query(filters.regex('TrfPlus'))
 def call_TrfPlus(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("CTRPLUS_"))
@@ -3709,6 +3825,9 @@ def call_TrfPlus(bot, query):
 @app.on_callback_query(filters.regex('DM_'))
 def call_DM(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         domain = data.split("DM_")[1]
@@ -3729,6 +3848,10 @@ def call_DM(bot, query):
 
 @app.on_callback_query(filters.regex('create'))
 def call_create(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("DM_"))
     else:
@@ -3738,6 +3861,9 @@ def call_create(bot, query):
 @app.on_callback_query(filters.regex('DMNONE_'))
 def call_DMNONE(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         domain = data.split("DMNONE_")[1]
@@ -3759,6 +3885,9 @@ def call_DMNONE(bot, query):
 @app.on_callback_query(filters.regex('Create_none'))
 def call_create(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("DMNONE_"))
@@ -3778,6 +3907,10 @@ def call_create(bot, query):
 
 @app.on_callback_query(filters.regex('SCC_'))
 def call_SCC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in seller_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     chat_id = query.message.chat.id
     status = data.split("SCC_")[1]
@@ -3796,6 +3929,9 @@ def call_SCC(bot, query):
 @app.on_callback_query(filters.regex('UP_'))
 def call_up(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         host = data.split("UP_")[1]
@@ -3807,6 +3943,10 @@ def call_up(bot, query):
 
 @app.on_callback_query(filters.regex('update'))
 def call_update(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("UP_"))
@@ -3820,6 +3960,9 @@ def call_update(bot, query):
 @app.on_callback_query(filters.regex('RM_'))
 def call_RM(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         host = data.split("RM_")[1]
@@ -3831,6 +3974,10 @@ def call_RM(bot, query):
 
 @app.on_callback_query(filters.regex('remove'))
 def call_remove(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("RM_"))
@@ -3844,6 +3991,9 @@ def call_remove(bot, query):
 @app.on_callback_query(filters.regex('UI_'))
 def call_UI(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         host = data.split("UI_")[1]
@@ -3855,6 +4005,10 @@ def call_UI(bot, query):
 
 @app.on_callback_query(filters.regex('userinfo'))
 def call_userinfo(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(query.message.chat.id) is False:
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("UI_"))
@@ -3868,6 +4022,9 @@ def call_userinfo(bot, query):
 @app.on_callback_query(filters.regex('userconfigs'))
 def call_userconfigs(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "userconfigs")
@@ -3879,6 +4036,9 @@ def call_userconfigs(bot, query):
 @app.on_callback_query(filters.regex('MIOU_'))
 def call_MIOU(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     delete_collector(chat_id)
     data = query.data
@@ -3901,6 +4061,9 @@ def call_MIOU(bot, query):
 @app.on_callback_query(filters.regex('IDADMIN_'))
 def call_IDADMIN(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     delete_collector(chat_id)
     data = query.data
@@ -3931,6 +4094,10 @@ def call_IDADMIN(bot, query):
 
 @app.on_callback_query(filters.regex('IDMNU&'))
 def call_IDMNU(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
@@ -3993,6 +4160,9 @@ def call_IDMNU(bot, query):
 @app.on_callback_query(filters.regex('ChangeWallet'))
 def call_change(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         add_cache(chat_id, "change_wallet")
         query.edit_message_text(text="آدرس ولت ترون بفرست")
@@ -4002,6 +4172,10 @@ def call_change(bot, query):
 
 @app.on_callback_query(filters.regex('OFT'))
 def call_OFT(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if settings['trx_buy'] == 'on':
         settings['trx_buy'] = 'off'
@@ -4015,6 +4189,10 @@ def call_OFT(bot, query):
 
 @app.on_callback_query(filters.regex('ONT'))
 def call_ONT(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if settings['trx_buy'] == 'off':
         settings['trx_buy'] = 'on'
@@ -4028,6 +4206,10 @@ def call_ONT(bot, query):
 
 @app.on_callback_query(filters.regex('wallet'))
 def call_wallet(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [
         [InlineKeyboardButton("🔧Change", callback_data='ChangeWallet')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFT'), InlineKeyboardButton("🟢 On", callback_data='ONT')],
@@ -4046,6 +4228,10 @@ def call_wallet(bot, query):
 
 @app.on_callback_query(filters.regex('OFC'))
 def call_OFC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if settings['card_buy'] == 'on':
         settings['card_buy'] = 'off'
@@ -4059,6 +4245,10 @@ def call_OFC(bot, query):
 
 @app.on_callback_query(filters.regex('ONC'))
 def call_ONC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if settings['card_buy'] == 'off':
         settings['card_buy'] = 'on'
@@ -4072,6 +4262,10 @@ def call_ONC(bot, query):
 
 @app.on_callback_query(filters.regex('Card'))
 def call_card(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [
         [InlineKeyboardButton("🔧Change", callback_data='Change')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFC'), InlineKeyboardButton("🟢 On", callback_data='ONC')],
@@ -4091,6 +4285,10 @@ def call_card(bot, query):
 @app.on_callback_query(filters.regex('Change'))
 def call_change(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "change")
         query.edit_message_text(text="خب شماره کارتتون بفرستین (فقط شماره کارت)")
@@ -4101,6 +4299,9 @@ def call_change(bot, query):
 @app.on_callback_query(filters.regex('ANS_'))
 def call_ANS(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         data = query.data
         cache_list = [data.split("ANS_")[1]]
@@ -4113,6 +4314,10 @@ def call_ANS(bot, query):
 
 @app.on_callback_query(filters.regex("RLS_"))
 def call_RLS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     chat_id = int(data.split("RLS_")[1])
     keyboard = [[InlineKeyboardButton("<<", callback_data='sellers')]]
@@ -4124,6 +4329,10 @@ def call_RLS(bot, query):
 
 @app.on_callback_query(filters.regex("ELS_"))
 def call_ELS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     chat_id = int(data.split("ELS_")[1])
     text = "Ok send only a number\n\n0 = unlimited\n10 = 10 clients"
@@ -4136,6 +4345,10 @@ def call_ELS(bot, query):
 
 @app.on_callback_query(filters.regex("SLM_"))
 def call_SLM(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(query.message.chat.id)
     data = query.data
     chat_id = int(data.split("SLM_")[1])
@@ -4152,6 +4365,10 @@ def call_SLM(bot, query):
 
 @app.on_callback_query(filters.regex("ADDSELLER"))
 def call_ADDSELLER(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(query.message.chat.id)
     add_cache(query.message.chat.id, "add_seller")
     keyboard = [[InlineKeyboardButton("<<", callback_data='sellers')]]
@@ -4162,6 +4379,9 @@ def call_ADDSELLER(bot, query):
 @app.on_callback_query(filters.regex('sellers'))
 def call_sellers(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     sellers = get_all_sellers()
     keyboard = []
@@ -4657,6 +4877,9 @@ def call_BU(bot, query):
 
 @app.on_callback_query(filters.regex("Confirmed_"))
 def call_Confirmed(bot, query):
+    if query.message.chat.id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     code = data.split("Confirmed_")[1]
     if check_code_exists(code) is True:
@@ -4717,6 +4940,9 @@ def call_Confirmed(bot, query):
 
 @app.on_callback_query(filters.regex("NO❌_"))
 def call_NO(bot, query):
+    if query.message.chat.id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     code = data.split("NO❌_")[1]
     if check_code_exists(code) is True:
@@ -4949,6 +5175,9 @@ def call_UPC(bot, query):
 
 @app.on_callback_query(filters.regex("ConfirmUPGRADE_"))
 def call_Confirmed_UPGRADE(bot, query):
+    if query.message.chat.id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     code = data.split("ConfirmUPGRADE_")[1]
     if check_code_exists(code) is True:
@@ -5000,6 +5229,9 @@ def call_Confirmed_UPGRADE(bot, query):
 
 @app.on_callback_query(filters.regex("ConfirmTraffic_"))
 def call_Confirmed_Traffic(bot, query):
+    if query.message.chat.id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     code = data.split("ConfirmTraffic_")[1]
     if check_code_exists(code) is True:
@@ -5042,6 +5274,9 @@ def call_Confirmed_Traffic(bot, query):
 
 @app.on_callback_query(filters.regex("ConfirmDeposit_"))
 def call_Confirmed_deposit(bot, query):
+    if query.message.chat.id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     code = data.split("ConfirmDeposit_")[1]
     if check_code_exists(code) is True:
@@ -5099,6 +5334,9 @@ sub.domain.com
 @app.on_callback_query(filters.regex('ADUB'))
 def call_ADUB(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         add_cache(chat_id, "Adminuserbalance")
         query.edit_message_text(text='خب آیدی عددی کاربر یا یه پیام ازش فوروارد کن ')
@@ -5108,6 +5346,10 @@ def call_ADUB(bot, query):
 
 @app.on_callback_query(filters.regex('Manager'))
 def call_Manager(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [
         [InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data='disable'), InlineKeyboardButton("🟢 فعال کاربر", callback_data='enable')],
         [InlineKeyboardButton("🔄تمدید کاربر ", callback_data='update'), InlineKeyboardButton("🗑حذف اکانت", callback_data='remove')],
@@ -5125,11 +5367,19 @@ def call_Manager(bot, query):
 
 @app.on_callback_query(filters.regex('RST'))
 def call_rst(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     query.edit_message_text(text="سرور مورد نظرو انتخاب کنین )این بخش اکانت های کاربر از ربات حذف میکنه و هم سرور از لیست ربات)", reply_markup=server_cb_creator("DTRS_"))
 
 
 @app.on_callback_query(filters.regex('DTRS_'))
 def call_DTRS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("DTRS_")[1]
     chat_id = query.message.chat.id
@@ -5171,11 +5421,19 @@ def call_DTRS(bot, query):
 
 @app.on_callback_query(filters.regex('MST'))
 def call_MST(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     query.edit_message_text(text="سرور مورد نظرتون انتخاب کنین", reply_markup=server_cb_creator("MPST_"))
 
 
 @app.on_callback_query(filters.regex('MPST_'))
 def call_MPST(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("MPST_")[1]
     if host in Get_hosts():
@@ -5192,11 +5450,19 @@ def call_MPST(bot, query):
 
 @app.on_callback_query(filters.regex('TST'))
 def call_TST(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     query.edit_message_text(text="سرور مورد نظرتون انتخاب کنین:", reply_markup=server_cb_creator("TTRS_"))
 
 
 @app.on_callback_query(filters.regex('TTRS_'))
 def call_TTRS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("TTRS_")[1]
     if host in Get_hosts():
@@ -5224,6 +5490,10 @@ def call_TTRS(bot, query):
 
 @app.on_callback_query(filters.regex('EUP_'))
 def call_EUP(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("EUP_")[1]
     if host in Get_hosts():
@@ -5240,6 +5510,10 @@ def call_EUP(bot, query):
 
 @app.on_callback_query(filters.regex('EDD_'))
 def call_EDD(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     rt = query.data
     host = rt.split("EDD_")[1]
     if host in Get_hosts():
@@ -5257,6 +5531,9 @@ def call_EDD(bot, query):
 @app.on_callback_query(filters.regex('AST'))
 def call_AST(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "AST")
@@ -5268,6 +5545,9 @@ def call_AST(bot, query):
 @app.on_callback_query(filters.regex('SMT'))
 def call_SMT(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
@@ -5286,6 +5566,9 @@ def call_SMT(bot, query):
 @app.on_callback_query(filters.regex('message'))
 def call_message(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         add_cache(chat_id, "message")
         keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
@@ -5528,6 +5811,9 @@ def call_referral(bot, query):
 @app.on_callback_query(filters.regex('ZAUB_'))
 def call_ZAUB(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     data = query.data
@@ -5545,6 +5831,9 @@ def call_ZAUB(bot, query):
 @app.on_callback_query(filters.regex('MAUB_'))
 def call_MAUB(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     data = query.data
@@ -5555,8 +5844,11 @@ def call_MAUB(bot, query):
 
 
 @app.on_callback_query(filters.regex('PAUB_'))
-def call_MAUB(bot, query):
+def call_PAUB(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     data = query.data
@@ -5602,6 +5894,9 @@ def call_UWM(bot, query):
 @app.on_callback_query(filters.regex('CTBKup'))
 def call_bktimer(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_cache(chat_id, "backup_timer")
     text = "OK send a number 1-72"
     keyboard = [[InlineKeyboardButton("<<", callback_data='Backup')]]
@@ -5611,6 +5906,10 @@ def call_bktimer(bot, query):
 
 @app.on_callback_query(filters.regex('BKupON'))
 def call_bkon(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if os.stat("Pannels.txt").st_size == 0:
         query.edit_message_text(text="هیچ سروری وجود نداره, یه سرور اد کنین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
     else:
@@ -5676,6 +5975,10 @@ def call_bkon(bot, query):
 
 @app.on_callback_query(filters.regex('BKupOFF'))
 def call_bkoff(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if backup[0] is True:
         backup.clear()
         backup.append(False)
@@ -5691,6 +5994,9 @@ def call_bkoff(bot, query):
 @app.on_callback_query(filters.regex('BKupBot'))
 def call_bkbot(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     msg = query.edit_message_text(text="Sending...").id
     files = ["All.txt", "ssh.db", "data.json", "Pannels.txt", "logs.txt", "nohup.out"]
     logs = "Done✔️\n\nLogs:\n\n"
@@ -5707,6 +6013,9 @@ def call_bkbot(bot, query):
 @app.on_callback_query(filters.regex('Backup'))
 def call_backup(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("🕔 تغییر تایم بکاپ ", callback_data='CTBKup')],
@@ -5727,6 +6036,9 @@ def call_backup(bot, query):
 @app.on_callback_query(filters.regex('WSMSG'))
 def call_WSMSG(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='ESMSG')],
@@ -5741,6 +6053,9 @@ def call_WSMSG(bot, query):
 @app.on_callback_query(filters.regex('ESMSG'))
 def call_ESMSG(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_cache(chat_id, "Start_message")
     text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='WSMSG')]]
@@ -5751,6 +6066,9 @@ def call_ESMSG(bot, query):
 @app.on_callback_query(filters.regex('WLMSG'))
 def call_WLMSG(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='ELMSG')],
@@ -5765,6 +6083,9 @@ def call_WLMSG(bot, query):
 @app.on_callback_query(filters.regex('ELMSG'))
 def call_ELMSG(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_cache(chat_id, "Price_message")
     text = "پیامتون بفرستین"
     keyboard = [[InlineKeyboardButton("<<", callback_data='WLMSG')]]
@@ -5775,6 +6096,9 @@ def call_ELMSG(bot, query):
 @app.on_callback_query(filters.regex('sponser'))
 def call_sponser(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='ESship')],
@@ -5789,6 +6113,10 @@ def call_sponser(bot, query):
 
 @app.on_callback_query(filters.regex('Delship'))
 def call_Delship(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     settings['sponser'] = "None"
     update_settings(settings)
@@ -5800,6 +6128,9 @@ def call_Delship(bot, query):
 @app.on_callback_query(filters.regex('ESship'))
 def call_ESship(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_cache(chat_id, "Sponser")
     text = "ربات تو گروه یا چنلتون ادمین کنین, حتما باید پابلیک باشه, آیدی چنل یا گروه به این صورت بفرست: @channel"
     keyboard = [[InlineKeyboardButton("<<", callback_data='sponser')]]
@@ -5810,6 +6141,9 @@ def call_ESship(bot, query):
 @app.on_callback_query(filters.regex('AutoDelete'))
 def call_AutoDelete(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='EADel')],
@@ -5824,6 +6158,9 @@ def call_AutoDelete(bot, query):
 @app.on_callback_query(filters.regex('EADel'))
 def call_EADel(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_cache(chat_id, "AutoDelete")
     text = "OK send only number"
     keyboard = [[InlineKeyboardButton("<<", callback_data='AutoDelete')]]
@@ -5833,6 +6170,10 @@ def call_EADel(bot, query):
 
 @app.on_callback_query(filters.regex('USD'))
 def call_USD(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     query.edit_message_text(text="wait...")
     chat_id = query.message.chat.id
     delete_cache(chat_id)
@@ -5854,6 +6195,9 @@ def call_USD(bot, query):
 @app.on_callback_query(filters.regex('Edollar'))
 def call_Edollar(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_cache(chat_id, "USD")
     text = "OK send only number\n\nبه تومن بفرستین مثل 50000"
     keyboard = [[InlineKeyboardButton("<<", callback_data='USD')]]
@@ -5864,6 +6208,9 @@ def call_Edollar(bot, query):
 @app.on_callback_query(filters.regex('maximum'))
 def call_maximum(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='EMXM')],
@@ -5878,6 +6225,9 @@ def call_maximum(bot, query):
 @app.on_callback_query(filters.regex('EMXM'))
 def call_EMXM(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_cache(chat_id, "maximum")
     text = "OK send only number"
     keyboard = [[InlineKeyboardButton("<<", callback_data='maximum')]]
@@ -5887,6 +6237,10 @@ def call_EMXM(bot, query):
 
 @app.on_callback_query(filters.regex('BSOPtion'))
 def call_BSOPtion(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if settings['buy'] == "on":
         emoji = "🟢"
@@ -5907,6 +6261,10 @@ def call_BSOPtion(bot, query):
 
 @app.on_callback_query(filters.regex('EBS_'))
 def call_EBS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     buy = data.split("EBS_")[1]
     settings = get_settings()
@@ -5920,6 +6278,9 @@ def call_EBS(bot, query):
 @app.on_callback_query(filters.regex('ADMINPRICES'))
 def call_ADMINPRICES(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Delete✖️", callback_data='DAPR')],
@@ -5942,6 +6303,9 @@ def call_ADMINPRICES(bot, query):
 @app.on_callback_query(filters.regex('AAPR'))
 def call_AAPR(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_collector(chat_id, "domain_none", [], [])
     delete_cache(chat_id)
     add_cache(chat_id, "A_price")
@@ -5951,6 +6315,10 @@ def call_AAPR(bot, query):
 
 @app.on_callback_query(filters.regex('DAPR'))
 def call_DAPR(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if len(settings['traffic']) == 0:
         query.answer("هیچی وجود نداره, تعرفه جدید اد کنین", show_alert=True)
@@ -5971,6 +6339,10 @@ def call_DAPR(bot, query):
 
 @app.on_callback_query(filters.regex('DSELP_'))
 def call_DSELP(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     i = int(data.split("DSELP_")[1])
     settings = get_settings()
@@ -5994,6 +6366,10 @@ def call_DSELP(bot, query):
 
 @app.on_callback_query(filters.regex('FLCHON'))
 def call_FLCHON(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if os.stat("Pannels.txt").st_size == 0:
         query.edit_message_text(text="هیچ سروری وجود نداره, یه سرور اد کنین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
     else:
@@ -6065,6 +6441,10 @@ def call_FLCHON(bot, query):
 
 @app.on_callback_query(filters.regex('FLCHOFF'))
 def call_FLCHOFF(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if Filtering_system[0] is True:
         Filtering_system.clear()
         Filtering_system.append(False)
@@ -6079,6 +6459,10 @@ def call_FLCHOFF(bot, query):
 
 @app.on_callback_query(filters.regex('FILCH'))
 def call_FILCH(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [
         [InlineKeyboardButton("ON 🟢", callback_data='FLCHON')],
         [InlineKeyboardButton("OFF 🔴", callback_data='FLCHOFF')]
@@ -6096,6 +6480,9 @@ def call_FILCH(bot, query):
 @app.on_callback_query(filters.regex('APRX'))
 def call_APRX(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     add_cache(chat_id, "proxy")
     text = "پروکسی رو بفرست"
@@ -6106,6 +6493,10 @@ def call_APRX(bot, query):
 
 @app.on_callback_query(filters.regex('DPRX'))
 def call_DPRX(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     settings['proxy'] = "None"
     update_settings(settings)
@@ -6118,6 +6509,9 @@ def call_DPRX(bot, query):
 @app.on_callback_query(filters.regex('Sprx'))
 def call_Sprx(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     settings = get_settings()
     if settings['proxy'] == "None":
@@ -6135,6 +6529,10 @@ def call_Sprx(bot, query):
 
 @app.on_callback_query(filters.regex('NUSYS'))
 def call_NUSYS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [
         [InlineKeyboardButton("ON 🟢", callback_data='SNON')],
         [InlineKeyboardButton("OFF 🔴", callback_data='SNFF')]
@@ -6154,6 +6552,10 @@ def call_NUSYS(bot, query):
 
 @app.on_callback_query(filters.regex('SNON'))
 def call_SNON(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if os.stat("Pannels.txt").st_size == 0:
         query.edit_message_text(text="هیچ سروری وجود نداره, یه سرور اد کنین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("➕ADD", callback_data='AST')]]))
     else:
@@ -6232,6 +6634,10 @@ def call_SNON(bot, query):
 
 @app.on_callback_query(filters.regex('SNFF'))
 def call_SNFF(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if notify_system[0] is True:
         notify_system.clear()
         notify_system.append(False)
@@ -6249,6 +6655,9 @@ def call_SNFF(bot, query):
 @app.on_callback_query(filters.regex('INVS'))
 def call_INVS(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='ENVS')],
@@ -6263,6 +6672,9 @@ def call_INVS(bot, query):
 @app.on_callback_query(filters.regex('ENVS'))
 def call_ENVS(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "invite")
@@ -6275,6 +6687,9 @@ def call_ENVS(bot, query):
 @app.on_callback_query(filters.regex('SID'))
 def call_SID(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
@@ -6289,6 +6704,10 @@ def call_SID(bot, query):
 
 @app.on_callback_query(filters.regex('DAID'))
 def call_DAID(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     settings['support'] = "None"
     update_settings(settings)
@@ -6300,6 +6719,9 @@ def call_DAID(bot, query):
 @app.on_callback_query(filters.regex('EAID'))
 def call_EAID(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "EAID")
@@ -6312,6 +6734,9 @@ def call_EAID(bot, query):
 @app.on_callback_query(filters.regex('Tutorials'))
 def call_Tutorials(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
@@ -6327,6 +6752,9 @@ def call_Tutorials(bot, query):
 @app.on_callback_query(filters.regex('CTI'))
 def call_CTI(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
@@ -6342,6 +6770,9 @@ def call_CTI(bot, query):
 @app.on_callback_query(filters.regex('ETI'))
 def call_ETI(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETI")
@@ -6354,6 +6785,9 @@ def call_ETI(bot, query):
 @app.on_callback_query(filters.regex('CTA'))
 def call_CTA(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
@@ -6369,6 +6803,9 @@ def call_CTA(bot, query):
 @app.on_callback_query(filters.regex('ETA'))
 def call_ETA(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETA")
@@ -6381,6 +6818,9 @@ def call_ETA(bot, query):
 @app.on_callback_query(filters.regex('CTM'))
 def call_CTM(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
@@ -6396,6 +6836,9 @@ def call_CTM(bot, query):
 @app.on_callback_query(filters.regex('ETM'))
 def call_ETM(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETM")
@@ -6408,6 +6851,9 @@ def call_ETM(bot, query):
 @app.on_callback_query(filters.regex('CTW'))
 def call_CTW(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
@@ -6423,6 +6869,9 @@ def call_CTW(bot, query):
 @app.on_callback_query(filters.regex('ETW'))
 def call_ETW(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETW")
@@ -6434,6 +6883,10 @@ def call_ETW(bot, query):
 
 @app.on_callback_query(filters.regex('TASET'))
 def call_TASET(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if settings['test'] == "on":
         emoji = "🟢"
@@ -6456,6 +6909,10 @@ def call_TASET(bot, query):
 
 @app.on_callback_query(filters.regex('DTAC'))
 def call_DTAC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     text = "با این کار تمامی کاربران اکانت تست حذف میشن و دوباره میتونن اکانت تست دریافت کنن"
     keyboard = [
         [InlineKeyboardButton("🗑حذف", callback_data='DLATU')],
@@ -6467,6 +6924,10 @@ def call_DTAC(bot, query):
 
 @app.on_callback_query(filters.regex('DLATU'))
 def call_DLATU(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_test_users()
     keyboard = [[InlineKeyboardButton("<<", callback_data='TASET')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -6475,6 +6936,10 @@ def call_DLATU(bot, query):
 
 @app.on_callback_query(filters.regex('ETOR_'))
 def call_ETOR(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     test = data.split("ETOR_")[1]
     settings = get_settings()
@@ -6488,6 +6953,9 @@ def call_ETOR(bot, query):
 @app.on_callback_query(filters.regex('ETTR'))
 def call_ETTR(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "ETTR")
@@ -6499,6 +6967,10 @@ def call_ETTR(bot, query):
 
 @app.on_callback_query(filters.regex('BTOPtion'))
 def call_BTOPtion(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if settings['buy-traffic'] == "on":
         emoji = "🟢"
@@ -6519,6 +6991,10 @@ def call_BTOPtion(bot, query):
 
 @app.on_callback_query(filters.regex('EBT_'))
 def call_EBT(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     buy = data.split("EBT_")[1]
     settings = get_settings()
@@ -6532,6 +7008,9 @@ def call_EBT(bot, query):
 @app.on_callback_query(filters.regex('ADTPR'))
 def call_ADTPR(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("Delete✖️", callback_data='DeATPR')],
@@ -6550,6 +7029,9 @@ def call_ADTPR(bot, query):
 @app.on_callback_query(filters.regex('AdATPR'))
 def call_AdATPR(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     add_collector(chat_id, "Traffic_price", [], [])
     delete_cache(chat_id)
     add_cache(chat_id, "Traffic_price")
@@ -6559,6 +7041,10 @@ def call_AdATPR(bot, query):
 
 @app.on_callback_query(filters.regex('DeATPR'))
 def call_DeATPR(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     settings = get_settings()
     if len(settings['plus-traffic']) == 0:
         query.answer("هیچی وجود نداره, تعرفه جدید اد کنین", show_alert=True)
@@ -6575,6 +7061,10 @@ def call_DeATPR(bot, query):
 
 @app.on_callback_query(filters.regex('TPDSEL_'))
 def call_TPDSEL(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     data = query.data
     i = int(data.split("TPDSEL_")[1])
     settings = get_settings()
@@ -6592,6 +7082,10 @@ def call_TPDSEL(bot, query):
 
 @app.on_callback_query(filters.regex('HOW'))
 def call_HOW(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = []
     text = '<b>How to use?</b>\n\nبرای اینکه یه کاربر سریعتر مدیریت کنین کافیه کپی کانفیگی که داخل پنل زده بودین و به کاربر فرستادینو مستقیم به ربات بفرستین:\n\nSSH Host: domain\nUsername : username\n\n\nبرای درست کردن لیست قیمت کافیه دکمه قیمت ها رو بزنین\n\n'
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
@@ -6601,6 +7095,10 @@ def call_HOW(bot, query):
 
 @app.on_callback_query(filters.regex('settings'))
 def call_settings(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     keyboard = [
         [InlineKeyboardButton("💵 ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳 کارت", callback_data='Card')],
         [InlineKeyboardButton("📃پیام استارت", callback_data='WSMSG'), InlineKeyboardButton("🏷 پیام تعرفه قیمت", callback_data='WLMSG')],
