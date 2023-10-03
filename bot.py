@@ -1879,7 +1879,10 @@ def text_private(bot, message):
                     keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     for i in range(len(admin_id)):
-                        bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        try:
+                            bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        except:
+                            pass
                     cache_list = [days, traffic, connection_limit, '90', name, chat_id, username]
                     add_code_buy(chat_id, code, "check", cache_list)
                     message.reply_text("ادمین ها بزودی درخواستتون بررسی میکنن.")
@@ -2137,7 +2140,10 @@ def text_private(bot, message):
                     keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     for i in range(len(admin_id)):
-                        bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        try:
+                            bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        except:
+                            pass
                     cache_list = [days, traffic, connection_limit, '90', user, host]
                     add_code_buy(chat_id, code, "checkup", cache_list)
                     message.reply_text("ادمین ها بزودی درخواستتون بررسی میکنن.")
@@ -2185,7 +2191,10 @@ def text_private(bot, message):
                     keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     for i in range(len(admin_id)):
-                        bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        try:
+                            bot.send_message(admin_id[i], text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        except:
+                            pass
                     cache_list = [traffic, '0', user, host]
                     add_code_buy(chat_id, code, "checkup", cache_list)
                     message.reply_text("ادمین ها بزودی درخواستتون بررسی میکنن.")
@@ -4652,6 +4661,7 @@ def call_Confirmed(bot, query):
             USERNAME = cache_list[-1]
         else:
             USERNAME = "None"
+        msg = bot.send_message(query.message.chat.id, "wait...").id
         try:
             host = get_random_server()
             if host is None:
@@ -4662,7 +4672,6 @@ def call_Confirmed(bot, query):
             username, password = get_host_username_password(host)
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
             t0 = "🥰مرسی از خریدتون\n\n"
-            process_codes.append(code)
             text = t0 + Session.Create(user, passw, connection_limit, days, GB)
             if "Error" not in text:
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
@@ -4681,12 +4690,11 @@ def call_Confirmed(bot, query):
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
                 delete_code_buy(code)
-                process_codes.remove(code)
-                bot.send_message(query.message.chat.id, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
+                bot.edit_message_text(query.message.chat.id, msg, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
-                bot.send_message(query.message.chat.id, f"Error: {text}")
+                bot.edit_message_text(query.message.chat.id, msg, f"Error: {text}")
         except Exception as e:
-            bot.send_message(query.message.chat.id, f"Error: {str(e)}")
+            bot.edit_message_text(query.message.chat.id, msg, f"Error: {str(e)}")
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -4942,6 +4950,7 @@ def call_Confirmed_UPGRADE(bot, query):
         connection_limit = int(cache_list[2])
         user = cache_list[4]
         host = cache_list[5]
+        msg = bot.send_message(query.message.chat.id, "wait...").id
         try:
             username, password = get_host_username_password(host)
             text = f"🥰مرسی از خریدتون\n\n"
@@ -4953,7 +4962,6 @@ def call_Confirmed_UPGRADE(bot, query):
                     days += old_days
             except:
                 pass'''
-            process_codes.append(code)
             server_msg = Session.Update(GB, days, connection_limit)
             text += server_msg
             if "Error" not in server_msg:
@@ -4965,12 +4973,11 @@ def call_Confirmed_UPGRADE(bot, query):
                 else:
                     bot.send_message(chat_id, f"✅ تمدید شد\n\nUsername : {user}\nSSH Host : {host}")
                 delete_code_buy(code)
-                process_codes.remove(code)
-                bot.send_message(query.message.chat.id, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
+                bot.edit_message_text(query.message.chat.id, msg, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
-                bot.send_message(query.message.chat.id, f"Error: {server_msg}")
+                bot.edit_message_text(query.message.chat.id, msg, f"Error: {server_msg}")
         except Exception as e:
-            bot.send_message(query.message.chat.id, f"Error: {str(e)}")
+            bot.edit_message_text(query.message.chat.id, msg, f"Error: {str(e)}")
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -4992,6 +4999,7 @@ def call_Confirmed_Traffic(bot, query):
         GB = int(cache_list[0])
         user = cache_list[2]
         host = cache_list[3]
+        msg = bot.send_message(query.message.chat.id, "wait...").id
         try:
             username, password = get_host_username_password(host)
             process_codes.append(code)
@@ -5007,11 +5015,11 @@ def call_Confirmed_Traffic(bot, query):
                     bot.send_message(chat_id, f"✅ترافیک افزایش پیدا کرد\n\nUsername : {user}\nSSH Host : {host}")
                 delete_code_buy(code)
                 process_codes.remove(code)
-                bot.send_message(query.message.chat.id, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
+                bot.edit_message_text(query.message.chat.id, msg, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
-                bot.send_message(query.message.chat.id, f"Error: {server_msg}")
+                bot.edit_message_text(query.message.chat.id, msg, f"Error: {server_msg}")
         except Exception as e:
-            bot.send_message(query.message.chat.id, f"Error: {str(e)}")
+            bot.edit_message_text(query.message.chat.id, msg, f"Error: {str(e)}")
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
