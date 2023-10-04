@@ -248,7 +248,7 @@ def QR_Maker(link):
     )
     qr.add_data(link)
     qr.make(fit=True)
-    img = qr.make_image(back_color=(20, 20, 20), fill_color=(255, 255, 255))
+    img = qr.make_image(fill_color="black", back_color="white")
     photo = "cache/" + uuid4().hex[0:8] + ".png"
     img.save(photo)
     return photo
@@ -573,7 +573,8 @@ def Login_test(username, password, host):
         port, udgpw = Session.Ports()
         int(port)
         return True
-    except:
+    except Exception as e:
+        print("Error: ", str(e))
         return False
 
 
@@ -2061,6 +2062,8 @@ def text_private(bot, message):
             host = status.split("remove_")[1]
             try:
                 username, password = get_host_username_password(host)
+                Session = sshx.PANNEL(host, username, password, 'User', user)
+                text = Session.Disable()
                 Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
                 text = Session.Delete(user)
                 if check_exist_user(host, user) is True:
@@ -3409,6 +3412,8 @@ def call_checker(bot, query):
                         total_usage += float(usages[i])
                         if status[i] != "فعال":
                             if (int(days_left[i]) <= -(settings['auto_delete'])):
+                                SessionDIS = sshx.PANNEL(host, username, password, 'User', usernames[i])
+                                text = SessionDIS.Disable()
                                 if "❌Deleted" in Session.Delete(usernames[i]):
                                     text += f"❌Deleted user {usernames[i]} & Days: {str(days_left[i])} ❌\n\n"
                                     count_deleted_clients += 1
@@ -4128,6 +4133,8 @@ def call_IDMNU(bot, query):
             text, users = Session.Kill(user)
 
         elif status == "Remove":
+            SessionDIS = sshx.PANNEL(host, username, password, 'User', usernames[i])
+            text = SessionDIS.Disable()
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
             text = Session.Delete(user)
             if check_exist_user(host, user) is True:
@@ -6594,6 +6601,8 @@ def call_SNON(bot, query):
                                                     delete_user(host, DB_username)
                                             if status[i] != "فعال":
                                                 if (int(days_left[i]) <= -(settings['auto_delete'])):
+                                                    SessionDIS = sshx.PANNEL(host, username, password, 'User', usernames[i])
+                                                    svs = SessionDIS.Disable()
                                                     if "❌Deleted" in Session.Delete(usernames[i]):
                                                         if check_exist_user(host, usernames[i]) is True:
                                                             ID, Name, Username = get_all_user_data(host, usernames[i])
