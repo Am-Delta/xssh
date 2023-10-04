@@ -4133,7 +4133,7 @@ def call_IDMNU(bot, query):
             text, users = Session.Kill(user)
 
         elif status == "Remove":
-            SessionDIS = sshx.PANNEL(host, username, password, 'User', usernames[i])
+            SessionDIS = sshx.PANNEL(host, username, password, 'User', user)
             text = SessionDIS.Disable()
             Session = sshx.PANNEL(host, username, password, 'Other', 'uname')
             text = Session.Delete(user)
