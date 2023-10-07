@@ -1,10 +1,9 @@
 # SSH Panel Telegram bot
 
 ربات تلگرام فروش و منیجر پنل اس اس اچ
-
 الان فقط برای شاهان کار میکنه و 
 بزودی ایکس پنل و راکت هم اضافه میکنم
-## 🔗 نصب
+## 🔗 نصب و آپدیت
 
 کامند پایین کپی و داخل سرور اجرا کنین
 ```bash
@@ -34,20 +33,7 @@ Group: https://t.me/deltabots_gp
 
 Channel: https://t.me/delta_bcc
 
-## Suggestion System
-- Auto installation with command
-Ubuntu 18+
-
-
-> Manuall installation , 
-install python and packages then Run run.py & session-updater.py & bot.py
-- Winodows 7, 10, 2016, 2019, 2022
-- Debian 10+
-- CentOS 8+
-- Fedora 36+
-- Arch Linux
-
-## Features
+##⭐️ Features
 
 - Manage Multiple servers
 - Auto backup, remove users, filtering checker
@@ -56,6 +42,25 @@ install python and packages then Run run.py & session-updater.py & bot.py
 - and more
  
 
+##🖥 Suggestion System
+Auto installation with command
+Ubuntu 18+
+
+> Manuall installation , 
+install python and packages then Run run.py > session-updater.py
+- Winodows 7, 10, 2016, 2019, 2022
+- Debian 10+, CentOS 8+, Fedora 36+, Arch Linux
+
+##❤️ Donate 
+
+BTC: bc1qftxmgxqntxmyuerqvwk69rxm52ayrtvhvdtmdc
+
+TRX: TAuhCY9PbmKw7gKgjKqkqQHmazNKUXHR26
+
+
+## 📷 Screenshots Admin Tools
+
+![Screenshot](https://i.ibb.co/nzsh4t5/Screenshot-2023-10-02-165554.png)![Screenshot2](https://i.ibb.co/G9F9YMs/Screenshot-2023-10-02-165608.png)![Screenshot](https://i.ibb.co/QmCQfQC/Screenshot-2023-10-02-165632.png)
 
 ## 🔗 A Special Thanks To
 [HamedAp](https://github.com/HamedAp)
@@ -63,16 +68,3 @@ install python and packages then Run run.py & session-updater.py & bot.py
 [XPanel](https://github.com/xpanel-cp/XPanel-SSH-User-Management)
 
 [mahmoud-ap](https://github.com/mahmoud-ap/rocket-ssh)
-
-
-## Donate
-
-BTC: bc1qftxmgxqntxmyuerqvwk69rxm52ayrtvhvdtmdc
-
-TRX: TAuhCY9PbmKw7gKgjKqkqQHmazNKUXHR26
-
-
-## Screenshots Admin Tools
-
-![Screenshot](https://i.ibb.co/nzsh4t5/Screenshot-2023-10-02-165554.png)![Screenshot2](https://i.ibb.co/G9F9YMs/Screenshot-2023-10-02-165608.png)![Screenshot](https://i.ibb.co/QmCQfQC/Screenshot-2023-10-02-165632.png)
-
