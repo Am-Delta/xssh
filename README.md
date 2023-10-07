@@ -33,7 +33,8 @@ Group: https://t.me/deltabots_gp
 
 Channel: https://t.me/delta_bcc
 
-##⭐️ Features
+
+## ⭐️ Features
 
 - Manage Multiple servers
 - Auto backup, remove users, filtering checker
@@ -42,7 +43,7 @@ Channel: https://t.me/delta_bcc
 - and more
  
 
-##🖥 Suggestion System
+## 🖥 Suggestion System
 Auto installation with command
 Ubuntu 18+
 
@@ -51,7 +52,8 @@ install python and packages then Run run.py > session-updater.py
 - Winodows 7, 10, 2016, 2019, 2022
 - Debian 10+, CentOS 8+, Fedora 36+, Arch Linux
 
-##❤️ Donate 
+
+## ❤️ Donate 
 
 BTC: bc1qftxmgxqntxmyuerqvwk69rxm52ayrtvhvdtmdc
 
