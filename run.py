@@ -30,23 +30,40 @@ def db_update():
     p = re.compile('(?<!\\\\)\'')
     s = p.sub('\"', s)
     settings = json.loads(s)
-    if settings.get("test", None) is None:
+    if settings.get("phone", None) is None:
         add_dict = {
-            "test": "off",
-            "test-traffic": 256,
-            "buy-traffic": "off"
+            "phone": "off",
+            "irphone": "off",
+            "seller_custom": "on",
+            "seller_prices": [50000, 150000],
+            "seller_connections": [1, 2],
+            "seller_days": [30, 30],
+            "seller_traffic": [50, 100],
+            "seller_plus_traffic": [10, 20],
+            "seller_plus_prices": [20000, 35000],
+            "lang": "en",
+            "invite": "off"
         }
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
     try:
-        cur.execute("SELECT * FROM Tests")
+        cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
     except sqlite3.OperationalError:
-        cur.execute("""CREATE TABLE Tests (
-            ID int,
-            'date' text
+        cur.execute("""CREATE TABLE Redeem (
+            Code text,
+            Value int,
+            kind text,
+            Count int,
+            UserIDs text,
+            Timer int
             )""")
+    try:
+        cur.execute("SELECT * FROM Tests WHERE Account=:Account", {'Account': "user"})
+    except sqlite3.OperationalError:
+        name1 = "Account"
+        cur.execute('''ALTER TABLE Tests ADD COLUMN ''' + name1 + ''' text''')
     conn.commit()
     cur.close()
     conn.close()
@@ -62,14 +79,14 @@ def run():
         os.system('python3 sshdb.py')
         print("Database Created, change the settings in the bot")
     db_update()
-    print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you want stop to the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
+    print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you wanna stop the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
     os.system('nohup python3 -u session-updater.py &')
     os.system('nohup python3 -u backup-ssh.py &')
     os.system('nohup python3 -u bot.py &')
     os.remove('sshdb.py')
 
 
-def settings():
+def options_set():
     print(colored("\nType admin id, if you want add multiple admins type like this: 123456 654321 789456", 'white'))
     while True:
         data = input("ids: ")
@@ -92,6 +109,9 @@ def settings():
             if status is True:
                 break
 
+    print(colored("\nBot Token: ", 'white'))
+    Token = input("")
+
     print(colored("\nif you want send your api_id or (default: n)", 'white'))
     while True:
         data = input(": ")
@@ -108,11 +128,10 @@ def settings():
                 break
             except:
                 print(colored("[-] Error: Type the correct value only numbers", 'red'))
+
     if api is False:
         print(colored("\napi_hash: ", 'white'))
         api_hash = input("")
-    print(colored("\nBot Token: ", 'white'))
-    Token = input("")
 
     add_dict = {
         "admin": admin_id,
@@ -125,6 +144,7 @@ def settings():
     if Path(file).is_file() is True:
         os.remove(file)
         print(colored("\nData renewed", 'cyan'))
+
     with open(file, 'w') as outfile:
         json.dump(new_dict, outfile)
         print(colored("\nSaved data in " + file, 'cyan'))
@@ -134,10 +154,10 @@ if Path(file).is_file() is True:
     print(colored("\nThe old settings exist, Do you want to change the settings? send y to change (Default: n)", 'cyan'))
     job = input("")
     if job == 'y':
-        settings()
+        options_set()
         run()
     else:
         run()
 else:
-    settings()
+    options_set()
     run()
