@@ -92,6 +92,15 @@ def Get_user_info(html, uname):
             return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days_left[n], status[n], usages[n]
 
 
+def Get_list_users_only(html):
+    usernames = []
+    for data in html.css('td'):
+        if data.attributes.get("name", None) is not None:
+            if 'username' in data.attributes['name']:
+                usernames.append(data.text())
+    return usernames
+
+
 def Get_list(html):
     ips = []
     expires = []
@@ -433,6 +442,19 @@ class PANNEL:
         except Exception as e:
             return "Error: " + str(e)
 
+    def Exist(self, user):
+        try:
+            s = self.r.get(self.url + "/p/index.php").text
+            html = HTMLParser(s)
+            usernames = Get_list_users_only(html)
+            if user in usernames:
+                return "Good", True
+            else:
+                return "Good", False
+        except Exception as e:
+            print("Error: " + str(e))
+            return "Error: " + str(e), False
+
     def Kill(self, user):
         try:
             status, users, ips = self.Online_clients()
@@ -612,6 +634,30 @@ class PANNEL:
         except Exception as e:
             return "Error: " + str(e)
 
+    def Username(self, username):
+        if "گیگابایت" in self.traffic:
+            Traffic = int((self.traffic).replace("گیگابایت", ""))
+        elif "نامحدود" in self.traffic:
+            Traffic = ""
+        payload = {
+            'edituserusername': username,
+            'edituserpassword': self.passwd,
+            'editusermobile': '',
+            'edituseremail': '',
+            'editusertraffic': Traffic,
+            'editusermultiuser': self.connection_limit,
+            'edituserfinishdate': self.days,
+            'edituserreferral': '',
+            'edituserinfo': '',
+            'editusersubmit': 'ثبت'
+        }
+        try:
+            s = self.r.post(self.url + "/p/newuser.php", data=payload)
+            if s.status_code == 200:
+                return f"🟢 Successfully changed to {username}"
+        except Exception as e:
+            return "Error: " + str(e)
+
     def Update(self, traffic, days, connection_limit):
         if traffic == 0:
             traffic = ''
@@ -684,7 +730,7 @@ class PANNEL:
                 status += "🟢"
             else:
                 status += "🔴"
-            return f"SSH Host : {self.ip}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {self.uname}\nPassword : {self.passwd}\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+            return f"SSH Host : {self.ip}\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
         except Exception as e:
             return "Error: " + str(e)
 
