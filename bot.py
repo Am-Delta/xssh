@@ -7430,7 +7430,7 @@ def call_INVS(bot, query):
         [InlineKeyboardButton("Edit✏️", callback_data='ENVS')],
         [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'XNVS_{cb}')]
     ]
-    text = '<b>Referrals Settings</b>\n\n' + "با دعوت هر یه نفر به ربات با لینک توسط یه کاربر یه مبلغی به کیف پولش اضافه میشه . دکمه ادیت بزنین و مبلغ مورد نظرتون به تومن بفرستین\n\nمیتونید این قابلیت برای کاربرا خاموش کنین\n\nCurrent: " + str(settings['referral']) + " تومن" + settings['invite'] + " " + emoji
+    text = '<b>Referrals Settings</b>\n\n' + "با دعوت هر یه نفر به ربات با لینک توسط یه کاربر یه مبلغی به کیف پولش اضافه میشه . دکمه ادیت بزنین و مبلغ مورد نظرتون به تومن بفرستین\n\nمیتونید این قابلیت برای کاربرا خاموش کنین\n\nCurrent: " + str(settings['referral']) + " تومن\n" + settings['invite'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -7950,7 +7950,7 @@ def call_XSM(bot, query):
         [InlineKeyboardButton("لیست خرید ترافیک", callback_data='SPBTL')],
     ]
     t0 = "\n\nCurrent: " + settings['seller_custom'] + " " + emoji
-    text = '<b>Sellers Settings</b>\n\n' + "با خاموش کردن این دکمه فروشنده میتونه آزادانه اکانت مورد نظرشو بسازه و نیاز به تایید شما هست.\nبا روشن بودن این دکمه کاربر باید از لیستی که شما تعیین کردین خرید انجام بده و اتوماتیک از کیف پولش برداشت میشه و نیازی به تایید شما نیست" + t0
+    text = '<b>Sellers Settings</b>\n\n' + "با روشن کردن این دکمه فروشنده میتونه آزادانه اکانت مورد نظرشو بسازه و نیاز به تایید شما هست.\nبا خاموش بودن این دکمه کاربر باید از لیستی که شما تعیین کردین خرید انجام بده و اتوماتیک از کیف پولش برداشت میشه و نیازی به تایید شما نیست" + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -8424,7 +8424,6 @@ def image_users(bot, message):
                     pass
             update_code_status(code, "checkdeposit")
             message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
-
         delete_cache(chat_id)
 
 app.run()
