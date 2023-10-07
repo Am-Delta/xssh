@@ -98,7 +98,18 @@ c.execute("""CREATE TABLE Sales (
 
 c.execute("""CREATE TABLE Tests (
             ID int,
-            'date' text
+            'date' text,
+            Account text
+            )""")
+
+
+c.execute("""CREATE TABLE Redeem (
+            Code text,
+            Value int,
+            kind text,
+            Count int,
+            UserIDs text,
+            Timer int
             )""")
 
 
@@ -135,7 +146,18 @@ settings = {
     "mac": "\nلینک دانلود برای مک 🍎\n\n⭐️v2box macOS 11.0 +\nhttps://apps.apple.com/us/app/v2box-v2ray-client/id6446814690\n\n⭐️Streisand macOS 11.0 +\nhttps://apps.apple.com/us/app/streisand/id6450534064\n\n▫️SSH proxy macOS 10.9+\nhttps://apps.apple.com/us/app/ssh-proxy/id597790822?mt=12",
     "support": "None",
     "test": "off",
-    "test-traffic": 256
+    "test-traffic": 256,
+    "phone": "off",
+    "irphone": "off",
+    "seller_custom": "on",
+    "seller_prices": [50000, 150000],
+    "seller_connections": [1, 2],
+    "seller_days": [30, 30],
+    "seller_traffic": [50, 100],
+    "seller_plus_traffic": [10, 20],
+    "seller_plus_prices": [20000, 35000],
+    "lang": "en",
+    "invite": "off"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
