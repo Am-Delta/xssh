@@ -8013,7 +8013,7 @@ def call_DeSTPR(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     settings = get_settings()
-    if len(settings['plus-traffic']) == 0:
+    if len(settings['seller_plus_traffic']) == 0:
         query.answer("هیچی وجود نداره, تعرفه جدید اد کنین", show_alert=True)
     else:
         keyboard = []
@@ -8424,6 +8424,7 @@ def image_users(bot, message):
                     pass
             update_code_status(code, "checkdeposit")
             message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
+
         delete_cache(chat_id)
 
 app.run()
