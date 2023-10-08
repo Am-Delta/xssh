@@ -4906,10 +4906,10 @@ def call_SLM(bot, query):
     ID, Name, Username, Limit = get_seller_info(chat_id)
     try:
         name, u, phone, old_value = get_full_user_data_id(chat_id)
-        balance = str(old_value) + " Toman"
+        Balance = str(old_value) + " Toman"
     except:
-        old_value = "Error: remove seller then add again"
-    text = f"ID: {str(chat_id)}\nName: {Name}\nUsername: @{Username}\n\n🏷sales: {str(len(accounts))}\n🔻Limit: {Limit}\n💰Balance: {Balane}\n\nبا حذف فروشنده اکانت های فروشنده حذف نمیشن"
+        Balance = "Error: remove seller then add again"
+    text = f"ID: {str(chat_id)}\nName: {Name}\nUsername: @{Username}\n\n🏷sales: {str(len(accounts))}\n🔻Limit: {Limit}\n💰Balance: {Balance}\n\nبا حذف فروشنده اکانت های فروشنده حذف نمیشن"
     keyboard = [
         [InlineKeyboardButton("🗑حذف ", callback_data=('RLS_' + str(chat_id))), InlineKeyboardButton("✏️تغییر محدودیت", callback_data=("ELS_" + str(chat_id)))],
         [InlineKeyboardButton("💰 مدیریت موجودی", callback_data=("BLS_" + str(chat_id)))],
