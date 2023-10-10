@@ -29,7 +29,7 @@ def db_update():
     s = s.replace("\'", "\"")
     p = re.compile('(?<!\\\\)\'')
     s = p.sub('\"', s)
-    settings = json.loads(s)
+    settings = json.loads(s, strict=False)
     if settings.get("phone", None) is None:
         add_dict = {
             "phone": "off",
