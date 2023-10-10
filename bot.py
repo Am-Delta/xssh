@@ -1091,7 +1091,7 @@ def get_settings():
             s = s.replace("\'", "\"")
             p = re.compile('(?<!\\\\)\'')
             s = p.sub('\"', s)
-            settings = json.loads(s)
+            settings = json.loads(s, strict=False)
             return settings
         except:
             pass
@@ -3835,7 +3835,7 @@ def call_checker(bot, query):
                     checked_servers += 1
             except Exception as e:
                 offline_servers += 1
-                logs += f"\n⭕️ Connection Error: {host}"
+                logs += f"\n⭕️ Connection Error: {host}, {str(e)}"
     count_clients -= count_deleted_clients
     remain_clients += count_deleted_clients
     if len(str(int(servers_traffic))) >= 3:
