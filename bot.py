@@ -494,12 +494,10 @@ def trx_price(irr_price):
 
 
 def fixed_link_json(link):
-    if "'" in link:
-        link = link.replace("'", "")
-    if '"' in link:
-        link = link.replace('"', '')
-    if "\\" in link:
-        link = link.replace("\\", "")
+    link = link.replace("'", "")
+    link = link.replace('"', '')
+    link = link.replace(u'\\xa0', u' ')
+    link = link.replace("\\", "")
     return link
 
 
@@ -1091,6 +1089,7 @@ def get_settings():
             s = s.replace("\'", "\"")
             p = re.compile('(?<!\\\\)\'')
             s = p.sub('\"', s)
+            s = s.replace(u'\\xa0', u' ')
             settings = json.loads(s, strict=False)
             return settings
         except:
