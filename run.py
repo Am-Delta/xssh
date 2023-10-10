@@ -3,6 +3,7 @@ import re
 import json
 import sqlite3
 from termcolor import colored
+from random import randint
 from pathlib import Path
 
 
@@ -29,6 +30,7 @@ def db_update():
     s = s.replace("\'", "\"")
     p = re.compile('(?<!\\\\)\'')
     s = p.sub('\"', s)
+    s = s.replace(u'\\xa0', u' ')
     settings = json.loads(s, strict=False)
     if settings.get("phone", None) is None:
         add_dict = {
@@ -116,8 +118,11 @@ def options_set():
     while True:
         data = input(": ")
         if data == "n" or data == "":
-            api_id = "24467048"
-            api_hash = "7e81e7df9b9b66deab287cb47bbc6d8a"
+            API_ID = ['27720937', "24467048"]
+            API_HASH = ["5998e6087a8e2c2eadab9fc3c51d5444", "7e81e7df9b9b66deab287cb47bbc6d8a"]
+            n = randint(0, 1)
+            api_id = API_ID[n]
+            api_hash = API_HASH[n]
             api = True
             break
         else:
