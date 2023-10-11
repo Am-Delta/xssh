@@ -911,7 +911,7 @@ class PANNEL:
                 for sec in html.css("small"):
                     if sec.attributes.get("title", None) is not None:
                         if (sec.attributes['title'] == "دانلود") or (sec.attributes['title'] == "آپلود"):
-                            band_info.append((sec.text()).replace(" ", "").replace("\n", ""))
+                            band_info.append((sec.text()).replace(" ", "").replace("\n", "").replace(",", ""))
                 server_traffic, clients_usage = get_traffic_rocket(band_info)
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
                 return text
@@ -1011,7 +1011,7 @@ class PANNEL:
                 for sec in html.css("small"):
                     if sec.attributes.get("title", None) is not None:
                         if (sec.attributes['title'] == "دانلود") or (sec.attributes['title'] == "آپلود"):
-                            band_info.append((sec.text()).replace(" ", "").replace("\n", ""))
+                            band_info.append((sec.text()).replace(" ", "").replace("\n", "").replace(",", ""))
                 server_traffic, clients_usage = get_traffic_rocket(band_info)
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
                 Bool, status = self.IP_Check()
