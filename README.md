@@ -1,6 +1,6 @@
 # SSH Panel Telegram bot
 
-ربات تلگرام فروش و منیجر پنل اس اس اچ برای پنل های شاهان و ایکس پنل و راکت
+ربات تلگرام فروش و منیجر پنل اس اس اچ برای پنل های شاهان و ایکس پنل و راکت (پایین تر ورژن های ساپورت نوشته شده)
 ## 🔗 نصب و آپدیت
 
 کامند پایین کپی و داخل سرور اجرا کنین
@@ -32,13 +32,10 @@ Group: https://t.me/deltabots_gp
 Channel: https://t.me/delta_bcc
 
 
-## ⭐️ Features
-
-- Manage Multiple servers
-- Auto backup, remove users, filtering checker
-- Get info & manage of servers
-- Create, Remove &... users
-- and more
+## Supported Panels
+- Shahan v6.6.1
+- XPanel v3.8.3
+- Rocket v1.2.0
  
 
 ## 🖥 Suggestion System
