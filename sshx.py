@@ -214,7 +214,10 @@ class PANNEL:
                         port = str(inp.attributes.get('value', None))
                 elif 'udpport' == inp.attributes['name']:
                     if inp.attributes.get('value', None) is not None:
-                        udgpw = str(inp.attributes.get('value', None))
+                        if "badvpn" in inp.attributes.get('value', None):
+                            udgpw = str(inp.attributes.get('value', None)).split("badvpn")[0]
+                        else:
+                            udgpw = str(inp.attributes.get('value', None))
         return port, udgpw
 
     def Backup_content(self):
