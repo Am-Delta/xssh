@@ -3323,7 +3323,7 @@ def text_private(bot, message):
                 keyboard = [[InlineKeyboardButton("<<", callback_data='SMT')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 if host in sshx.HOSTS():
-                    sm = Change_udp_port('xpanel', host, link)
+                    sm = sshx.Change_udp_port('xpanel', host, link)
                     message.reply_text(sm, reply_markup=reply_markup)
                 else:
                     message.reply_text(f"سروری با این آدرس وجود نداره:\n\n{host}", reply_markup=reply_markup)
@@ -3337,7 +3337,7 @@ def text_private(bot, message):
                 keyboard = [[InlineKeyboardButton("<<", callback_data='SMT')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 if host in sshx.HOSTS():
-                    sm = Change_ssh_port('xpanel', host, link)
+                    sm = sshx.Change_ssh_port('xpanel', host, link)
                     message.reply_text(sm, reply_markup=reply_markup)
                 else:
                     message.reply_text(f"سروری با این آدرس وجود نداره:\n\n{host}", reply_markup=reply_markup)
