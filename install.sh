@@ -13,6 +13,7 @@ pip install bs4
 pip install requests
 pip install termcolor
 pip install Unidecode
+pip install jdatetime
 
 mkdir /root/botCh
 
