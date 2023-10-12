@@ -1,6 +1,5 @@
 echo "Running ..."
 
-cd /root/
 sudo apt install python3
 sudo apt install pip
 sudo apt install git
