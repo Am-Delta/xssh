@@ -5783,6 +5783,7 @@ def call_upgrade(bot, query):
 
 @app.on_callback_query(filters.regex('UPG_'))
 def call_UPG(bot, query):
+    chat_id = query.message.chat.id
     data = query.data
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
