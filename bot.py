@@ -1902,9 +1902,6 @@ def text_private(bot, message):
                         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
                         text = Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]))
                         port, udgpw = Session.Ports()
-                        if panel != "rocket":
-                            Session = sshx.PANNEL(host, username, password, port, panel, 'User', cache_list[1])
-                            text = Session.User_info()
                         HOST = ((text.split("SSH Host : ")[1]).split("\n")[0])
                         url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}'
                         photo = QR_Maker(url)
@@ -2147,9 +2144,6 @@ def text_private(bot, message):
                     Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
                     text = Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]))
                     port, udgpw = Session.Ports()
-                    if panel != "rocket":
-                        Session = sshx.PANNEL(host, username, password, port, panel, 'User', cache_list[1])
-                        text = Session.User_info()
                     HOST = ((text.split("SSH Host : ")[1]).split("\n")[0])
                     url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}'
                     photo = QR_Maker(url)
@@ -5568,9 +5562,6 @@ def call_BL(bot, query):
                 text = t0 + Session.Create(user, passw, connection_limit, days, GB)
                 if "Error" not in text:
                     port, udgpw = Session.Ports()
-                    if panel != "rocket":
-                        Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                        text = Session.User_info()
                     HOST = ((text.split("SSH Host : ")[1]).split("\n")[0])
                     url = f"ssh://{user}:{passw}@{HOST}:{port}"
                     photo = QR_Maker(url)
@@ -5695,9 +5686,6 @@ def call_Confirmed(bot, query):
             if "Error" not in text:
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 port, udgpw = Session.Ports()
-                if panel != "rocket":
-                    Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                    text = Session.User_info()
                 HOST = ((text.split("SSH Host : ")[1]).split("\n")[0])
                 url = f"ssh://{user}:{passw}@{HOST}:{port}"
                 photo = QR_Maker(url)
@@ -6155,7 +6143,6 @@ def call_ADUB(bot, query):
         query.edit_message_text(text='خب آیدی عددی کاربر یا یه پیام ازش فوروارد کن ')
     else:
         query.edit_message_text(text="Please /cancel it first")
-
 
 
 @app.on_callback_query(filters.regex('GUA'))
@@ -6718,9 +6705,6 @@ def call_test(bot, query):
                 if "Error" not in text:
                     add_test_user(chat_id, user)
                     port, udgpw = Session.Ports()
-                    if panel != "rocket":
-                        Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                        text = Session.User_info()
                     HOST = ((text.split("SSH Host : ")[1]).split("\n")[0])
                     url = f"ssh://{user}:{passw}@{HOST}:{port}"
                     photo = QR_Maker(url)
