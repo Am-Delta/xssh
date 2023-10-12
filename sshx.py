@@ -336,7 +336,7 @@ def Get_user_info_shahan(html, uname):
             if inp.attributes['placeholder'] == "روز اعتبار":
                 if inp.attributes.get("name", None) is not None:
                     if "edituserfinishdate" in inp.attributes['name']:
-                        if inp.attributes.get("name", None) is not None:
+                        if inp.attributes.get("value", None) is not None:
                             days_left_trubleshoots.append(inp.attributes['value'])
                         else:
                             days_left_trubleshoots.append('9999')
