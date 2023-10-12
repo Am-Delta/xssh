@@ -5231,6 +5231,7 @@ def call_traffic(bot, query):
 
 @app.on_callback_query(filters.regex('UTGB_'))
 def call_UTGB(bot, query):
+    chat_id = query.message.chat.id
     data = query.data
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
@@ -6895,8 +6896,7 @@ def call_UWM(bot, query):
     name, u, phone, old_value = get_full_user_data_id(chat_id)
     text = f"💰 موجودی کیف پول:\n{str(old_value)} تومن "
     keyboard = [
-        [InlineKeyboardButton("افزایش موجودی➕", callback_data='UWPM')],
-        [InlineKeyboardButton("کد هدیه 🎁", callback_data='UGift')],
+        [InlineKeyboardButton("کد هدیه 🎁", callback_data='UGift'), InlineKeyboardButton("افزایش موجودی➕", callback_data='UWPM')],
         [InlineKeyboardButton("<<", callback_data='back')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
