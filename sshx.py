@@ -1542,7 +1542,7 @@ class PANNEL:
                     if traffic == '':
                         traffic = "Unlimited♾"
                     port, udgpw = self.Ports()
-                    return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {uname}\nPassword : {passw}\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+                    return f"SSH Host : <pre>{self.host}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -1604,7 +1604,7 @@ class PANNEL:
                     if traffic == 0:
                         traffic = "Unlimited♾"
                     port, udgpw = self.Ports()
-                    return f"SSH Host : {self.host}\nPort : {port}\nUdgpw : {udgpw}\nUsername : {uname}\nPassword : {passw}\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+                    return f"SSH Host : <pre>{self.host}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
 
