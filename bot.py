@@ -1704,6 +1704,7 @@ def text_private(bot, message):
                 data = status.split("_")[1]
                 if len(link) <= 12:
                     if (link not in filter_name) and (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+                        link = link.lower()
                         cb_cc = "CC_" + data + "?" + link
                         cb_tr = "TR_" + data + "?" + link
                         cb_bl = "BL_" + data + "?" + link
@@ -1824,6 +1825,7 @@ def text_private(bot, message):
         if status == "name_none":
             if len(link) <= 16:
                 if (link not in filter_name) and (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+                    link = link.lower()
                     cache_list, host_cahce = get_collector_cache(chat_id)
                     message.reply_text("حجمو بفرستین فقط بصورت عدد مثلا 10 گیگ (0 = نامحدود) یا /cancel")
                     cache_list.append(link)
@@ -2091,6 +2093,7 @@ def text_private(bot, message):
         elif status == "name":
             if len(link) <= 16:
                 if (link not in filter_name) and (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+                    link = link.lower()
                     cache_list, host_cahce = get_collector_cache(chat_id)
                     message.reply_text("حجمو بفرستین فقط بصورت عدد مثلا 10 گیگ (0 = نامحدود) یا /cancel")
                     cache_list.append(link)
@@ -4706,28 +4709,25 @@ def call_IDADMIN(bot, query):
     data = query.data
     host = (data.split("_")[1]).split("$")[0]
     user = data.split("$")[1]
-    if check_exist_user(host, user) is True:
-        try:
-            cb = data.split("_")[1]
-            port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
-            Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-            text = Session.User_info()
-            keyboard = [
-                [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
-                [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
-                [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))],
-                [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
-                [InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb))],
-                [InlineKeyboardButton("<<", callback_data='back_admin')]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
-        except Exception as e:
-            query.answer(f"⚠️Error: {str(e)}", show_alert=True)
-    else:
-        keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
+    try:
+        cb = data.split("_")[1]
+        port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
+        Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+        text = Session.User_info()
+        keyboard = [
+            [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
+            [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
+            [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))],
+            [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
+            [InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb))],
+            [InlineKeyboardButton("<<", callback_data='back_admin')]
+        ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="چیزی پیدا نشد!", reply_markup=reply_markup)
+        query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    except:
+        keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="⚠️Error: Maybe user not found or connection Lost", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('IDMNU&'))
