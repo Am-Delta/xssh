@@ -7386,8 +7386,6 @@ def call_FLCHON(bot, query):
                             if do is True:
                                 try:
                                     Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
-                                    if host in checked_connections:
-                                        checked_connections.remove(host)
                                     status, content = Session.IP_Check()
                                     if (status is True) and (host not in checked_filtering):
                                         # try again
@@ -7407,18 +7405,18 @@ def call_FLCHON(bot, query):
                                         if "Error" not in content:
                                             if host in checked_filtering:
                                                 checked_filtering.remove(host)
-                                                text = "🟢Back online: " + host
+                                                text = "🟢Back online [IP Check]: " + host
+                                                for admin in admin_id:
+                                                    bot.send_message(admin, text)
+                                            if host in checked_connections:
+                                                checked_connections.remove(host)
+                                                text = "🟢Back online [Bot Connection]: " + host
                                                 for admin in admin_id:
                                                     bot.send_message(admin, text)
                                         else:
                                             if host not in checked_connections:
                                                 text = "🔴Connection Error: " + host + "\nLog:\n" + content
                                                 checked_connections.append(host)
-                                                for admin in admin_id:
-                                                    bot.send_message(admin, text)
-                                            else:
-                                                checked_connections.remove(host)
-                                                text = "🟢Back online: " + host
                                                 for admin in admin_id:
                                                     bot.send_message(admin, text)
                                 except:
