@@ -1,6 +1,5 @@
 echo "Running ..."
 
-sudo -i
 cd /root
 sudo apt install python3
 sudo apt install pip
