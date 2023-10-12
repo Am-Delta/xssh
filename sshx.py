@@ -168,7 +168,7 @@ def Add_Host(host, port, username, password, panel, route_path, sshport, udgpw):
 
 
 def Update_host(old_host, new_host):
-    port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(old_host)
+    port, username, password, panel, route_path, sshport, udgpw = HOST_INFO(old_host)
     if "host has been removed from the list" in Remove_Host(old_host):
         Add_Host(new_host, port, username, password, panel, route_path, sshport, udgpw)
         return "Done✔️"
@@ -177,7 +177,7 @@ def Update_host(old_host, new_host):
 
 
 def Update_user_pass_port(host, new_port, new_username, new_password):
-    port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
+    port, username, password, panel, route_path, sshport, udgpw = HOST_INFO(host)
     if "host has been removed from the list" in Remove_Host(host):
         Add_Host(host, new_port, new_username, new_password, panel, route_path, sshport, udgpw)
         return "Done✔️"
@@ -194,7 +194,7 @@ def Update_Host_All_info(old_host, host, port, username, password, panel, route_
 
 
 def Change_udp_port(panel, host, udgpw):
-    port, username, password, panel, route_path, sshport, old_udgpw = sshx.HOST_INFO(host)
+    port, username, password, panel, route_path, sshport, old_udgpw = HOST_INFO(host)
     if panel == "xpanel":
         if "host has been removed from the list" in Remove_Host(host):
             Add_Host(host, port, username, password, panel, route_path, sshport, udgpw)
@@ -204,7 +204,7 @@ def Change_udp_port(panel, host, udgpw):
 
 
 def Change_ssh_port(panel, host, sshport):
-    port, username, password, panel, route_path, old_sshport, udgpw = sshx.HOST_INFO(host)
+    port, username, password, panel, route_path, old_sshport, udgpw = HOST_INFO(host)
     if panel == "xpanel":
         if "host has been removed from the list" in Remove_Host(host):
             Add_Host(host, port, username, password, panel, route_path, sshport, udgpw)
@@ -336,7 +336,7 @@ def Get_user_info_shahan(html, uname):
             if inp.attributes['placeholder'] == "روز اعتبار":
                 if inp.attributes.get("name", None) is not None:
                     if "edituserfinishdate" in inp.attributes['name']:
-                        if inp.attributes.get("value", None) is not None:
+                        if inp.attributes.get("name", None) is not None:
                             days_left_trubleshoots.append(inp.attributes['value'])
                         else:
                             days_left_trubleshoots.append('9999')
@@ -511,7 +511,7 @@ def Get_list_shahan(html):
             if inp.attributes['placeholder'] == "روز اعتبار":
                 if inp.attributes.get("name", None) is not None:
                     if "edituserfinishdate" in inp.attributes['name']:
-                        if inp.attributes.get("name", None) is not None:
+                        if inp.attributes.get("value", None) is not None:
                             days_left_trubleshoots.append(inp.attributes['value'])
                         else:
                             days_left_trubleshoots.append('9999')
