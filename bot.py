@@ -7397,21 +7397,28 @@ def call_FLCHON(bot, query):
                                                 if check_host_api(host) is True:
                                                     text = "🔴Blocked in IRAN: " + host
                                                     checked_filtering.append(host)
-                                                    bot.send_message(chat_id, text)
+                                                    for admin in admin_id:
+                                                        bot.send_message(admin, text)
                                                     break
                                             elif status is False:
                                                 break
-                                            sleep(3)
+                                            sleep(1)
                                     else:
                                         if "Error" not in content:
                                             if host in checked_filtering:
                                                 checked_filtering.remove(host)
                                                 text = "🟢Back online: " + host
-                                                bot.send_message(chat_id, text)
+                                                for admin in admin_id:
+                                                    bot.send_message(admin, text)
                                         else:
                                             if host not in checked_connections:
                                                 text = "🔴Connection Error: " + host + "\nLog:\n" + content
                                                 checked_connections.append(host)
+                                                for admin in admin_id:
+                                                    bot.send_message(admin, text)
+                                            else:
+                                                checked_connections.remove(host)
+                                                text = "🟢Back online: " + host
                                                 for admin in admin_id:
                                                     bot.send_message(admin, text)
                                 except:
