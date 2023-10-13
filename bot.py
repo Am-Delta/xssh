@@ -25,11 +25,11 @@ if Path(session + ".session").is_file() is True:
     os.remove(session + ".session")
 
 with open("data.json", "r") as json_file:
-    data_file = json.load(json_file)
-    admin_id = data_file['admin']
-    api_id = data_file['api_id']
-    api_hash = data_file['api_hash']
-    TOKEN = data_file['Token']
+    file_data = json.load(json_file)
+    admin_id = file_data['admin']
+    api_id = file_data['api_id']
+    api_hash = file_data['api_hash']
+    TOKEN = file_data['Token']
 
 app = Client(session, api_id, api_hash, bot_token=TOKEN)
 
@@ -105,7 +105,7 @@ def Seller_Tools_keys():
         [InlineKeyboardButton("🔄تمدید کاربر", callback_data='update'), InlineKeyboardButton("⬆️افزایش ترافیک", callback_data='TrfPlus')],
         [InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none'), InlineKeyboardButton("🗑حذف کاربر", callback_data='remove')],
         [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS')],
-        [InlineKeyboardButton("📦 اکانت های من", callback_data='service'), InlineKeyboardButton("➕ افزودن سرویس", callback_data='config')],
+        [InlineKeyboardButton("📦 اکانت های من", callback_data='service'), InlineKeyboardButton("ℹ️ اطلاعات سرویس", callback_data='config')],
         [InlineKeyboardButton("🆘 آموزش", callback_data='help'), InlineKeyboardButton("💰کیف پول", callback_data='UWM')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -114,14 +114,21 @@ def Seller_Tools_keys():
 
 def User_Tools_keys():
     keyboard = [
-        [InlineKeyboardButton("🛒 خرید", callback_data='buy'), InlineKeyboardButton("🔄 تمدید", callback_data='upgrade')],
-        [InlineKeyboardButton("🔁 خرید ترافیک", callback_data='traffic')],
-        [InlineKeyboardButton("🏷 تعرفه قیمت ها", callback_data='price'), InlineKeyboardButton("🗒 تست", callback_data='test')],
-        [InlineKeyboardButton("➕ افزودن سرویس", callback_data='config'), InlineKeyboardButton("📦 سرویس های من", callback_data='service')],
-        [InlineKeyboardButton("👥 پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘 آموزش", callback_data='help')],
-        [InlineKeyboardButton("🆓 پروکسی تلگرام", callback_data='FREEPX'), InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral')],
-        [InlineKeyboardButton("💰کیف پول", callback_data='UWM')]
+        [InlineKeyboardButton("🏷 تعرفه قیمت ها", callback_data='price'), InlineKeyboardButton("💰کیف پول", callback_data='UWM')],
+        [InlineKeyboardButton("ℹ️ اطلاعات سرویس", callback_data='config'), InlineKeyboardButton("📦 سرویس های من", callback_data='service')],
+        [InlineKeyboardButton("👥 پشتیبانی", callback_data='support'), InlineKeyboardButton("🆘 آموزش", callback_data='help')]
     ]
+    settings = get_settings()
+    if settings['buy'] == 'on':
+        keyboard.insert(0, [InlineKeyboardButton("🛒 خرید", callback_data='buy'), InlineKeyboardButton("🔄 تمدید", callback_data='upgrade')])
+    if settings['buy-traffic'] == 'on':
+        keyboard.insert(1, [InlineKeyboardButton("🔁 خرید ترافیک", callback_data='traffic')])
+    if settings['test'] == "on":
+        keyboard.insert(2, [InlineKeyboardButton("🗒 تست", callback_data='test')])
+    if settings['proxy'] != "None":
+        keyboard.insert(-1, [InlineKeyboardButton("🆓 پروکسی تلگرام", callback_data='FREEPX')])
+    if settings['invite'] == "on":
+        keyboard.insert(-1, [InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
@@ -1731,18 +1738,21 @@ def text_private(bot, message):
                 user = status.split("$")[1]
                 passw = link
                 if 4 <= len(passw) <= 16:
-                    port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
-                    try:
-                        Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                        text = Session.Password(passw)
-                        if "Error" not in text:
-                            text = f"پسورد اکانت {user} به {passw} تغییر پیدا کرد 🫵"
-                        else:
+                    if (link not in filter_name) and (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+                        port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
+                        try:
+                            Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+                            text = Session.Password(passw)
+                            if "Error" not in text:
+                                text = f"پسورد اکانت {user} به {passw} تغییر پیدا کرد 🫵"
+                            else:
+                                text = "خطایی پیش اومد بعدا امتحان کنین😑"
+                        except:
                             text = "خطایی پیش اومد بعدا امتحان کنین😑"
-                    except:
-                        text = "خطایی پیش اومد بعدا امتحان کنین😑"
-                    message.reply_text(text)
-                    delete_cache(chat_id)
+                        message.reply_text(text)
+                        delete_cache(chat_id)
+                    else:
+                        message.reply_text("این پسورد قابل قبول نیست باید ترکیبی از حروف انگلیسی و اعداد باشه")
                 elif len(passw) <= 3:
                     message.reply_text("پسورد خیلی کوتاهه! بین 4 تا 16 کاراکتر باید باشه")
                 else:
@@ -1985,15 +1995,18 @@ def text_private(bot, message):
             try:
                 passw = link
                 if 4 <= len(passw) <= 16:
-                    cache_list, host_cahce = get_collector_cache(chat_id)
-                    host = cache_list[0]
-                    user = cache_list[1]
-                    port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
-                    Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                    text = Session.Password(passw)
-                    message.reply_text(text)
-                    delete_cache(chat_id)
-                    delete_collector(chat_id)
+                    if (link not in filter_name) and (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+                        cache_list, host_cahce = get_collector_cache(chat_id)
+                        host = cache_list[0]
+                        user = cache_list[1]
+                        port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
+                        Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+                        text = Session.Password(passw)
+                        message.reply_text(text)
+                        delete_cache(chat_id)
+                        delete_collector(chat_id)
+                    else:
+                        message.reply_text("این پسورد قابل قبول نیست باید ترکیبی از حروف انگلیسی و اعداد باشه")
                 elif len(passw) <= 3:
                     message.reply_text("پسورد خیلی کوتاهه! بین 4 تا 16 کاراکتر بفرستین")
                 else:
@@ -3830,9 +3843,8 @@ def call_checker(bot, query):
         return
     settings = get_settings()
     maximum = settings['maximum']
-    cache.clear()
-    cache.append(True)
-    query.edit_message_text(text="درحال انجام...")
+    cache[0] = True
+    msg = query.edit_message_text(text="درحال انجام...").id
     chat_id = query.message.chat.id
     start = int(time())
     count_servers, checked_servers, online_servers, offline_servers, full_servers, count_clients, count_active_clients, count_inactive_clients, close_to_disabled, count_online_clients, count_deleted_clients, servers_traffic, notify, allowed_connections, remain_clients = (0,)*15
@@ -3926,8 +3938,8 @@ def call_checker(bot, query):
         totat_usage_clients = f"{str('{:.2f}'.format(float(total_usage)))} GB"
     text = f"🖥Servers: {str(count_servers)}\n☑️Checked: {str(checked_servers)}\n⚫️Full servers: {str(full_servers)}\n{logs}\n👤Clients: {str(count_clients)}\n✔️Active: {str(count_active_clients)}\n🔴Inactive: {str(count_inactive_clients)}\n🟢Online: {str(count_online_clients)}\n⚪️Remain: {str(remain_clients)}\n🔵Connections: {str(allowed_connections)}\n⚠️Alerts: {str(close_to_disabled)}\n❌Deleted: {str(count_deleted_clients)}\n🗳Notify: {str(notify)}\n\n🔁Server Usage: {total_usage_vps}\n🔄Clients Usage: {totat_usage_clients}\n\n⏳Time: {str(int(time() - start))}s"
     bot.send_message(chat_id, text, reply_markup=reply_markup)
-    cache.clear()
-    cache.append(False)
+    cache[0] = False
+    bot.delete_messages(chat_id, msg)
 
 
 @app.on_callback_query(filters.regex('stats'))
@@ -5110,8 +5122,9 @@ def call_sellers(bot, query):
 
 @app.on_callback_query(filters.regex('price'))
 def call_price(bot, query):
-    keyboard = []
-    keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+    keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+    if get_settings()['buy'] == 'on':
+        keyboard[0].insert(1, InlineKeyboardButton("🛒 خرید", callback_data='buy'))
     reply_markup = InlineKeyboardMarkup(keyboard)
     text = (get_settings())['list']
     query.edit_message_text(text=text, reply_markup=reply_markup)
@@ -6614,7 +6627,7 @@ def call_ID(bot, query):
             ]
             settings = get_settings()
             if (settings['buy'] == 'on') or (chat_id in seller_id):
-                keyboard.append([InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb))])
+                keyboard[0].insert(1, InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb)))
             if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
                 keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
             keyboard.append([InlineKeyboardButton("<<", callback_data='service')])
@@ -6690,16 +6703,16 @@ def call_test(bot, query):
     else:
         if check_test_exists(chat_id) is False:
             try:
+                msg = query.edit_message_text(text="Wait...").id
                 host = get_random_server()
                 if host is None:
                     query.answer("ظرفیت پر شده بعدا امتحان کنین", show_alert=True)
                     return
-                query.edit_message_text(text="Wait...")
                 user = host.split('.')[0] + "a" + str(randint(1243, 6523))
                 passw = str(randint(214254, 999999))
                 port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
                 Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
-                t0 = "🥰مرسی از خریدتون\n\n"
+                t0 = "اکانت تست شما ❤️\n\n"
                 GB = float(str("{:.2f}".format(float((settings['test-traffic'] / 1024)))))
                 text = t0 + Session.Create(user, passw, 1, 1, GB)
                 if "Error" not in text:
@@ -6725,6 +6738,7 @@ def call_test(bot, query):
                     bot.send_message(chat_id, f"Error: {text}")
             except Exception as e:
                 bot.send_message(chat_id, "خطایی پیش اومد بعدا امتحان کنین😑")
+            bot.delete_messages(chat_id, msg)
         else:
             query.answer("شما قبلا از اکانت تست استفاده کردین", show_alert=True)
 
