@@ -291,6 +291,7 @@ def Get_user_info_shahan(html, uname):
     passwords = []
     traffics = []
     ips = []
+    expires = []
     days_left = []
     days_left_trubleshoots = []
     for data in html.css('td'):
@@ -306,6 +307,8 @@ def Get_user_info_shahan(html, uname):
             elif "فعال نشده" in data.text():
                 days_left.append("inactive")
         else:
+            if 'expire' in data.attributes['name']:
+                expires.append(data.text())
             if 'multilogin' in data.attributes['name']:
                 connection_limits.append(data.text())
             if 'username' in data.attributes['name']:
@@ -347,7 +350,7 @@ def Get_user_info_shahan(html, uname):
                 days = days_left_trubleshoots[n]
             else:
                 days = days_left[n]
-            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n]
+            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n], expires[n]
 
 
 def Get_user_info_rocket(datas, uname, r, url):
@@ -692,7 +695,7 @@ class PANNEL:
                 s = self.r.get(self.url + "/p/index.php").text
                 html = HTMLParser(s)
                 self.req = self.url + "/p/newuser.php"
-                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage = Get_user_info_shahan(html, uname)
+                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date = Get_user_info_shahan(html, uname)
 
             elif panel == "rocket":
                 self.uname = uname
@@ -1960,7 +1963,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
             except Exception as e:
                 return "Error: " + str(e)
 
