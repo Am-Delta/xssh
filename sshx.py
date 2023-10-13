@@ -247,7 +247,9 @@ def get_cache_xpanel(html):
         return Usage
     cache = []
     for td in html.css('td'):
-        if "Unlimited" in td.text():
+        if td.attributes.get('style', None) is not None:
+            pass
+        elif "Unlimited" in td.text():
             cache.append("Unlimited")
             tdx = td.text().split("Unlimited")[1].replace(" ", '').replace("\n", '')
             cache.append(((get_usage(tdx)).split(" گیگابایت")[0]).replace(" ", ""))
@@ -612,7 +614,6 @@ def Get_list_xpanel(html, ip, info, r, url):
         else:
             status.append('غیرفعال')
         ips.append(ip)
-
     traffic_data = info.split("Storage: ")[1].split('👤Clients')[0]
     if "GB" in traffic_data.split('Clients Traffic')[0]:
         server_traffic = float(traffic_data.split("Server Traffic: ")[1].split(" GB")[0])
