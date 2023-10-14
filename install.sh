@@ -1,8 +1,10 @@
 echo "Running ..."
 
 sudo apt install python3
+sudo apt install python3-pip
 sudo apt install pip
 sudo apt install git
+pip install --ugpgrade pip
 pip install pyrogram
 pip install random2
 pip install qrcode
@@ -50,6 +52,8 @@ clear
 
 chmod 664 /root/bot/
 chmod 664 /usr/local/lib/
+
+echo 'import sys ; print(sys.path)' | python3
 
 python3 run.py
 
