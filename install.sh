@@ -4,7 +4,7 @@ sudo apt install python3
 sudo apt install python3-pip
 sudo apt install pip
 sudo apt install git
-pip install --ugpgrade pip
+pip install --upgrade pip
 pip install pyrogram
 pip install random2
 pip install qrcode
