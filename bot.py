@@ -1359,7 +1359,7 @@ def update_host_users(host, new_host):
 
 
 @app.on_message(filters.chat(admin_id) & filters.command('backup'))
-def backup_command(bot, message):
+def backup_cmd(bot, message):
     if backup_command[0] is False:
         backup_command[0] = True
         chat_id = message.chat.id
