@@ -29,6 +29,7 @@ mv /root/bot/cache /root/botCh
 mv /root/bot/logs.txt /root/botCh
 mv /root/bot/All.txt /root/botCh
 mv /root/bot/ssh.db /root/botCh
+mv /root/bot/backup.db /root/botCh
 mv /root/bot/data.json /root/
 
 rm -r /root/bot
@@ -42,6 +43,7 @@ mv /root/botCh/cache /root/bot
 mv /root/botCh/logs.txt /root/bot
 mv /root/botCh/All.txt /root/bot
 mv /root/botCh/ssh.db /root/bot
+mv /root/botCh/backup.db /root/bot
 mv /root/data.json /root/bot/
 
 rm -r /root/botCh
