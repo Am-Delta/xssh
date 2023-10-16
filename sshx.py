@@ -82,7 +82,7 @@ def Login(username, password, host, port, panel):
             pickle.dump(r.cookies, f)
             if responde.status_code <= 302:
                 if Test(r, host, port, panel, 'login') is True:
-                    print(f"Login and saved session at ssh/{host}.session | Code: ", responde.status_code)
+                    print(f"Login and saved session at {session} | Code: ", responde.status_code)
                     return True
                 else:
                     print("Error : Test")
@@ -96,18 +96,21 @@ def Login(username, password, host, port, panel):
     r.close()
 
 
-#>>     Domain:Panelport @ User:Password ? Panel:path & sshport:udgpw
-#>>     Domain:Panelport @ User:Password ? Panel:default & default:default
+#>>     Domain:Panelport @ User:Password ? Panel:path & sshport:udgpw & remark
+#>>     Domain:Panelport @ User:Password ? Panel:default & default:default & remark
 def HOSTS():
     hosts = []
-    with open("Pannels.txt", "r") as f:
+    remarks = []
+    with open("Pannels.txt", "r", encoding="utf-8") as f:
         for data in f.readlines():
+            data = data.replace("\n", "")
             hosts.append(data.split(":")[0])
-    return hosts
+            remarks.append(data.split("&")[2])
+    return hosts, remarks
 
 
 def HOST_INFO(target):
-    with open("Pannels.txt", "r") as f:
+    with open("Pannels.txt", "r", encoding="utf-8") as f:
         for data in f.readlines():
             data = data.replace("\n", "")
             host = data.split(":")[0]
@@ -119,12 +122,13 @@ def HOST_INFO(target):
                 route_path = data.split("&")[0].split("?")[1].split(":")[1]
                 sshport = data.split("&")[1].split(":")[0]
                 udgpw = data.split("&")[1].split(":")[1]
-                return port, username, password, panel, route_path, sshport, udgpw
-    return None, None, None, None, None, None, None
+                remark = data.split("&")[2]
+                return port, username, password, panel, route_path, sshport, udgpw, remark
+    return None, None, None, None, None, None, None, None
 
 
 def get_port_xpanel(host):
-    port, username, password, panel, route_path, sshport, udgpw = HOST_INFO(host)
+    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(host)
     return sshport, udgpw
 
 
@@ -136,7 +140,7 @@ def Remove_Host(host):
         text += "Session has been removed\n"
     except Exception as e:
         text += f"Error Session removing: {str(e)}\n"
-    with open("Pannels.txt", "r") as f:
+    with open("Pannels.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
     Line = None
     for line in lines:
@@ -145,14 +149,14 @@ def Remove_Host(host):
             break
     if Line is not None:
         try:
-            with open("Pannels.txt", "w") as f:
+            with open("Pannels.txt", "w", encoding="utf-8") as f:
                 for line in lines:
                     if line.strip("\n") != Line:
                         f.write(line)
             text += "host has been removed from the list"
         except Exception as e:
             os.remove("Pannels.txt")
-            with open("Pannels.txt", "a+") as f:
+            with open("Pannels.txt", "a+", encoding="utf-8") as f:
                 for line in lines:
                     f.writelines(line)
             text += f"Error host list removing: {str(e)}"
@@ -161,25 +165,25 @@ def Remove_Host(host):
     return text
 
 
-def Add_Host(host, port, username, password, panel, route_path, sshport, udgpw):
-    with open("Pannels.txt", 'a+') as txt:
-        data = f"{host}:{port}@{username}:{password}?{panel}:{route_path}&{sshport}:{udgpw}"
+def Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark):
+    with open("Pannels.txt", 'a+', encoding="utf-8") as txt:
+        data = f"{host}:{port}@{username}:{password}?{panel}:{route_path}&{sshport}:{udgpw}&{remark}"
         txt.writelines(data + "\n")
 
 
 def Update_host(old_host, new_host):
-    port, username, password, panel, route_path, sshport, udgpw = HOST_INFO(old_host)
+    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(old_host)
     if "host has been removed from the list" in Remove_Host(old_host):
-        Add_Host(new_host, port, username, password, panel, route_path, sshport, udgpw)
+        Add_Host(new_host, port, username, password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
         return "Error"
 
 
 def Update_user_pass_port(host, new_port, new_username, new_password):
-    port, username, password, panel, route_path, sshport, udgpw = HOST_INFO(host)
+    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(host)
     if "host has been removed from the list" in Remove_Host(host):
-        Add_Host(host, new_port, new_username, new_password, panel, route_path, sshport, udgpw)
+        Add_Host(host, new_port, new_username, new_password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
         return "Error"
@@ -187,30 +191,39 @@ def Update_user_pass_port(host, new_port, new_username, new_password):
 
 def Update_Host_All_info(old_host, host, port, username, password, panel, route_path, sshport, udgpw):
     if "host has been removed from the list" in Remove_Host(old_host):
-        Add_Host(host, port, username, password, panel, route_path, sshport, udgpw)
+        Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
         return "Error"
 
 
 def Change_udp_port(panel, host, udgpw):
-    port, username, password, panel, route_path, sshport, old_udgpw = HOST_INFO(host)
+    port, username, password, panel, route_path, sshport, old_udgpw, remark = HOST_INFO(host)
     if panel == "xpanel":
         if "host has been removed from the list" in Remove_Host(host):
-            Add_Host(host, port, username, password, panel, route_path, sshport, udgpw)
+            Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
             return "Done✔️"
         else:
             return "Error"
 
 
 def Change_ssh_port(panel, host, sshport):
-    port, username, password, panel, route_path, old_sshport, udgpw = HOST_INFO(host)
+    port, username, password, panel, route_path, old_sshport, udgpw, remark = HOST_INFO(host)
     if panel == "xpanel":
         if "host has been removed from the list" in Remove_Host(host):
-            Add_Host(host, port, username, password, panel, route_path, sshport, udgpw)
+            Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
             return "Done✔️"
         else:
             return "Error"
+
+
+def Change_remark(host, remark):
+    port, username, password, panel, route_path, sshport, udgpw, old_remark = HOST_INFO(host)
+    if "host has been removed from the list" in Remove_Host(host):
+        Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
+        return "Done✔️"
+    else:
+        return "Error"
 
 
 def ASCII_Check(text):
@@ -234,6 +247,14 @@ def Contains(text):
             return True
 
 
+def TXT_FILTER(text):
+    special_characters = ['?', '@', '&', ':']
+    for char in special_characters:
+        if char in text:
+            return False
+    return True
+
+
 def OTX_Check(text):
     return bool(re.match("^[A-Za-z0-9_-]*$", text))
 
@@ -248,7 +269,7 @@ def get_cache_xpanel(html):
     cache = []
     for td in html.css('td'):
         if td.attributes.get('style', None) is not None:
-            pass
+            cache.append(td.text().replace("\n", "").replace("        ", "").replace('    ', ""))
         elif "Unlimited" in td.text():
             cache.append("Unlimited")
             tdx = td.text().split("Unlimited")[1].replace(" ", '').replace("\n", '')
@@ -296,6 +317,7 @@ def Get_user_info_shahan(html, uname):
     expires = []
     days_left = []
     days_left_trubleshoots = []
+    descriptions = []
     for data in html.css('td'):
         if data.attributes.get("name", None) is None:
             if 'روز' in data.text():
@@ -341,10 +363,14 @@ def Get_user_info_shahan(html, uname):
             if inp.attributes['placeholder'] == "روز اعتبار":
                 if inp.attributes.get("name", None) is not None:
                     if "edituserfinishdate" in inp.attributes['name']:
-                        if inp.attributes.get("name", None) is not None:
+                        if inp.attributes.get("value", None) is not None:
                             days_left_trubleshoots.append(inp.attributes['value'])
                         else:
                             days_left_trubleshoots.append('9999')
+    for textarea in html.css("textarea"):
+        if textarea.attributes.get("name", None) is not None:
+            if "edituserinfo" in textarea.attributes['name']:
+                descriptions.append(textarea.text())
     for username in usernames:
         if username == uname:
             n = usernames.index(uname)
@@ -352,7 +378,7 @@ def Get_user_info_shahan(html, uname):
                 days = days_left_trubleshoots[n]
             else:
                 days = days_left[n]
-            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n], expires[n]
+            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n], expires[n], descriptions[n]
 
 
 def Get_user_info_rocket(datas, uname, r, url):
@@ -371,16 +397,30 @@ def Get_user_info_rocket(datas, uname, r, url):
             else:
                 kind = "expiry"
             days = data['remaining_days']
+            s = r.get(f"{url}/ajax-views/users/{str(data['id'])}/edit?_={str(int(time()))}").text
+            s = json.loads(s)['html']
+            html = HTMLParser(s)
+            description = ''
+            for textarea in html.css("textarea"):
+                if textarea.attributes.get("name", None) is not None:
+                    if "desc" in textarea.attributes['name']:
+                        description = textarea.text()
+                        break
             if data['end_date'] == 0:
-                s = r.get(f"{url}/ajax-views/users/{str(data['id'])}/edit?_={str(int(time()))}").text
-                s = json.loads(s)['html']
-                html = HTMLParser(s)
                 for inp in html.css('input'):
                     if inp.attributes.get("name", None) is not None:
                         if inp.attributes['name'] == "exp_days":
                             days = inp.attributes['value']
                             break
-            return data['password'], traffic, int(data['limit_users']), int(days), data['status_label'], usage, data['id'], kind, Date
+            s = r.get(f"{url}/ajax-views/users/{str(data['id'])}/info?_={str(int(time()))}").text
+            s = json.loads(s)['html']
+            html = HTMLParser(s)
+            public_link = ""
+            for a in html.css('a'):
+                if a.attributes.get("href", None) is not None:
+                    if "/account/" in a.attributes['href']:
+                        public_link = a.attributes['href']
+            return data['password'], traffic, int(data['limit_users']), int(days), data['status_label'], usage, data['id'], kind, Date, description, public_link
 
 
 def Get_user_info_xpanel(html, uname):
@@ -392,8 +432,9 @@ def Get_user_info_xpanel(html, uname):
     usages = []
     days_left = []
     status = []
+    descriptions = []
     cache = get_cache_xpanel(html)
-    for i in range(0, len(cache), 9):
+    for i in range(0, len(cache), 10):
         usernames.append(cache[i + 2])
         passwords.append(cache[i + 3])
         traffic = cache[i + 4]
@@ -404,7 +445,7 @@ def Get_user_info_xpanel(html, uname):
         connection_limits.append(cache[i + 6])
         days = cache[i + 7]
         if days == 'Unlimit':
-            days = "1"
+            days = "9999"
             expires.append("?")
         else:
             expires.append(str(datetime.fromtimestamp(time() + (int(days) * 86400))).split(" ")[0])
@@ -413,13 +454,20 @@ def Get_user_info_xpanel(html, uname):
             status.append('فعال')
         else:
             status.append('غیرفعال')
+        descriptions.append(cache[i + 9])
+    dropbear = ""
+    for a in html.css('a'):
+        if a.attributes.get('data-drop', None) is not None:
+            URI = a.attributes['data-drop']
+            dropbear = URI.split('@')[1].split(':')[1].split("/")[0]
+            break
     for i in range(len(usernames)):
         if uname == usernames[i]:
             if expires[i] == "?":
                 kind = "days"
             else:
                 kind = "expiry"
-            return passwords[i], traffics[i], int(connection_limits[i]), int(days_left[i]), status[i], usages[i], kind, expires[i]
+            return passwords[i], traffics[i], int(connection_limits[i]), int(days_left[i]), status[i], usages[i], kind, expires[i], descriptions[i], dropbear
 
 
 def Get_list_users_only_shahan(html):
@@ -458,6 +506,7 @@ def Get_list_shahan(html):
     days_left = []
     days_left_trubleshoots = []
     status = []
+    descriptions = []
     server_traffic = 0
     online_clients = 0
     for setr in html.css('small.pull-left'):
@@ -467,6 +516,10 @@ def Get_list_shahan(html):
         elif "ترابایت" in setr.text():
             server_traffic = float(((setr.text()).split("ترابایت")[0]).replace(" ", '')) * 1024
             break
+    for textarea in html.css("textarea"):
+        if textarea.attributes.get("name", None) is not None:
+            if "edituserinfo" in textarea.attributes['name']:
+                descriptions.append(textarea.text())
     for data in html.css('td'):
         if data.attributes.get("name", None) is None:
             if 'روز' in data.text():
@@ -523,7 +576,7 @@ def Get_list_shahan(html):
     for i in range(len(days_left)):
         if days_left[i] == "inactive":
             days_left[i] = days_left_trubleshoots[i]
-    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, int(info[1]), True
+    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions,server_traffic, int(info[1]), True
 
 
 def Get_list_rocket(datas, ip, info, r, url):
@@ -537,6 +590,7 @@ def Get_list_rocket(datas, ip, info, r, url):
     usages = []
     days_left = []
     status = []
+    descriptions = []
     server_traffic = 0.0
     online_clients = 0
     for data in datas['data']:
@@ -573,7 +627,7 @@ def Get_list_rocket(datas, ip, info, r, url):
     else:
         server_traffic = float(traffic_data.split("Traffic: ")[1].split(" TB")[0]) * 1024
 
-    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, online_clients, True
+    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions,server_traffic, online_clients, True
 
 
 def Get_list_xpanel(html, ip, info, r, url):
@@ -587,10 +641,11 @@ def Get_list_xpanel(html, ip, info, r, url):
     usages = []
     days_left = []
     status = []
+    descriptions = []
     server_traffic = 0
     online_clients = 0
     cache = get_cache_xpanel(html)
-    for i in range(0, len(cache), 9):
+    for i in range(0, len(cache), 10):
         usernames.append(cache[i + 2])
         passwords.append(cache[i + 3])
         traffic = cache[i + 4]
@@ -614,13 +669,14 @@ def Get_list_xpanel(html, ip, info, r, url):
         else:
             status.append('غیرفعال')
         ips.append(ip)
+        descriptions.append(cache[i + 9])
     traffic_data = info.split("Storage: ")[1].split('👤Clients')[0]
     if "GB" in traffic_data.split('Clients Traffic')[0]:
         server_traffic = float(traffic_data.split("Server Traffic: ")[1].split(" GB")[0])
     else:
         server_traffic = float(traffic_data.split("Traffic: ")[1].split(" TB")[0]) * 1024
     online_clients = int(info.split("Online: ")[1])
-    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, server_traffic, online_clients, True
+    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions, server_traffic, online_clients, True
 
 
 def get_traffic_rocket(band_info):
@@ -648,22 +704,22 @@ def get_traffic_rocket(band_info):
         up_client = float(band_info[3].split("GB")[0])
     else:
         up_client = 0
-    server_traffic = str(up_server + down_server) + " GB"
-    clients_usage = str(up_client + down_client) + " GB"
+    server_traffic = str('{:.2f}'.format(float(up_server + down_server))) + " GB"
+    clients_usage = str('{:.2f}'.format(float(up_client + down_client))) + " GB"
     return server_traffic, clients_usage
 
 
 def get_traffic_xpanel(band_info):
     if "TB" in band_info[0]:
-        server_traffic = str(float(band_info[0].split("TB")[0]) * 1024) + " GB"
+        server_traffic = str('{:.2f}'.format(float(band_info[0].split("TB")[0]) * 1024)) + " GB"
     elif "GB" in band_info[0]:
         server_traffic = str(float(band_info[0].split("GB")[0])) + " GB"
     else:
         server_traffic = "0 GB"
     if "TB" in band_info[1]:
-        clients_usage = str(float(band_info[0].split("TB")[0]) * 1024) + " GB"
+        clients_usage = str('{:.2f}'.format(float(band_info[1].split("TB")[0]) * 1024)) + " GB"
     elif "GB" in band_info[1]:
-        clients_usage = str(float(band_info[0].split("GB")[0])) + " GB"
+        clients_usage = str(float(band_info[1].split("GB")[0])) + " GB"
     else:
         clients_usage = "0 GB"
     return server_traffic, clients_usage
@@ -691,12 +747,13 @@ class PANNEL:
         #self.route_path = "cp"
 
         if job == 'User':
+            self.dropbear = ""
             if panel == "shahan":
                 self.uname = uname
                 s = self.r.get(self.url + "/p/index.php").text
                 html = HTMLParser(s)
                 self.req = self.url + "/p/newuser.php"
-                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date = Get_user_info_shahan(html, uname)
+                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description = Get_user_info_shahan(html, uname)
 
             elif panel == "rocket":
                 self.uname = uname
@@ -705,7 +762,7 @@ class PANNEL:
                     s = s.split("<br")[0]
                 datas = json.loads(s)
                 self.req = self.url + "/ajax/users/"
-                self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.uid, self.kind, self.Date = Get_user_info_rocket(datas, uname, self.r, self.url)
+                self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.uid, self.kind, self.Date, self.description, self.public_link = Get_user_info_rocket(datas, uname, self.r, self.url)
                 self.ip = host
 
             elif self.panel == "xpanel":
@@ -714,7 +771,7 @@ class PANNEL:
                 html = HTMLParser(s)
                 self.req = self.url + "/cp/user/edit"
                 self.token = get_token(s)
-                self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.kind, self.Date = Get_user_info_xpanel(html, uname)
+                self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.kind, self.Date, self.description, self.dropbear = Get_user_info_xpanel(html, uname)
                 self.ip = host
 
     def Ports(self):
@@ -1093,7 +1150,7 @@ class PANNEL:
                 return Get_list_shahan(html)
             except Exception as e:
                 print("Error: " + str(e))
-                return [], [], [], [], [], [], [], [], [], [], 0, 0, False
+                return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
         elif self.panel == "rocket":
             try:
@@ -1105,7 +1162,7 @@ class PANNEL:
                 return Get_list_rocket(data, self.host, text, self.r, self.url)
             except Exception as e:
                 print("Error: " + str(e))
-                return [], [], [], [], [], [], [], [], [], [], 0, 0, False
+                return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
         elif self.panel == "xpanel":
             try:
@@ -1115,7 +1172,7 @@ class PANNEL:
                 return Get_list_xpanel(html, self.host, text, self.r, self.url)
             except Exception as e:
                 print("Error: " + str(e))
-                return [], [], [], [], [], [], [], [], [], [], 0, 0, False
+                return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
     def Check_Premium(self):
         if self.panel == "shahan":
@@ -1523,23 +1580,39 @@ class PANNEL:
             except Exception as e:
                 return "Error: " + str(e)
 
-    def Create(self, uname, passw, connection_limit, days, traffic):
+    def Create(self, uname, passw, connection_limit, days, traffic, description, first):
         if self.panel == "shahan":
             if traffic == 0:
                 traffic = ""
-            payload = {
-                'newuserusername': uname,
-                'newuserpassword': passw,
-                'newusermobile': '',
-                'newuseremail': '',
-                'newusertraffic': traffic,
-                'newusermultiuser': connection_limit,
-                'newuserfinishdate': days,
-                'newuserreferral': '',
-                'newusertelegramid': '',
-                'newuserinfo': '',
-                'newusersubmit': 'ثبت'
-            }
+            if first is True:
+                payload = {
+                    'newuserusername': uname,
+                    'newuserpassword': passw,
+                    'newusermobile': '',
+                    'newuseremail': '',
+                    'newusertraffic': traffic,
+                    'newusermultiuser': connection_limit,
+                    'newuserfinishdate': days,
+                    'newuserreferral': '',
+                    'newusertelegramid': '',
+                    'newuserfirstlogin': 'newuserfirstlogin',
+                    'newuserinfo': description,
+                    'newusersubmit': 'ثبت'
+                }
+            else:
+                payload = {
+                    'newuserusername': uname,
+                    'newuserpassword': passw,
+                    'newusermobile': '',
+                    'newuseremail': '',
+                    'newusertraffic': traffic,
+                    'newusermultiuser': connection_limit,
+                    'newuserfinishdate': days,
+                    'newuserreferral': '',
+                    'newusertelegramid': '',
+                    'newuserinfo': description,
+                    'newusersubmit': 'ثبت'
+                }
             try:
                 s = self.r.post(self.url + "/p/newuser.php", data=payload)
                 if s.status_code == 200:
@@ -1559,24 +1632,34 @@ class PANNEL:
             >>> d.timestamp()
             1697401800.0
             '''
-            '''
-            expiry_type: days,
-            exp_days: 3,
-            exp_date: ,
-            ''' 
-            Date = (str(jdatetime.datetime.fromtimestamp(time() + (days * 86400))).split(" ")[0]).replace("-", "/")
-            payload = {
-                'username': uname,
-                'password': passw,
-                'email': "",
-                'mobile': "",
-                'limit_users': connection_limit,
-                'traffic': traffic,
-                'expiry_type': 'date',
-                'exp_days': "",
-                'exp_date': Date,
-                'desc': "",
-            }
+            if first is True:
+                Date = ""
+                payload = {
+                    'username': uname,
+                    'password': passw,
+                    'email': "",
+                    'mobile': "",
+                    'limit_users': connection_limit,
+                    'traffic': traffic,
+                    'expiry_type': 'days',
+                    'exp_days': days,
+                    'exp_date': '',
+                    'desc': description,
+                }
+            else:
+                Date = (str(jdatetime.datetime.fromtimestamp(time() + (days * 86400))).split(" ")[0]).replace("-", "/")
+                payload = {
+                    'username': uname,
+                    'password': passw,
+                    'email': "",
+                    'mobile': "",
+                    'limit_users': connection_limit,
+                    'traffic': traffic,
+                    'expiry_type': 'date',
+                    'exp_days': "",
+                    'exp_date': Date,
+                    'desc': description,
+                }
             try:
                 s = self.r.post(self.url + "/ajax/users", data=payload)
                 if s.status_code == 200:
@@ -1588,20 +1671,36 @@ class PANNEL:
                 return "Error: " + str(e)
 
         elif self.panel == "xpanel":
-            Date = str(datetime.fromtimestamp(time() + (days * 86400))).split(" ")[0]
-            payload = {
-                '_token': get_token(self.r.get(self.url + "/cp/users").text),
-                'username': uname,
-                'password': passw,
-                'email': '',
-                'mobile': '',
-                'multiuser': connection_limit,
-                'connection_start': '',
-                'traffic': traffic,
-                'type_traffic': 'gb',
-                'expdate': Date,
-                'desc': '',
-            }
+            if first is True:
+                Date = ""
+                payload = {
+                    '_token': get_token(self.r.get(self.url + "/cp/users").text),
+                    'username': uname,
+                    'password': passw,
+                    'email': '',
+                    'mobile': '',
+                    'multiuser': connection_limit,
+                    'connection_start': days,
+                    'traffic': traffic,
+                    'type_traffic': 'gb',
+                    'expdate': '',
+                    'desc': description,
+                }
+            else:
+                Date = str(datetime.fromtimestamp(time() + (days * 86400))).split(" ")[0]
+                payload = {
+                    '_token': get_token(self.r.get(self.url + "/cp/users").text),
+                    'username': uname,
+                    'password': passw,
+                    'email': '',
+                    'mobile': '',
+                    'multiuser': connection_limit,
+                    'connection_start': '',
+                    'traffic': traffic,
+                    'type_traffic': 'gb',
+                    'expdate': Date,
+                    'desc': description,
+                }
             try:
                 s = self.r.post(self.url + "/cp/users", data=payload)
                 if s.status_code <= 302:
@@ -1627,7 +1726,7 @@ class PANNEL:
                 'editusermultiuser': self.connection_limit,
                 'edituserfinishdate': self.days,
                 'edituserreferral': '',
-                'edituserinfo': '',
+                'edituserinfo': self.description,
                 'editusersubmit': 'ثبت'
             }
             try:
@@ -1654,7 +1753,7 @@ class PANNEL:
                     'expiry_type': self.kind,
                     'exp_days': self.days,
                     'exp_date': "",
-                    'desc': ""
+                    'desc': self.description
                 }
             else:
                 payload = {
@@ -1665,7 +1764,7 @@ class PANNEL:
                     'traffic': Traffic,
                     'exp_days': self.days,
                     'exp_date': self.Date,
-                    'desc': ""
+                    'desc': self.description
                 }
             try:
                 s = self.r.put(self.req + str(self.uid), data=payload)
@@ -1697,7 +1796,7 @@ class PANNEL:
                     'type_traffic': 'gb',
                     'expdate': '',
                     'activate': status,
-                    'desc': '',
+                    'desc': self.description,
                     'submit': 'submit'
                 }
             else:
@@ -1712,7 +1811,7 @@ class PANNEL:
                     'type_traffic': 'gb',
                     'expdate': self.Date,
                     'activate': status,
-                    'desc': '',
+                    'desc': self.description,
                     'submit': 'submit'
                 }
             try:
@@ -1739,7 +1838,7 @@ class PANNEL:
                 'editusermultiuser': self.connection_limit,
                 'edituserfinishdate': self.days,
                 'edituserreferral': '',
-                'edituserinfo': '',
+                'edituserinfo': self.description,
                 'editusersubmit': 'ثبت'
             }
             try:
@@ -1762,7 +1861,7 @@ class PANNEL:
                 'editusermultiuser': connection_limit,
                 'edituserfinishdate': days,
                 'edituserreferral': '',
-                'edituserinfo': '',
+                'edituserinfo': self.description,
                 'editusersubmit': 'ثبت'
             }
             try:
@@ -1791,7 +1890,7 @@ class PANNEL:
                     'expiry_type': self.kind,
                     'exp_days': days,
                     'exp_date': "",
-                    'desc': ""
+                    'desc': self.description
                 }
             else:
                 Date = (str(jdatetime.datetime.fromtimestamp(time() + (days * 86400))).split(" ")[0]).replace("-", "/")
@@ -1803,7 +1902,7 @@ class PANNEL:
                     'traffic': Traffic,
                     'exp_days': days,
                     'exp_date': Date,
-                    'desc': ""
+                    'desc': self.description
                 }
             try:
                 if self.r.put(self.req + str(self.uid), data=payload).status_code == 200:
@@ -1833,7 +1932,7 @@ class PANNEL:
                 'type_traffic': 'gb',
                 'expdate': Date,
                 'activate': "active",
-                'desc': '',
+                'desc': self.description,
                 'submit': 'submit'
             }
             try:
@@ -1950,7 +2049,11 @@ class PANNEL:
             else:
                 return "🔴 Already Disabled"
 
-    def User_info(self):
+    def User_info(self, DROP):
+        if (DROP == "on") and (self.dropbear != ""):
+            drop = f"\nDropbear Port : <pre>{self.dropbear}</pre>"
+        else:
+            drop = ""
         if self.panel == "shahan":
             try:
                 port, udgpw = self.Ports()
@@ -1964,7 +2067,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nتاریخ انقضا : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -1977,7 +2080,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host :  <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                return f"SSH Host :  <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}\nPublic Link: {self.public_link}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -1994,7 +2097,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2016,7 +2119,7 @@ class PANNEL:
                 'editusermultiuser': self.connection_limit,
                 'edituserfinishdate': self.days,
                 'edituserreferral': '',
-                'edituserinfo': '',
+                'edituserinfo': self.description,
                 'editusersubmit': 'ثبت'
             }
             try:
@@ -2043,7 +2146,7 @@ class PANNEL:
                     'expiry_type': self.kind,
                     'exp_days': self.days,
                     'exp_date': "",
-                    'desc': ""
+                    'desc': self.description
                 }
             else:
                 payload = {
@@ -2054,7 +2157,7 @@ class PANNEL:
                     'traffic': Traffic,
                     'exp_days': self.days,
                     'exp_date': self.Date,
-                    'desc': ""
+                    'desc': self.description
                 }
             try:
                 s = self.r.put(self.req + str(self.uid), data=payload)
@@ -2087,7 +2190,7 @@ class PANNEL:
                     'type_traffic': 'gb',
                     'expdate': '',
                     'activate': status,
-                    'desc': '',
+                    'desc': self.description,
                     'submit': 'submit'
                 }
             else:
@@ -2102,7 +2205,7 @@ class PANNEL:
                     'type_traffic': 'gb',
                     'expdate': self.Date,
                     'activate': status,
-                    'desc': '',
+                    'desc': self.description,
                     'submit': 'submit'
                 }
             try:
