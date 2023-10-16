@@ -5446,10 +5446,12 @@ def call_UTGB(bot, query):
                     for i in range(len(settings['seller_plus_traffic'])):
                         tcb = f"{str(settings['seller_plus_traffic'][i])} گیگابایت - {str(settings['seller_plus_prices'][i])} تومن"
                         cb = f"LTPB_{str(settings['seller_plus_traffic'][i])}-{str(settings['seller_plus_prices'][i])}:{user}@{host}"
+                        keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
                 else:
                     for i in range(len(settings['plus-traffic'])):
                         tcb = f"{str(settings['plus-traffic'][i])} گیگابایت - {str(settings['plus-prices'][i])} تومن"
                         cb = f"TBP_{str(settings['plus-traffic'][i])}-{str(settings['plus-prices'][i])}:{user}@{host}"
+                        keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -6076,6 +6078,7 @@ def call_UPG(bot, query):
                             traffic = str(settings['seller_traffic'][i]) + " گیگ"
                         tcb = f"{str(settings['seller_days'][i])} روزه - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
                         cb = f"UPKIF_{str(settings['seller_days'][i])}-{str(settings['seller_traffic'][i])}#{str(settings['seller_connections'][i])}&{str(settings['seller_prices'][i])}:{user}@{host}"
+                        keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
                 else:
                     for i in range(len(settings['prices'])):
                         if settings['traffic'][i] == 0:
@@ -7455,7 +7458,7 @@ def call_backup(bot, query):
         backup_status = "OFF ❌"
     else:
         backup_status = "ON ✅"
-    text = '<b>Backup Settings</b>\n\n(فقط برای ادمینی که این گزینه رو روشن میکنه کار میکنه)' + "\n\n🔄Status\n\n" + "Backup: " + backup_status + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
+    text = '<b>Backup Settings</b>\n\n(فقط برای ادمینی که این گزینه رو روشن میکنه کار میکنه)' + "\n\n<a href='https://t.me/deltabots_gp/10/955'>آموزش انتقال ربات به سرور جدید</a>" + "\n\n🔄Status\n\n" + "Backup: " + backup_status + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
