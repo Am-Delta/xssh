@@ -49,6 +49,21 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+    if settings.get("list_status", None) is None:
+        add_dict = {
+            "list_status": "on",
+            "support_status": "on",
+            "upgrade_days": "off",
+            "dropbear": "off",
+            "select_server_users": "off",
+            "select_server_sellers": "off",
+            "first_connect": "off",
+            "after_buy": "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین",
+            "delete_user": "off"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
@@ -73,12 +88,12 @@ def db_update():
 
 def fix_panel_txt():
     if os.stat("Pannels.txt").st_size != 0:
-        with open("Pannels.txt", "r") as f:
+        with open("Pannels.txt", "r", encoding="utf-8") as f:
             lines = f.readlines()
             if "?" in lines[0]:
                 return
         os.remove("Pannels.txt")
-        with open("Pannels.txt", "a+") as f:
+        with open("Pannels.txt", "a+", encoding="utf-8") as f:
             for line in lines:
                 line = line.replace("\n", "")
                 host = line.split("@")[0]
@@ -88,16 +103,44 @@ def fix_panel_txt():
                 f.writelines(new_line)
 
 
+def fix_panel_txt_2():
+    if os.stat("Pannels.txt").st_size != 0:
+        with open("Pannels.txt", "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            if lines[0].count("&") == 2:
+                return
+        os.remove("Pannels.txt")
+        with open("Pannels.txt", "a+", encoding="utf-8") as f:
+            for data in lines:
+                data = data.replace("\n", "")
+                host = data.split(":")[0]
+                port = data.split("@")[0].split(":")[1]
+                username = data.split("@")[1].split(":")[0]
+                password = data.split("?")[0].split("@")[1].split(":")[1]
+                panel = data.split("?")[1].split(":")[0]
+                route_path = data.split("&")[0].split("?")[1].split(":")[1]
+                sshport = data.split("&")[1].split(":")[0]
+                udgpw = data.split("&")[1].split(":")[1]
+                remark = host.split(".")[0]
+                new_line = f"{host}:{port}@{username}:{password}?{panel}:{route_path}&{sshport}:{udgpw}&{remark}\n"
+                f.writelines(new_line)
+
+
 def run():
     if Path("Pannels.txt").is_file() is False:
-        open("Pannels.txt", "w")
+        open("Pannels.txt", "w", encoding="utf-8")
     if Path("All.txt").is_file() is False:
         with open("All.txt", "a+") as f:
             f.writelines("1" + "\n")
     if Path("ssh.db").is_file() is False:
         os.system('python3 sshdb.py')
         print("Database Created, change the settings in the bot")
+    if Path("backup.db").is_file() is True:
+        os.remove("ssh.db")
+        os.rename('backup.db', 'ssh.db')
+        print(colored("\nBackup recoverd", 'blue'))
     fix_panel_txt()
+    fix_panel_txt_2()
     db_update()
     print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you wanna stop the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
     os.system('nohup python3 -u session-updater.py &')
