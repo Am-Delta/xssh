@@ -157,7 +157,16 @@ settings = {
     "seller_plus_traffic": [10, 20],
     "seller_plus_prices": [20000, 35000],
     "lang": "en",
-    "invite": "off"
+    "invite": "off",
+    "list_status": "on",
+    "support_status": "on",
+    "upgrade_days": "off",
+    "dropbear": "off",
+    "select_server_users": "off",
+    "select_server_sellers": "off",
+    "first_connect": "off",
+    "delete_user": "off",
+    "after_buy": "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
