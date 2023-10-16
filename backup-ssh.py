@@ -11,9 +11,9 @@ if os.path.isdir(folder) is False:
 
 
 def main():
-    hosts = sshx.HOSTS()
+    hosts, remarks = sshx.HOSTS()
     for host in hosts:
-        port, username, password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(host)
+        port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         try:
             Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
             status, content = Session.Backup_content()
@@ -24,10 +24,9 @@ def main():
                 with open(f, 'wb') as file:
                     file.write(content)
             else:
-                print("[-] Error: " + content + " | " + host)
+                print("[-] Backup Error: " + content + " | " + host)
         except Exception as e:
-            print("[-] Error: " + str(e) + " | " + host)
-
+            print("[-] Backup Error: " + str(e) + " | " + host)
 while True:
     main()
     sleep(sleeper)
