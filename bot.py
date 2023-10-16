@@ -5539,6 +5539,7 @@ def call_LTPB(bot, query):
             return
         keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="wait...")
         try:
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
@@ -5548,7 +5549,7 @@ def call_LTPB(bot, query):
                 update_user_wallet(chat_id, value)
                 keyboard = [[InlineKeyboardButton("آموزش اتصال📡", callback_data='help')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                bot.send_message(chat_id, f"🥰ترافیک اکانتتون با موفقیت افزایش پیدا کرد\n{user}\n\nبرای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
+                query.edit_message_text(text=f"🥰ترافیک اکانتتون با موفقیت افزایش پیدا کرد\n{user}\n\nبرای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
             else:
                 query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
         except:
@@ -6140,6 +6141,7 @@ def call_UPKIF(bot, query):
         keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         try:
+            query.edit_message_text(text="wait...")
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
             settings = get_settings()
@@ -6157,7 +6159,7 @@ def call_UPKIF(bot, query):
                 update_user_wallet(chat_id, value)
                 keyboard = [[InlineKeyboardButton("آموزش اتصال📡", callback_data='help')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                bot.send_message(chat_id, f"🥰اکانتتون تمدید شد:\n{user}\n\nبرای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
+                query.edit_message_text(text=f"🥰اکانتتون تمدید شد:\n{user}\n\nبرای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
                 try:
                     if user in checked_users:
                         checked_users.remove(user)
