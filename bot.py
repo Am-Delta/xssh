@@ -5543,7 +5543,6 @@ def call_LTPB(bot, query):
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
             server_msg = Session.Update_Traffic(GB)
-            text += server_msg
             if "Error" not in server_msg:
                 value = old_value - price
                 update_user_wallet(chat_id, value)
@@ -6153,7 +6152,6 @@ def call_UPKIF(bot, query):
                 except:
                     pass
             server_msg = Session.Update(GB, days, connection_limit)
-            text += server_msg
             if "Error" not in server_msg:
                 value = old_value - price
                 update_user_wallet(chat_id, value)
@@ -9108,7 +9106,7 @@ def call_HOW(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     keyboard = []
-    text = '<b>How to use?</b>\n\nبرای اینکه یه کاربر سریعتر مدیریت کنین کافیه کپی کانفیگی که داخل پنل زده بودین و به کاربر فرستادینو مستقیم به ربات بفرستین:\n\nSSH Host: domain\nUsername : username\n\n\nبرای درست کردن لیست قیمت کافیه دکمه قیمت ها رو بزنین\n\nکانال ربات :/n@delta_bcc\nگروه رفع باگ و سوالا:\n@deltabots_gp'
+    text = '<b>How to use?</b>\n\nبرای اینکه یه کاربر سریعتر مدیریت کنین کافیه کپی کانفیگی که داخل پنل زده بودین و به کاربر فرستادینو مستقیم به ربات بفرستین:\n\nSSH Host: domain\nUsername : username\n\n\nبرای درست کردن لیست قیمت کافیه دکمه قیمت ها رو بزنین\n\nکانال ربات :\n@delta_bcc\nگروه رفع باگ و سوالا:\n@deltabots_gp'
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
