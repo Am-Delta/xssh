@@ -1679,6 +1679,14 @@ def text_private(bot, message):
                 keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                 rm = True
                 if host is not None:
+                    if (password_retry.count(user) == 5):
+                        timer = int(time()) - password_retry_time[password_retry.index(user)]
+                        if (timer <= 3600):
+                            keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+                            reply_markup = InlineKeyboardMarkup(keyboard)
+                            text = f"شما بدلیل اسپم تا  {str(timer)} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
+                            message.reply_text(text, reply_markup=reply_markup)
+                            return
                     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                     settings = get_settings()
                     if check_exist_user(host, user) is False:
@@ -1689,17 +1697,29 @@ def text_private(bot, message):
                                 USERNAME = message.from_user.username
                             except:
                                 USERNAME = "None"
-                            add_user_db(chat_id, message.from_user.first_name, USERNAME, user, host)
-                            cb = host + "$" + user
-                            keyboard = [
-                                [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('SELFCPA_' + cb))],
-                                [InlineKeyboardButton("📲 کد QR و لینک اتصال", callback_data=f'QRCODE_{cb}')]
-                            ]
-                            if (settings['buy'] == 'on') or (chat_id in seller_id):
-                                keyboard[0].insert(1, InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb)))
-                            if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
-                                keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
-                            keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+                            csct = text.replace('<pre>', "").replace('</pre>', "")
+                            passw = csct.split("Password : ")[1].split("\n")[0]
+                            if link in passw:
+                                add_user_db(chat_id, message.from_user.first_name, USERNAME, user, host)
+                                cb = host + "$" + user
+                                keyboard = [
+                                    [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('SELFCPA_' + cb))],
+                                    [InlineKeyboardButton("📲 کد QR و لینک اتصال", callback_data=f'QRCODE_{cb}')]
+                                ]
+                                if (settings['buy'] == 'on') or (chat_id in seller_id):
+                                    keyboard[0].insert(1, InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb)))
+                                if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
+                                    keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
+                                keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+                                password_retry_del(user)
+                            else:
+                                password_retry_time.append(int(time()))
+                                password_retry.append(user)
+                                text = "پسورد اکانت اشتباهه دوباره تلاش کن :("
+                                keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+                                reply_markup = InlineKeyboardMarkup(keyboard)
+                                message.reply_text(text, reply_markup=reply_markup)
+                                return
                         except:
                             text = "چیزی پیدا نشد:("
                     else:
@@ -1740,7 +1760,7 @@ def text_private(bot, message):
                         add_cache(chat_id, f"Auth_{host}${user}")
                         keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                         reply_markup = InlineKeyboardMarkup(keyboard)
-                        messages.reply_text("پسورد اکانتتون بفرستین: ", reply_markup=reply_markup)
+                        message.reply_text("پسورد اکانتتون بفرستین: ", reply_markup=reply_markup)
                         return
                     else:
                         ID, Name, Username = get_all_user_data(host, user)
