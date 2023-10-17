@@ -1699,7 +1699,7 @@ def text_private(bot, message):
                                 USERNAME = "None"
                             csct = text.replace('<pre>', "").replace('</pre>', "")
                             passw = csct.split("Password : ")[1].split("\n")[0]
-                            if link in passw:
+                            if passw in link:
                                 add_user_db(chat_id, message.from_user.first_name, USERNAME, user, host)
                                 cb = host + "$" + user
                                 keyboard = [
