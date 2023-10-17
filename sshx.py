@@ -314,6 +314,7 @@ def Get_user_info_shahan(html, uname):
     passwords = []
     traffics = []
     ips = []
+    ports = []
     expires = []
     days_left = []
     days_left_trubleshoots = []
@@ -343,6 +344,9 @@ def Get_user_info_shahan(html, uname):
                 traffics.append(data.text())
             if 'ip' in data.attributes['name']:
                 ips.append(data.text())
+            if 'port' in data.attributes['name']:
+                if (data.attributes['name']).split("port")[0] != "udp":
+                    ports.append(data.text())
     status = []
     for a in html.css('a'):
         href = a.attributes.get("href", None)
@@ -378,7 +382,7 @@ def Get_user_info_shahan(html, uname):
                 days = days_left_trubleshoots[n]
             else:
                 days = days_left[n]
-            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n], expires[n], descriptions[n]
+            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n], expires[n], descriptions[n], ports[n]
 
 
 def Get_user_info_rocket(datas, uname, r, url):
@@ -753,7 +757,7 @@ class PANNEL:
                 s = self.r.get(self.url + "/p/index.php").text
                 html = HTMLParser(s)
                 self.req = self.url + "/p/newuser.php"
-                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description = Get_user_info_shahan(html, uname)
+                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description, self.SPort = Get_user_info_shahan(html, uname)
 
             elif panel == "rocket":
                 self.uname = uname
@@ -790,6 +794,8 @@ class PANNEL:
                         if inp.attributes.get('value', None) is not None:
                             if "badvpn" in inp.attributes.get('value', None):
                                 udgpw = str(inp.attributes.get('value', None)).split("badvpn")[0]
+                            elif "localhost" in inp.attributes.get('value', None):
+                                udgpw = str(inp.attributes.get('value', None)).split("localhost")[0]
                             else:
                                 udgpw = str(inp.attributes.get('value', None))
             return port, udgpw
@@ -1618,8 +1624,14 @@ class PANNEL:
                 if s.status_code == 200:
                     if traffic == '':
                         traffic = "Unlimited♾"
-                    port, udgpw = self.Ports()
-                    return f"SSH Host : <pre>{self.host}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+                    PORT, udgpw = self.Ports()
+                    try:
+                        s = self.r.get(self.url + "/p/index.php").text
+                        html = HTMLParser(s)
+                        PASSW, TRAFFIC, CONNECTION_LIMIT, IP, DAYS, STATUS, USAGE, DATE, DESCRIPTION, PORT = Get_user_info_shahan(html, uname)
+                    except:
+                        IP = self.host
+                    return f"SSH Host : <pre>{IP}</pre>\nPort : <pre>{PORT}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2067,7 +2079,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nتاریخ انقضا : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{self.SPort}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nتاریخ انقضا : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
             except Exception as e:
                 return "Error: " + str(e)
 
