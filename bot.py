@@ -68,7 +68,7 @@ password_retry_time = []
 filter_name = ['root', 'Root', 'ROOT', 'ubuntu', 'Ubuntu', 'UBUNTU', 'centos', 'Centos', 'CentOS', 'user', 'User', 'Username', 'username']
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
 headers = {"user-agent": user_agent}
 
 
@@ -2047,7 +2047,7 @@ def text_private(bot, message):
                     text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
                     cb = "Confirmed_" + code
                     no = "NO❌_" + code
-                    keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
+                    keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)], [InlineKeyboardButton("پیام به کاربر ✉️", callback_data='ANS_' + str(chat_id))]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     for i in range(len(admin_id)):
                         try:
@@ -2438,7 +2438,7 @@ def text_private(bot, message):
                     text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
                     cb = "ConfirmUPGRADE_" + code
                     no = "NO❌_" + code
-                    keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
+                    keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)], [InlineKeyboardButton("پیام به کاربر ✉️", callback_data='ANS_' + str(chat_id))]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     for i in range(len(admin_id)):
                         try:
@@ -2507,7 +2507,7 @@ def text_private(bot, message):
                     text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\ninfo buy:\n" + t1
                     cb = "ConfirmTraffic_" + code
                     no = "NO❌_" + code
-                    keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
+                    keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)], [InlineKeyboardButton("پیام به کاربر ✉️", callback_data='ANS_' + str(chat_id))]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     for i in range(len(admin_id)):
                         try:
@@ -5272,7 +5272,7 @@ def call_ANS(bot, query):
         cache_list = [data.split("ANS_")[1]]
         add_collector(chat_id, "answer", cache_list, [])
         add_cache(chat_id, "answer")
-        bot.send_message(chat_id, "پیامتون بفرستین  یا ")
+        bot.send_message(chat_id, "پیامتون بفرستین  یا  /cancel")
     else:
         bot.send_message(chat_id, "Please /cancel it first")
 
@@ -7137,6 +7137,7 @@ def call_ID(bot, query):
     user = data.split("$")[1]
     cb = host + "$" + user
     if check_exist_user(host, user) is True:
+        query.edit_message_text(text="wait...")
         try:
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
@@ -9508,7 +9509,7 @@ def image_users(bot, message):
             text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\nاطلاعات خرید اکانت\n" + t1
             cb = "Confirmed_" + code
             no = "NO❌_" + code
-            keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
+            keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)], [InlineKeyboardButton("پیام به کاربر ✉️", callback_data='ANS_' + str(chat_id))]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             for i in range(len(admin_id)):
                 try:
@@ -9532,7 +9533,7 @@ def image_users(bot, message):
             text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\nاطلاعات تمدید:\n" + t1
             cb = "ConfirmUPGRADE_" + code
             no = "NO❌_" + code
-            keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
+            keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)], [InlineKeyboardButton("پیام به کاربر ✉️", callback_data='ANS_' + str(chat_id))]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             for i in range(len(admin_id)):
                 try:
@@ -9580,7 +9581,7 @@ def image_users(bot, message):
             text = "id: <pre>" + str(chat_id) + "</pre>\nName: " + name + '\nUsername: ' + username + "\n\nاطلاعات خرید:\n" + t1
             cb = "ConfirmDeposit_" + code
             no = "NO❌_" + code
-            keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)]]
+            keyboard = [[InlineKeyboardButton("Confirm✅", callback_data=cb), InlineKeyboardButton("NO❌", callback_data=no)], [InlineKeyboardButton("پیام به کاربر ✉️", callback_data='ANS_' + str(chat_id))]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             for i in range(len(admin_id)):
                 try:
