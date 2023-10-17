@@ -63,6 +63,8 @@ seller_id = []
 botusername = []
 process_codes = []
 backup_command = [False]
+password_retry = []
+password_retry_time = []
 filter_name = ['root', 'Root', 'ROOT', 'ubuntu', 'Ubuntu', 'UBUNTU', 'centos', 'Centos', 'CentOS', 'user', 'User', 'Username', 'username']
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
@@ -114,7 +116,7 @@ def Seller_Tools_keys():
 def User_Tools_keys():
     keyboard = [
         [InlineKeyboardButton("💰کیف پول", callback_data='UWM')],
-        [InlineKeyboardButton(" اطلاعات سرویس ℹ️", callback_data='config'), InlineKeyboardButton("📦 سرویس های من", callback_data='service')],
+        [InlineKeyboardButton("📦 سرویس های من", callback_data='service')],
         [InlineKeyboardButton("🆘 آموزش", callback_data='help')]
     ]
     settings = get_settings()
@@ -124,6 +126,11 @@ def User_Tools_keys():
         for i in range(len(keyboard)):
             if InlineKeyboardButton("💰کیف پول", callback_data='UWM') in keyboard[i]:
                 keyboard[i].insert(1, InlineKeyboardButton("🏷 تعرفه قیمت ها", callback_data='price'))
+                break
+    if settings['info_service'] == "on":
+        for i in range(len(keyboard)):
+            if InlineKeyboardButton("📦 سرویس های من", callback_data='service') in keyboard[i]:
+                keyboard[i].insert(0, InlineKeyboardButton(" اطلاعات سرویس ℹ️", callback_data='config'))
                 break
     if settings['test'] == "on":
         keyboard.insert(1, [InlineKeyboardButton("🗒 تست", callback_data='test')])
@@ -357,6 +364,17 @@ def checker_notify(ids):
         return True
     else:
         return False
+
+
+def password_retry_del(user):
+    indexes = []
+    for i in range(len(password_retry)):
+        if password_retry[i] == user:
+            indexes.append(i)
+    indexes = list(reversed(indexes))
+    for i in indexes:
+        del password_retry[i]
+        del password_retry_time[i]
 
 
 def check_host_api(host):
@@ -1685,11 +1703,15 @@ def text_private(bot, message):
                         except:
                             text = "چیزی پیدا نشد:("
                     else:
-                        try:
-                            Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                            text = Session.User_info(settings['dropbear'])
-                        except:
+                        ID, Name, Username = get_all_user_data(host, user)
+                        if ID != chat_id:
                             text = "چیزی پیدا نشد:("
+                        else:
+                            try:
+                                Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+                                text = Session.User_info(settings['dropbear'])
+                            except:
+                                text = "چیزی پیدا نشد:("
                 else:
                     host, st = Check_in_hosts(link)
                     if st is True:
@@ -1714,6 +1736,43 @@ def text_private(bot, message):
                     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                     settings = get_settings()
                     if check_exist_user(host, user) is False:
+                        delete_cache(chat_id)
+                        add_cache(chat_id, f"Auth_{host}${user}")
+                        keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        messages.reply_text("پسورد اکانتتون بفرستین: ", reply_markup=reply_markup)
+                        return
+                    else:
+                        ID, Name, Username = get_all_user_data(host, user)
+                        if ID != chat_id:
+                            text = "چیزی پیدا نشد:("
+                        else:
+                            try:
+                                Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+                                text = Session.User_info(settings['dropbear'])
+                            except:
+                                text = "چیزی پیدا نشد:("
+                else:
+                    text = "چیزی پیدا نشد:("
+                message.reply_text(text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                delete_cache(chat_id)
+
+            elif "Auth_" in status:
+                host = status.split("Auth_")[1].split("$")[0]
+                user = status.split("$")[1]
+                host, st = Check_in_hosts(host)
+                if (password_retry.count(user) == 5):
+                    timer = int(time()) - password_retry_time[password_retry.index(user)]
+                    if (timer <= 3600):
+                        keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        text = f"شما بدلیل اسپم تا  {str(timer)} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
+                        message.reply_text(text, reply_markup=reply_markup)
+                        return
+                if st is True:
+                    port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+                    settings = get_settings()
+                    if check_exist_user(host, user) is False:
                         try:
                             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
                             text = Session.User_info(settings['dropbear'])
@@ -1721,25 +1780,41 @@ def text_private(bot, message):
                                 USERNAME = message.from_user.username
                             except:
                                 USERNAME = "None"
-                            add_user_db(chat_id, message.from_user.first_name, USERNAME, user, host)
-                            cb = host + "$" + user
-                            keyboard = [
-                                [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('SELFCPA_' + cb))],
-                                [InlineKeyboardButton("📲 کد QR و لینک اتصال", callback_data=f'QRCODE_{cb}')]
-                            ]
-                            if (settings['buy'] == 'on') or (chat_id in seller_id):
-                                keyboard[0].insert(1, InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb)))
-                            if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
-                                keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
-                            keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+                            csct = text.replace('<pre>', "").replace('</pre>', "")
+                            passw = csct.split("Password : ")[1].split("\n")[0]
+                            if link in passw:
+                                add_user_db(chat_id, message.from_user.first_name, USERNAME, user, host)
+                                cb = host + "$" + user
+                                keyboard = [
+                                    [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('SELFCPA_' + cb))],
+                                    [InlineKeyboardButton("📲 کد QR و لینک اتصال", callback_data=f'QRCODE_{cb}')]
+                                ]
+                                if (settings['buy'] == 'on') or (chat_id in seller_id):
+                                    keyboard[0].insert(1, InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb)))
+                                if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
+                                    keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
+                                keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+                                password_retry_del(user)
+                            else:
+                                password_retry_time.append(int(time()))
+                                password_retry.append(user)
+                                text = "پسورد اکانت اشتباهه دوباره تلاش کن :("
+                                keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+                                reply_markup = InlineKeyboardMarkup(keyboard)
+                                message.reply_text(text, reply_markup=reply_markup)
+                                return
                         except:
                             text = "چیزی پیدا نشد:("
                     else:
-                        try:
-                            Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                            text = Session.User_info(settings['dropbear'])
-                        except:
+                        ID, Name, Username = get_all_user_data(host, user)
+                        if ID != chat_id:
                             text = "چیزی پیدا نشد:("
+                        else:
+                            try:
+                                Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+                                text = Session.User_info(settings['dropbear'])
+                            except:
+                                text = "چیزی پیدا نشد:("
                 else:
                     text = "چیزی پیدا نشد:("
                 message.reply_text(text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -9041,16 +9116,41 @@ def call_RWUAD(bot, query):
         emoji_3 = "🔴"
         cb_3 = 'on'
         emoji_cb_3 = "🟢"
+    if settings['info_service'] == "on":
+        emoji_4 = "🟢"
+        cb_4 = 'off'
+        emoji_cb_4 = "🔴"
+    else:
+        emoji_4 = "🔴"
+        cb_4 = 'on'
+        emoji_cb_4 = "🟢"
     keyboard = [
         [InlineKeyboardButton(f"Delete: {cb} {emoji_cb}", callback_data=f'JDOSSK_{cb}')],
         [InlineKeyboardButton(f"Server selection: {cb_2} {emoji_cb_2}", callback_data=f'CJSLC_{cb_2}')],
-        [InlineKeyboardButton(f"Dropbear Port: {cb_3} {emoji_cb_3}", callback_data=f'Dropbear_{cb_3}')]
+        [InlineKeyboardButton(f"Dropbear Port: {cb_3} {emoji_cb_3}", callback_data=f'Dropbear_{cb_3}')],
+        [InlineKeyboardButton(f"Account info button: {cb_4} {emoji_cb_4}", callback_data=f'ISCSO_{cb_4}')]
     ]
-    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3
-    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته" + t0
+    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3 + "\nAccount info button: " + settings['info_service'] + " " + emoji_4
+    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته\n\nگزینه چهارم برای دکمه اطلاعات سرویس هست که نمایش داده بشه یا نه" + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('ISCSO_'))
+def call_ISCSO(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    info_service = data.split("ISCSO_")[1]
+    settings = get_settings()
+    settings['info_service'] = info_service
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='RWUAD')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('Dropbear_'))
