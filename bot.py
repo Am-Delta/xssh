@@ -1669,7 +1669,7 @@ def text_private(bot, message):
     else:
         status = get_cache_status(chat_id)
 
-        if (chat_id not in (admin_id)) and ((status == "config") or ("host_" in status) or ("support" in status) or ("USP_" in status) or ("USU_" in status) or ("userwpm" == status) or ("usergift" == status) or ("Uname_" in status)):
+        if (chat_id not in (admin_id)) and ((status == "config") or ("host_" in status) or ("support" in status) or ("USP_" in status) or ("USU_" in status) or ("userwpm" == status) or ("usergift" == status) or ("Uname_" in status) or ("Auth_" in status)):
             if (status == "config"):
                 try:
                     host, user = get_host_username(link)
@@ -1681,10 +1681,10 @@ def text_private(bot, message):
                 if host is not None:
                     if (password_retry.count(user) == 5):
                         timer = int(time()) - password_retry_time[password_retry.index(user)]
-                        if (timer <= 3600):
+                        if (timer <= 3601):
                             keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                             reply_markup = InlineKeyboardMarkup(keyboard)
-                            text = f"شما بدلیل اسپم تا  {str(timer)} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
+                            text = f"شما بدلیل اسپم تا  {str(3600 - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
                             message.reply_text(text, reply_markup=reply_markup)
                             return
                     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
@@ -1777,7 +1777,7 @@ def text_private(bot, message):
                 message.reply_text(text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                 delete_cache(chat_id)
 
-            elif "Auth_" in status:
+            elif ("Auth_" in status):
                 host = status.split("Auth_")[1].split("$")[0]
                 user = status.split("$")[1]
                 host, st = Check_in_hosts(host)
@@ -4514,6 +4514,29 @@ def call_enable(bot, query):
             query.edit_message_text(text="یکی از اکانت هارو انتخاب کن:", reply_markup=Reply_action_sellers(hosts, accounts, "EIXS_"))
 
 
+@app.on_callback_query(filters.regex('VDSLF_'))
+def call_VDSLF(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in (admin_id + seller_id):
+        query.answer("Access denied", show_alert=True)
+        return
+    rt = query.data
+    host = rt.split("VDSLF_")[1].split("$")[0]
+    user = rt.split("$")[1]
+    keyboard = [[InlineKeyboardButton("<<", callback_data='back_seller')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if check_exist_user(host, user) is True:
+        query.edit_message_text(text="wait...")
+        port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+        try:
+            Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+            query.edit_message_text(text=Session.User_info(get_settings()['dropbear']), reply_markup=reply_markup)
+        except Exception as e:
+            query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
+    else:
+        query.answer("نام کاربری پیدا نشد", show_alert=True)
+
+
 @app.on_callback_query(filters.regex('EIXS_'))
 def call_EIXS(bot, query):
     chat_id = query.message.chat.id
@@ -4943,8 +4966,11 @@ def call_userinfo(bot, query):
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("UI_"))
         else:
-            add_cache(query.message.chat.id, "infohost")
-            query.edit_message_text(text="آدرس سرور بفرستین")
+            accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
+            if status is False:
+                query.answer("سرویسی پیدا نشد!", show_alert=True)
+            else:
+                query.edit_message_text(text="یکی از اکانت هارو انتخاب کن:", reply_markup=Reply_action_sellers(hosts, accounts, "VDSLF_"))
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -6500,6 +6526,9 @@ def call_Confirmed_deposit(bot, query):
 
 @app.on_callback_query(filters.regex('config'))
 def call_config(bot, query):
+    if get_settings()['info_service'] == "off":
+        query.answer("Access denied", show_alert=True)
+        return
     chat_id = query.message.chat.id
     if check_cache(chat_id) is False:
         add_cache(chat_id, "config")
