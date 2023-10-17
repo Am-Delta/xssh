@@ -1781,6 +1781,8 @@ def text_private(bot, message):
                 host = status.split("Auth_")[1].split("$")[0]
                 user = status.split("$")[1]
                 host, st = Check_in_hosts(host)
+                keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
                 if (password_retry.count(user) == 5):
                     timer = int(time()) - password_retry_time[password_retry.index(user)]
                     if (timer <= 3600):
