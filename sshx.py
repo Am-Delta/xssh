@@ -352,7 +352,10 @@ def Get_user_info_shahan(html, uname):
                     elif "localhost" in data.text():
                         udgpw = (data.text()).split("localhost")[0]
                     else:
-                        udgpw = ""
+                        try:
+                            udgpw = data.text()
+                        except:
+                            udgpw = ""
                     udgpws.append(udgpw)
                 else:
                     ports.append(data.text())
@@ -1640,6 +1643,8 @@ class PANNEL:
                     except:
                         IP = self.host
                         PORT, UDGPW = self.Ports()
+                    #IP = self.host
+                    #PORT, UDGPW = self.Ports()
                     return f"SSH Host : <pre>{IP}</pre>\nPort : <pre>{PORT}</pre>\nUdgpw : <pre>{UDGPW}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
