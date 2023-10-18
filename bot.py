@@ -1594,7 +1594,16 @@ def start_user(bot, message):
             except:
                 username = 'None'
             add_client_db(chat_id, name, username, 'None', 0)
-
+            if get_settings()['notification'] == "on":
+                for admin in admin_id:
+                    try:
+                        mention = "<a href='tg://user?id=" + str(chat_id) + "'>" + name + "</a>"
+                        text = f"⚪️ کاربر جدید: {mention} با آیدی عددی <pre>{str(chat_id)}</pre> و یوزرنیم  {username}"
+                        bot.send_message(admin, text, parse_mode=enums.ParseMode.HTML)
+                    except:
+                        pass
+            if get_settings()['before_start_msg'] != "None":
+                message.reply_text(get_settings()['before_start_msg'])
         Buttons = [[KeyboardButton("ارسال شماره تلفن 📞", request_contact=True)]]
         reply_markup = ReplyKeyboardMarkup(Buttons, resize_keyboard=True)
         text = "لطفا برای استفاده از ربات دکمه پایین کلیک کنین و شمارتون بفرستین👇"
@@ -3124,6 +3133,18 @@ def text_private(bot, message):
             else:
                 message.reply_text("اینطوری پروکسیو بفرستین:\n https://t.me/proxy?server=... or /cancel")
 
+        elif "before_start_msg" == status:
+            if len(link) <= 3900:
+                settings = get_settings()
+                settings['before_start_msg'] = fixed_link_json(link)
+                update_settings(settings)
+                keyboard = [[InlineKeyboardButton("<<", callback_data='QPAEOI')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text("Done✔️", reply_markup=reply_markup)
+                delete_cache(chat_id)
+            else:
+                message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
+
         elif "Connectionmsg_" in status:
             if len(link) <= 128:
                 host = status.split("Connectionmsg_")[1]
@@ -4074,7 +4095,7 @@ def call_hosts(bot, query):
             Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
             text = Session.Panel_Short_info()
             text += f"\n\nName: {remark}\nLogin info User: {username}\nPass: {password}"
-            if "Premium: ✔️" in text:
+            if ("Premium: ✔️" in text):
                 keyboard = [
                     [InlineKeyboardButton("✉️پیام اتصال", callback_data=f"HSMSC_{host}"), InlineKeyboardButton("🔒محدودیت کاربر", callback_data=f"HSUL_{host}")],
                     [InlineKeyboardButton("🎁هدیه روزانه", callback_data=f"HSUGift_{host}"), InlineKeyboardButton("🟢کاربران آنلاین", callback_data=f"HSOU_{host}")],
@@ -4085,13 +4106,18 @@ def call_hosts(bot, query):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 query.edit_message_text(text=text, reply_markup=reply_markup)
             else:
-                keyboard = [
-                    [InlineKeyboardButton("⚠️کاربران نزدیک اتمام", callback_data=f"HSCU_{host}")],
-                    [InlineKeyboardButton("🔴کاربران غیرفعال", callback_data=f"HSDU_{host}"), InlineKeyboardButton("🟢کاربران آنلاین", callback_data=f"HSOU_{host}")]
-                ]
-                keyboard.append([InlineKeyboardButton("🔙Back", callback_data="servers")])
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                query.edit_message_text(text=text, reply_markup=reply_markup)
+                if "Error:" not in text:
+                    keyboard = [
+                        [InlineKeyboardButton("⚠️کاربران نزدیک اتمام", callback_data=f"HSCU_{host}")],
+                        [InlineKeyboardButton("🔴کاربران غیرفعال", callback_data=f"HSDU_{host}"), InlineKeyboardButton("🟢کاربران آنلاین", callback_data=f"HSOU_{host}")]
+                    ]
+                    keyboard.append([InlineKeyboardButton("🔙Back", callback_data="servers")])
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    query.edit_message_text(text=text, reply_markup=reply_markup)
+                else:
+                    keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    query.edit_message_text(text=text, reply_markup=reply_markup)
         except Exception as e:
             keyboard = [[InlineKeyboardButton("🔙Back", callback_data="servers")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -6032,6 +6058,10 @@ def call_Confirmed(bot, query):
     if "*" in code:
         code = code.replace("*", "")
     if check_code_exists(code) is True:
+        if code in process_codes:
+            query.answer("This operation is Processing...")
+            return
+        process_codes.append(code)
         chat_id, cache_list = get_code_buy_data(code)
         try:
             username_admin = "@" + query.message.chat.username
@@ -6107,6 +6137,8 @@ def call_Confirmed(bot, query):
                 bot.edit_message_text(query.message.chat.id, msg, f"Error: {text}")
         except Exception as e:
             bot.edit_message_text(query.message.chat.id, msg, f"Error: {str(e)}")
+        if code in process_codes:
+            process_codes.remove(code)
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -6387,6 +6419,10 @@ def call_Confirmed_UPGRADE(bot, query):
     data = query.data
     code = data.split("ConfirmUPGRADE_")[1]
     if check_code_exists(code) is True:
+        if code in process_codes:
+            query.answer("This operation is Processing...")
+            return
+        process_codes.append(code)
         chat_id, cache_list = get_code_buy_data(code)
         try:
             username_admin = "@" + query.message.chat.username
@@ -6433,6 +6469,8 @@ def call_Confirmed_UPGRADE(bot, query):
                 bot.edit_message_text(query.message.chat.id, msg, f"Error: {server_msg}")
         except Exception as e:
             bot.edit_message_text(query.message.chat.id, msg, f"Error: {str(e)}")
+        if code in process_codes:
+            process_codes.remove(code)
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -6449,6 +6487,10 @@ def call_Confirmed_Traffic(bot, query):
     data = query.data
     code = data.split("ConfirmTraffic_")[1]
     if check_code_exists(code) is True:
+        if code in process_codes:
+            query.answer("This operation is Processing...")
+            return
+        process_codes.append(code)
         chat_id, cache_list = get_code_buy_data(code)
         try:
             username_admin = "@" + query.message.chat.username
@@ -6460,7 +6502,6 @@ def call_Confirmed_Traffic(bot, query):
         msg = bot.send_message(query.message.chat.id, "wait...").id
         try:
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-            process_codes.append(code)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
             server_msg = Session.Update_Traffic(GB)
             if "Error" not in server_msg:
@@ -6472,7 +6513,6 @@ def call_Confirmed_Traffic(bot, query):
                 else:
                     bot.send_message(chat_id, f"✅ترافیک افزایش پیدا کرد\n\nUsername : {user}\nSSH Host : {host}")
                 delete_code_buy(code)
-                process_codes.remove(code)
                 bot.edit_message_text(query.message.chat.id, msg, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
                 try:
                     if user in checked_users:
@@ -6484,6 +6524,8 @@ def call_Confirmed_Traffic(bot, query):
                 bot.edit_message_text(query.message.chat.id, msg, f"Error: {server_msg}")
         except Exception as e:
             bot.edit_message_text(query.message.chat.id, msg, f"Error: {str(e)}")
+        if code in process_codes:
+            process_codes.remove(code)
     else:
         if check_admin_confirm(code) is True:
             Name, Username, Confirm, Checked = get_check_admin_data(code)
@@ -7909,13 +7951,23 @@ def call_ZBSHP(bot, query):
         [InlineKeyboardButton("🚦 وضعیت خرید ترافیک", callback_data='BTOPtion'), InlineKeyboardButton("🔐وضعیت خرید اکانت", callback_data='BSOPtion')],
         [InlineKeyboardButton("🔄تنظیم تمدید کاربر ", callback_data='ZQUC')],
         [InlineKeyboardButton("📃 پیام بعد از خرید اکانت کاربر ", callback_data='PODSC')],
-        [InlineKeyboardButton(f"ساخت از اولین اتصال : {cb} {emoji_cb}", callback_data=f'VKDLS_{cb}')]
+        [InlineKeyboardButton(f"ساخت از اولین اتصال : {cb} {emoji_cb}", callback_data=f'VKDLS_{cb}')],
+        [InlineKeyboardButton("🔑تنظیم پسورد", callback_data='DKSJJHJ')]
     ]
     t0 = "\n\nCurrent: " + settings['first_connect'] + " " + emoji
     text = '<b>Shop Settings</b>\n\n' + "تنظیمات خرید و تمدید اکانت و ترافیک\n\nاگه گزینه روشن باشه 🟢 on کاربر یا فروشنده وقتی اکانتی رو میخره از اولین اتصال روز اکانت درست میشه و اگه خاموش باشه از همون لحظه شروع میشه " + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('DKSJJHJ'))
+def call_DKSJJHJ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.answer("Soon...", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('VKDLS_'))
@@ -9137,6 +9189,97 @@ def call_DelSELP(bot, query):
     query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('NSCLS'))
+def call_NSCLS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    if settings['notification'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+        emoji_cb = "🔴"
+    else:
+        emoji = "🔴"
+        cb = 'on'
+        emoji_cb = "🟢"
+    keyboard = [
+        [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'NSCXZ_{cb}')],
+        [InlineKeyboardButton("🗒پیام قبل استارت", callback_data='QPAEOI')]
+    ]
+    text = '<b>Notification Settings</b>\n\n' + 'بهتون اطلاع میده کی عضو ربات شده \n\nگزینه دوم میتونین برای کاربر یه پیامی رو تنظیم کنین که بعد از استارت نمایش داده بشه و فقط یکبار نشون داده میشه' + "\n\nCurrent: " + settings['notification'] + " " + emoji
+    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('QAAEOI'))
+def call_QAAEOI(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    delete_cache(chat_id)
+    add_cache(chat_id, "before_start_msg")
+    text = "پیامتو بفرست"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='QPAEOI')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('QDAEOI'))
+def call_QDAEOI(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    settings['before_start_msg'] = "None"
+    update_settings(settings)
+    text = "Done✔️"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='QPAEOI')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('QPAEOI'))
+def call_QPAEOI(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    delete_cache(chat_id)
+    settings = get_settings()
+    if settings['before_start_msg'] == "None":
+        keyboard = [[InlineKeyboardButton("Add➕", callback_data='QAAEOI')]]
+    else:
+        keyboard = [
+            [InlineKeyboardButton("Edit✏️", callback_data='QAAEOI')],
+            [InlineKeyboardButton("Delete✖️", callback_data='QDAEOI')],
+        ]
+    text = '<b>After Start MSG Settings</b>\n\n' + "Current: \n" + settings['before_start_msg']
+    keyboard.append([InlineKeyboardButton("<<", callback_data='NSCLS')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('NSCXZ_'))
+def call_NSCXZ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    notification = data.split("NSCXZ_")[1]
+    settings = get_settings()
+    settings['notification'] = notification
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='NSCLS')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('RWUAD'))
 def call_RWUAD(bot, query):
     chat_id = query.message.chat.id
@@ -9274,7 +9417,7 @@ def call_settings(bot, query):
         return
     keyboard = [
         [InlineKeyboardButton("🛒تنظیمات خرید ", callback_data='ZBSHP'), InlineKeyboardButton("تنظیم دسترسی 🔐", callback_data='RWUAD')],
-        [InlineKeyboardButton("💲 تنظیمات فروشنده ها", callback_data='XSM')],
+        [InlineKeyboardButton("💲 تنظیمات فروشنده ها", callback_data='XSM'), InlineKeyboardButton("🔔اطلاع رسانی ", callback_data='NSCLS')],
         [InlineKeyboardButton("📃پیام استارت", callback_data='WSMSG'), InlineKeyboardButton("🏷 پیام تعرفه قیمت", callback_data='WLMSG')],
         [InlineKeyboardButton("❔ بخش آموزش کاربر", callback_data='Tutorials'), InlineKeyboardButton("📩 تنظیم پشتیبانی", callback_data='SID')],
         [InlineKeyboardButton("🗑حذف خودکار کاربر", callback_data='AutoDelete'), InlineKeyboardButton("💲قیمت دلار", callback_data='USD')],
@@ -9591,7 +9734,6 @@ def image_users(bot, message):
                     pass
             update_code_status(code, "checkdeposit")
             message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
-
         delete_cache(chat_id)
 
 app.run()
