@@ -71,6 +71,16 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+    if settings.get("notification", None) is None:
+        add_dict = {
+            "notification": "on",
+            "before_start_msg": "None",
+            "password_method": "number",
+            "password_length": 6
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
@@ -153,7 +163,8 @@ def run():
     os.system('nohup python3 -u session-updater.py &')
     os.system('nohup python3 -u backup-ssh.py &')
     os.system('nohup python3 -u bot.py &')
-    os.remove('sshdb.py')
+    if Path("sshdb.py").is_file() is True:
+        os.remove('sshdb.py')
 
 
 def options_set():
