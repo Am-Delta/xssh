@@ -239,6 +239,15 @@ def Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, 
         txt.writelines(data + "\n")
 
 
+def host_to_end(host):
+    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(host)
+    if "host has been removed from the list" in Remove_Host(host):
+        Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
+        return "Done✔️"
+    else:
+        return "Error"
+
+
 def Update_host(old_host, new_host):
     port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(old_host)
     if "host has been removed from the list" in Remove_Host(old_host):
