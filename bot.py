@@ -6714,6 +6714,7 @@ def call_DTRS(bot, query):
         if "Error host" not in text:
             delete_host_users_accounts(host)
         bot.send_message(chat_id, text, reply_markup=reply_markup)
+        query.edit_message_text(text="Done✔️")
     else:
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
@@ -7005,6 +7006,32 @@ def call_LKXHC(bot, query):
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('CGDJS'))
+def call_CGDJS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="با کلیک روی یکی از سرورا , اون سرور به ته لیست میره و برای اکانت تست یا انتخاب سرور بصورت رندوم اولویت با اولین سرور داخل لیست هست.", reply_markup=server_cb_creator("SDGXQ_"))
+
+
+@app.on_callback_query(filters.regex('SDGXQ_'))
+def call_SDGXQ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    keyboard = [[InlineKeyboardButton("<<", callback_data='CGDJS')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    hosts, remarks = sshx.HOSTS()
+    if host in hosts:
+        query.edit_message_text(text=sshx.host_to_end(host), reply_markup=reply_markup)
+    else:
+        query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('SMT'))
 def call_SMT(bot, query):
     chat_id = query.message.chat.id
@@ -7018,7 +7045,8 @@ def call_SMT(bot, query):
         [InlineKeyboardButton("⚫️ظرفیت سرورها", callback_data='full')],
         [InlineKeyboardButton("➖ حذف", callback_data='RST'), InlineKeyboardButton("➕ افزودن", callback_data='AST')],
         [InlineKeyboardButton("تغییر پورت ssh", callback_data='XESSP'), InlineKeyboardButton("تغییر پورت udp", callback_data='UXEP')],
-        [InlineKeyboardButton("تغییر نام سرور 🏳️", callback_data='FSLJC')],
+        [InlineKeyboardButton("🏳️تغییر نام سرور ", callback_data='FSLJC')],
+        [InlineKeyboardButton("⚪️تغییر اولویت انتخاب سرور", callback_data='CGDJS')],
         [InlineKeyboardButton("🔄 تغییر دامین و یوزر و پسورد و پورت پنل", callback_data='TST')],
         [InlineKeyboardButton("📩 ارسال پیام به کاربران خاص یک سرور", callback_data='MST')]
     ]
@@ -9734,6 +9762,8 @@ def image_users(bot, message):
                     pass
             update_code_status(code, "checkdeposit")
             message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
+
+
         delete_cache(chat_id)
 
 app.run()
