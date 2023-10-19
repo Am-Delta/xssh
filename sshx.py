@@ -18,6 +18,8 @@ def open_session(host, port):
         r.cookies.update(pickle.load(f))
     troubleshooting(host)
     protocol = get_protocol_cache(host)
+    if (port == "80") and (protocol == "https"):
+        port = "443"
     url = protocol + "://" + host + ":" + port
     return url, r
 
