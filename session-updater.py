@@ -19,8 +19,16 @@ def main():
             if Path(session).is_file() is False:
                 if sshx.Login(username, password, host, port, panel) is False:
                     do = False
+            if (Path("protocol-cache.txt").is_file() is False) or (sshx.get_protocol_cache(host) is None):
+                protocol = sshx.check_panel_protocol(host)
+                sshx.add_protocol_cache(host, protocol)
             if do is True:
                 try:
+                    protocol_cache = sshx.get_protocol_cache(host)
+                    protocol_check = sshx.check_panel_protocol(host)
+                    if protocol_check != protocol_cache:
+                        sshx.remove_protocol_cache(host)
+                        sshx.add_protocol_cache(host, protocol_check)
                     url, r = sshx.open_session(host, port)
                     if sshx.Test(r, host, port, panel, 'updater') is False:
                         sshx.Login(username, password, host, port, panel)
