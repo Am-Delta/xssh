@@ -3,6 +3,7 @@ import json
 import os
 import re
 import jdatetime
+from pathlib import Path
 from bs4 import BeautifulSoup
 from selectolax.parser import HTMLParser
 from datetime import datetime
@@ -10,16 +11,14 @@ from time import time
 from uuid import uuid4
 
 
-#only for this os
-proxy = {'http': 'http://127.0.0.1:10809', 'https': 'http://127.0.0.1:10809'}
-
-
 def open_session(host, port):
     r = requests.session()
     session = "ssh/" + host + ".session"
     with open(session, 'rb') as f:
         r.cookies.update(pickle.load(f))
-    url = "http://" + host + ":" + port
+    troubleshooting(host)
+    protocol = get_protocol_cache(host)
+    url = protocol + "://" + host + ":" + port
     return url, r
 
 
@@ -31,9 +30,67 @@ def get_token(req):
                 return data.attributes['content']
 
 
+def check_panel_protocol(host):
+    url = 'https://' + host
+    try:
+        response = requests.head(url, allow_redirects=True)
+        if response.status_code == 200:
+            if response.url.startswith("https://"):
+                return "https"
+            elif response.url.startswith("http://"):
+                return "http"
+            else:
+                #Unknown
+                return "http"
+        else:
+            return "http"
+    except:
+        return "http"
+
+
+def troubleshooting(host):
+    if (Path("protocol-cache.txt").is_file() is False) or (get_protocol_cache(host) is None):
+        protocol = check_panel_protocol(host)
+        add_protocol_cache(host, protocol)
+
+
+def add_protocol_cache(host, protocol):
+    with open("protocol-cache.txt", 'a+') as f:
+        if host not in f.read():
+            f.writelines(f"{host}:{protocol}\n")
+
+
+def remove_protocol_cache(host):
+    with open("protocol-cache.txt", "r") as f:
+        lines = f.readlines()
+    for line in lines:
+        if host in line:
+            Line = line.replace("\n", "")
+            break
+    try:
+        with open("protocol-cache.txt", "w") as f:
+            for line in lines:
+                if line.strip("\n") != Line:
+                    f.write(line)
+    except Exception as e:
+        os.remove("protocol-cache.txt")
+        with open("protocol-cache.txt", "a+") as f:
+            for line in lines:
+                f.writelines(line)
+
+
+def get_protocol_cache(host):
+    with open("protocol-cache.txt", 'r') as f:
+        for data in f.readlines():
+            if host in data:
+                return data.split(':')[1].replace('\n', '')
+    return None
+
+
 def Test(r, host, port, panel, status):
     if panel == "shahan":
-        s = r.get(f"http://{host}/p/index.php").text
+        protocol = check_panel_protocol(host)
+        s = r.get(f"{protocol}://{host}/p/index.php").text
         html = HTMLParser(s)
         for button in html.css('button'):
             if button.attributes.get("name", None) is not None:
@@ -43,7 +100,8 @@ def Test(r, host, port, panel, status):
 
     elif panel == "rocket":
         if status == 'updater':
-            s = r.get(f"http://{host}:{port}/settings").text
+            protocol = check_panel_protocol(host + ':' + port)
+            s = r.get(f"{protocol}://{host}:{port}/settings").text
             html = HTMLParser(s)
             for form in html.css('form'):
                 if form.attributes.get("action", None) is not None:
@@ -52,7 +110,8 @@ def Test(r, host, port, panel, status):
         return True
 
     elif panel == "xpanel":
-        s = r.get(f"http://{host}:{port}/cp/users").text
+        protocol = check_panel_protocol(host + ':' + port)
+        s = r.get(f"{protocol}://{host}:{port}/cp/users").text
         html = HTMLParser(s)
         for form in html.css('form'):
             if form.attributes.get("action", None) is not None:
@@ -64,15 +123,18 @@ def Test(r, host, port, panel, status):
 def Login(username, password, host, port, panel):
     r = requests.session()
     if panel == "shahan":
-        login_path = f"http://{host}/p/login.php"
+        protocol = check_panel_protocol(host)
+        login_path = f"{protocol}://{host}/p/login.php"
         data = {'username': username, 'password': password, "loginsubmit": ""}
 
     elif panel == "xpanel":
-        login_path = f"http://{host}:{port}/login"
+        protocol = check_panel_protocol(host + ':' + port)
+        login_path = f"{protocol}://{host}:{port}/login"
         data = {'_token': get_token(r.get(login_path).text), 'username': username, 'password': password}
 
     elif panel == "rocket":
-        login_path = f"http://{host}:{port}/ajax/login"
+        protocol = check_panel_protocol(host + ':' + port)
+        login_path = f"{protocol}://{host}:{port}/ajax/login"
         data = {'username': username, 'password': password, "remember": ""}
 
     session = "ssh/" + host + ".session"
@@ -83,6 +145,12 @@ def Login(username, password, host, port, panel):
             if responde.status_code <= 302:
                 if Test(r, host, port, panel, 'login') is True:
                     print(f"Login and saved session at {session} | Code: ", responde.status_code)
+                    if Path("protocol-cache.txt").is_file() is False:
+                        add_protocol_cache(host, protocol)
+                    else:
+                        if get_protocol_cache(host) is not None:
+                            remove_protocol_cache(host)
+                        add_protocol_cache(host, protocol)
                     return True
                 else:
                     print("Error : Test")
@@ -280,6 +348,10 @@ def get_cache_xpanel(html):
             tdx = td.text().replace(" ", "").replace("\n", "")
             cache.append(tdx)
         elif "Expired" in td.text():
+            cache.append("Deactive")
+        elif "فعال" == td.text():
+            cache.append("Active")
+        elif "غیرفعال" == td.text():
             cache.append("Deactive")
         elif "GB" in td.text():
             tdx = td.text().replace(" ", "").replace("\n", "")
@@ -746,7 +818,7 @@ def check_premium_spliter(html):
         href = a.attributes.get("href", None)
         if href is None:
             return True, "Yes"
-        elif "http://shahanpanel.online" in href:
+        elif "shahanpanel.online" in href:
             return False, "NO"
         else:
             return True, "YES"
@@ -1004,17 +1076,17 @@ class PANNEL:
                 info = []
                 for sec in html.css('h6'):
                     info.append(sec.text())
-                clients = (info[10]).replace("All User: ", "")
+                clients = (info[10]).replace("All User: ", "").replace("تمام کاربران: ", "")
                 onlines = info[9]
                 active = info[5]
                 disabled = info[8]
                 band_info = []
                 for sec in html.css("h5"):
                     t = sec.text()
-                    if "Server" in t:
-                        t = t.replace("Server", "")
-                    elif "Client" in t:
-                        t = t.replace("Client", "")
+                    if ("Server" in t) or ("سرور" in t):
+                        t = t.replace("Server", "").replace("سرور", "")
+                    elif ("Client" in t) or ("کلاینت" in t):
+                        t = t.replace("Client", "").replace("کلاینت", "")
                     band_info.append(t)
                 server_traffic, clients_usage = get_traffic_xpanel(band_info)
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
@@ -1106,17 +1178,17 @@ class PANNEL:
                 info = []
                 for sec in html.css('h6'):
                     info.append(sec.text())
-                clients = (info[10]).replace("All User: ", "")
+                clients = (info[10]).replace("All User: ", "").replace("تمام کاربران: ", "")
                 onlines = info[9]
                 active = info[5]
                 disabled = info[8]
                 band_info = []
                 for sec in html.css("h5"):
                     t = sec.text()
-                    if "Server" in t:
-                        t = t.replace("Server", "")
-                    elif "Client" in t:
-                        t = t.replace("Client", "")
+                    if ("Server" in t) or ("سرور" in t):
+                        t = t.replace("Server", "").replace("سرور", "")
+                    elif ("Client" in t) or ("کلاینت" in t):
+                        t = t.replace("Client", "").replace("کلاینت", "")
                     band_info.append(t)
                 server_traffic, clients_usage = get_traffic_xpanel(band_info)
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
@@ -1156,7 +1228,7 @@ class PANNEL:
                 info = []
                 for sec in html.css('h6'):
                     info.append(sec.text())
-                return str((info[10]).replace("All User: ", ""))
+                return str((info[10]).replace("All User: ", "").replace("تمام کاربران: ", ""))
             except Exception as e:
                 return "Error: " + str(e)
 
