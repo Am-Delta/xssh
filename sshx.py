@@ -32,6 +32,15 @@ def get_token(req):
                 return data.attributes['content']
 
 
+def check_lang_details(html):
+    for span in html.css('span.pc-mtext'):
+        if "داشبورد" in span.text():
+            return "Fa"
+        elif "Dashboard" in span.text():
+            return "En"
+    return "Fa"
+
+
 def check_panel_protocol(host):
     url = 'https://' + host
     try:
@@ -119,6 +128,11 @@ def Test(r, host, port, panel, status):
             if form.attributes.get("action", None) is not None:
                 if "/login" in form.attributes['action']:
                     return False
+        try:
+            if check_lang_details(html) != "en":
+                r.get(f"{protocol}://{host}:{port}/cp/settings/lang/en")
+        except:
+            pass
         return True
 
 
@@ -146,7 +160,7 @@ def Login(username, password, host, port, panel):
             pickle.dump(r.cookies, f)
             if responde.status_code <= 302:
                 if Test(r, host, port, panel, 'login') is True:
-                    print(f"Login and saved session at {session} | Code: ", responde.status_code)
+                    print(f"Login and saved session at {host} | Code: ", responde.status_code)
                     if Path("protocol-cache.txt").is_file() is False:
                         add_protocol_cache(host, protocol)
                     else:
@@ -1000,6 +1014,16 @@ class PANNEL:
             print("over view: ", info[0])
             print("All available: ", count)
 
+    def Change_lang(self):
+        if self.panel == "xpanel":
+            self.r.get(self.url + "/cp/settings/lang/en")
+
+    def Check_lang(self):
+        if self.panel == "xpanel":
+            s = self.r.get(self.url + "/cp/dashboard").text
+            html = HTMLParser(s)
+            return check_lang_details(html)
+
     def Backup(self):
         f = uuid4().hex[0:8] + ".sql"
         try:
@@ -1796,6 +1820,7 @@ class PANNEL:
                     'desc': description,
                 }
             else:
+                days -= 1
                 Date = str(datetime.fromtimestamp(time() + (days * 86400))).split(" ")[0]
                 payload = {
                     '_token': get_token(self.r.get(self.url + "/cp/users").text),
