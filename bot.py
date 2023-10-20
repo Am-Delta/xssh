@@ -8,6 +8,7 @@ import socket
 import qrcode
 import requests
 import jdatetime
+import payment
 import cryptocompare
 from uuid import uuid4
 from pathlib import Path
@@ -65,9 +66,11 @@ process_codes = []
 backup_command = [False]
 password_retry = []
 password_retry_time = []
+plisio_retry = []
+plisio_retry_time = []
+plisio_attemp = []
 filter_name = ['root', 'Root', 'ROOT', 'ubuntu', 'Ubuntu', 'UBUNTU', 'centos', 'Centos', 'CentOS', 'user', 'User', 'Username', 'username']
 
-API_main_address = "http://hd.ladokpro.pw:5000/usd"
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
 headers = {"user-agent": user_agent}
 
@@ -303,7 +306,14 @@ def server_cb_creator(job):
 
 
 def server_cb_creator_user(job, data):
-    hosts, remarks = sshx.HOSTS()
+    file_hosts, file_remarks = sshx.HOSTS()
+    hosts = []
+    remarks = []
+    settings = get_settings()
+    for host in file_hosts:
+        if host not in settings['server_archives']:
+            hosts.append(host)
+            remarks.append(file_remarks[file_hosts.index(host)])
     keyboard = []
     if len(hosts) >= 2:
         if len(hosts) % 2 == 0:
@@ -366,15 +376,25 @@ def checker_notify(ids):
         return False
 
 
-def password_retry_del(user):
+def password_retry_del(chat_id):
     indexes = []
     for i in range(len(password_retry)):
-        if password_retry[i] == user:
+        if password_retry[i] == chat_id:
             indexes.append(i)
     indexes = list(reversed(indexes))
     for i in indexes:
         del password_retry[i]
         del password_retry_time[i]
+
+
+def plisio_attemp_del(chat_id):
+    indexes = []
+    for i in range(len(plisio_attemp)):
+        if plisio_attemp[i] == chat_id:
+            indexes.append(i)
+    indexes = list(reversed(indexes))
+    for i in indexes:
+        del plisio_attemp[i]
 
 
 def check_host_api(host):
@@ -412,160 +432,8 @@ def check_host_api(host):
     return True
 
 
-def API_0():
-    try:
-        r = requests.get(API_main_address, headers=headers)
-        if r.status_code == 200:
-            price = int(json.loads(r.text)['usd'])
-            if len(str(price)) >= 5:
-                if price == 49000:
-                    return False, 0
-                else:
-                    return True, price
-            else:
-                return False, 0
-        else:
-            return False, 0
-    except:
-        return False, 0
-
-
-def API_1():
-    try:
-        headers = {
-            'Content-type': 'application/json',
-            'Accept': 'text/plain',
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
-        }
-        r = requests.get("https://www.tasnimnews.com/fa/currency/table", headers=headers)
-        if r.status_code == 200:
-            datas = json.loads(json.loads(r.text))['currency']
-            for data in datas:
-                if data['title'] == "price_dollar_rl":
-                    price = int(float(data['p'].replace(",", "")))
-                    if len(str(price)) >= 6:
-                        return True, price // 10
-                    else:
-                        return False, 0
-        else:
-            return False, 0
-    except:
-        return False, 0
-
-
-def API_2():
-    try:
-        data = {'signal': 'getdata'}
-        r = requests.post("https://irarz.com/Aj.php", headers=headers, data=data)
-        if r.status_code == 200:
-            datas = json.loads(r.text)
-            for data in datas:
-                if data.get("price_dollar_rl", None) is not None:
-                    price = int(float(unidecode(data['price_dollar_rl'].encode().decode().replace(",", ""))))
-                    if len(str(price)) >= 6:
-                        return True, price // 10
-                    else:
-                        return False, 1
-        else:
-            return False, r.status_code
-    except:
-        return False, 0
-
-
-def API_3():
-    try:
-        r = requests.get("https://api.sarmayex.com/api/v2/currency/87", headers=headers)
-        if r.status_code == 200:
-            price = int(float(json.loads(r.text)['currency']['buy']['price']))
-            if len(str(price)) >= 5:
-                return True, price
-            else:
-                return False, 0
-        else:
-            return False, 0
-    except:
-        return False, 0
-
-
-def API_4():
-    try:
-        r = requests.get("https://api.bitpin.ir/v1/mkt/markets/", headers=headers)
-        if r.status_code == 200:
-            datas = json.loads(r.text)['results']
-            for data in datas:
-                if data['title'] == "Tether/Toman":
-                    price = int(float(data['price']))
-                    if len(str(price)) >= 5:
-                        return True, price
-                    else:
-                        return False, 0
-        else:
-            return False, 0
-    except:
-        return False, 0
-
-
-def API_5():
-    try:
-        r = requests.get("https://api.pooleno.ir/v1/token/chartData/currentPrice/tether", headers=headers)
-        if r.status_code == 200:
-            price = json.loads(r.text)['priceRial']
-            if len(str(price)) >= 6:
-                return True, price // 10
-            else:
-                return False, 0
-        else:
-            return False, 0
-    except:
-        return False, 0
-
-
-def API_6():
-    try:
-        r = requests.get("https://abantether.com/management/all-coins/?format=json", headers=headers)
-        if r.status_code == 200:
-            datas = json.loads(r.text)
-            for data in datas:
-                if data['symbol'] == "USDT":
-                    price = int(float(data['priceBuy']))
-                    if len(str(price)) >= 5:
-                        return True, price
-                    else:
-                        return False, 0
-        else:
-            return False, 0
-    except:
-        return False, 0
-
-
-def GET_USD():
-    status, value = API_0()
-    if status is True:
-        return True, value
-    status, value = API_1()
-    if status is True:
-        return True, value
-    status, value = API_2()
-    if status is True:
-        return True, value
-    status, value = API_3()
-    if status is True:
-        return True, value
-    status, value = API_4()
-    if status is True:
-        return True, value
-    status, value = API_5()
-    if status is True:
-        return True, value
-    status, value = API_6()
-    if status is True:
-        return True, value
-
-    return False, 0
-
-
 def Toman_USD():
-    status, value = GET_USD()
+    status, value = payment.GET_USD()
     if status is True:
         toman = value
     else:
@@ -599,10 +467,12 @@ def randomized_text():
 
 
 def get_random_server():
+    settings = get_settings()
     hosts, remarks = sshx.HOSTS()
     for host in hosts:
-        if check_domain_reached_maximum(host) is False:
-            return host
+        if host not in settings['server_archives']:
+            if check_domain_reached_maximum(host) is False:
+                return host
     return None
 
 
@@ -791,6 +661,16 @@ def add_gift_code(value, count, timer, code):
     for i in range(5):
         try:
             cur.execute("INSERT INTO Redeem (Code, Value, kind, Count, UserIDs, Timer) VALUES (?, ?, ?, ?, ?, ?)", (code, value, 'gift', count, str([]), timer))
+            conn.commit()
+            break
+        except:
+            pass
+
+
+def add_payment(chat_id, name, username, payment, value, txn_id, status):
+    for i in range(5):
+        try:
+            cur.execute("INSERT INTO Payments (ID, Name, Username, Payment, Value, Data, Status, Timer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (chat_id, name, username, payment, value, txn_id, status, int(time())))
             conn.commit()
             break
         except:
@@ -1145,6 +1025,17 @@ def get_full_user_data_id(chat_id):
             pass
 
 
+def get_payment_details(txn_id):
+    for i in range(5):
+        try:
+            cur.execute("SELECT * FROM Payments WHERE Data=:Data", {'Data': txn_id})
+            records = cur.fetchall()
+            for row in records:
+                return row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+        except:
+            pass
+
+
 def get_count_test_users():
     for i in range(5):
         try:
@@ -1371,6 +1262,15 @@ def update_host_users(host, new_host):
     for i in range(5):
         try:
             cur.execute("UPDATE Users SET Host = ? WHERE Host =?", (new_host, host))
+            conn.commit()
+        except:
+            pass
+
+
+def update_payment_details(txn_id, status):
+    for i in range(5):
+        try:
+            cur.execute("UPDATE Payments SET Status = ? WHERE Data =?", (status, txn_id))
             conn.commit()
         except:
             pass
@@ -1688,12 +1588,12 @@ def text_private(bot, message):
                 keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                 rm = True
                 if host is not None:
-                    if (password_retry.count(user) == 5):
+                    if (password_retry.count(chat_id) == 5):
                         timer = int(time()) - password_retry_time[password_retry.index(user)]
-                        if (timer <= 3601):
+                        if (timer <= 1800):
                             keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                             reply_markup = InlineKeyboardMarkup(keyboard)
-                            text = f"شما بدلیل اسپم تا  {str(3600 - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
+                            text = f"شما بدلیل اسپم تا  {str((1800 + password_retry_time[password_retry.index(user)]) - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
                             message.reply_text(text, reply_markup=reply_markup)
                             return
                     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
@@ -1720,10 +1620,10 @@ def text_private(bot, message):
                                 if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
                                     keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
                                 keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
-                                password_retry_del(user)
+                                password_retry_del(chat_id)
                             else:
                                 password_retry_time.append(int(time()))
-                                password_retry.append(user)
+                                password_retry.append(chat_id)
                                 text = "پسورد اکانت اشتباهه دوباره تلاش کن :("
                                 keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                                 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1792,12 +1692,12 @@ def text_private(bot, message):
                 host, st = Check_in_hosts(host)
                 keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                if (password_retry.count(user) == 5):
+                if (password_retry.count(chat_id) == 5):
                     timer = int(time()) - password_retry_time[password_retry.index(user)]
-                    if (timer <= 3600):
+                    if (timer <= 1801):
                         keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                         reply_markup = InlineKeyboardMarkup(keyboard)
-                        text = f"شما بدلیل اسپم تا  {str(timer)} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
+                        text = f"شما بدلیل اسپم تا  {str((1800 + password_retry_time[password_retry.index(user)]) - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
                         message.reply_text(text, reply_markup=reply_markup)
                         return
                 if st is True:
@@ -1825,10 +1725,10 @@ def text_private(bot, message):
                                 if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
                                     keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
                                 keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
-                                password_retry_del(user)
+                                password_retry_del(chat_id)
                             else:
                                 password_retry_time.append(int(time()))
-                                password_retry.append(user)
+                                password_retry.append(chat_id)
                                 text = "پسورد اکانت اشتباهه دوباره تلاش کن :("
                                 keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                                 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1945,7 +1845,7 @@ def text_private(bot, message):
             elif ("userwpm" == status):
                 try:
                     deposit = int(link)
-                    if deposit >= 10000:
+                    if deposit >= 1000:
                         if deposit <= 1000000000:
                             add_collector(chat_id, "deposit", [], [])
                             cache_list = [deposit]
@@ -1953,8 +1853,10 @@ def text_private(bot, message):
                             add_cache(chat_id, "deposit")
                             cb_cc = "CUWPD_" + str(deposit)
                             cb_tr = "TUWPD_" + str(deposit)
+                            cb_pl = "PUWPD_" + str(deposit)
                             keyboard = [
                                 [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)],
+                                [InlineKeyboardButton("درگاه ارزدیجیتال Plisio", callback_data=cb_pl)],
                                 [InlineKeyboardButton("<< back", callback_data='UWM')]
                             ]
                             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2653,6 +2555,21 @@ def text_private(bot, message):
                 message.reply_text("Done✔️", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='wallet')]]))
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
+
+        elif status == "change_plisio":
+            if sshx.OTX_Check(link) is True:
+                link = fixed_link_json(link)
+                st, server_msg = payment.check_valid_api_plisio(link)
+                reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='plisio')]])
+                if st is True:
+                    settings = get_settings()
+                    settings['plisio_API'] = link
+                    update_settings(settings)
+                    message.reply_text("Done✔️", reply_markup=reply_markup)
+                else:
+                    message.reply_text(server_msg, reply_markup=reply_markup)
+            else:
+                message.reply_text("این API غلطه درستشو بفرستین یا /cancel")
 
         elif ("disable_" in status) or ("enable_" in status):
             msg = message.reply_text("Wait...").id
@@ -5152,17 +5069,87 @@ def call_IDMNU(bot, query):
         query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('plisio'))
+def call_plisio(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("🔧Change API", callback_data='ChPSio')],
+        [InlineKeyboardButton("🔴 Off", callback_data='OFP'), InlineKeyboardButton("🟢 On", callback_data='ONP')],
+        [InlineKeyboardButton("<< Back", callback_data='ZBSHP')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    settings = get_settings()
+    if settings['plisio'] == "off":
+        status = "🔴 OFF"
+    else:
+        status = "🟢 ON"
+    text = f"💳plisio API: <pre>{settings['plisio_API']}</pre>\n\nStatus: {status}\n\nدرگاه پرداخت plisio.net\nبرای فعال کردن این قابلیت باید به داخل سایت برید و یه API بگیرین آموزش گرفتنشم : \n\nt.me/deltabots_gp/10"
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
+
+
+@app.on_callback_query(filters.regex('ChPSio'))
+def call_ChPSio(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "change_plisio")
+    keyboard = [[InlineKeyboardButton("<<", callback_data='plisio')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="API رو بفرستین", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('OFP'))
+def call_OFP(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    if settings['plisio'] == 'on':
+        settings['plisio'] = 'off'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='plisio')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+    else:
+        query.answer("Already OFF", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('ONP'))
+def call_ONP(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    if settings['plisio'] == 'off':
+        settings['plisio'] = 'on'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='plisio')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+    else:
+        query.answer("Already ON", show_alert=True)
+
+
 @app.on_callback_query(filters.regex('ChangeWallet'))
 def call_change(bot, query):
     chat_id = query.message.chat.id
     if chat_id not in admin_id:
         query.answer("Access denied", show_alert=True)
         return
-    if check_cache(chat_id) is False:
-        add_cache(chat_id, "change_wallet")
-        query.edit_message_text(text="آدرس ولت ترون بفرست")
-    else:
-        query.answer("Please /cancel it first", show_alert=True)
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "change_wallet")
+    query.edit_message_text(text="آدرس ولت ترون بفرست")
 
 
 @app.on_callback_query(filters.regex('OFT'))
@@ -5284,11 +5271,10 @@ def call_change(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     chat_id = query.message.chat.id
-    if check_cache(chat_id) is False:
-        add_cache(chat_id, "change")
-        query.edit_message_text(text="خب شماره کارتتون بفرستین (فقط شماره کارت)")
-    else:
-        query.answer("Please /cancel it first", show_alert=True)
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "change")
+    query.edit_message_text(text="خب شماره کارتتون بفرستین (فقط شماره کارت)")
 
 
 @app.on_callback_query(filters.regex('ANS_'))
@@ -5539,6 +5525,110 @@ def call_TUWPD(bot, query):
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
         query.answer("دوباره تلاش کنید", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('PUWPD_'))
+def call_PUWPD(bot, query):
+    settings = get_settings()
+    if (settings['plisio'] == "off") or (settings['plisio_API'] == "None"):
+        query.answer("این روش پرداخت توسط ادمین غیرفعال شده", show_alert=True)
+        return
+    chat_id = query.message.chat.id
+    if chat_id in plisio_attemp:
+        if plisio_attemp.count(chat_id) == 3:
+            #get_all_user_payments(chat_id) for check timer if 30min 
+            query.answer("شما درخواست زیادی ارسال کردین صبر کنین تا روند پرداخت تموم بشه و مجددا میتونین درخوست بدین", show_alert=True)
+            return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    if check_cache(chat_id) is False:
+        data = query.data
+        price = int(data.split("PUWPD_")[1])
+        query.edit_message_text(text="wait...")
+        status, value = payment.GET_USD()
+        amount = str('{:.2f}'.format(float(price / value)))
+        server_msg, txn_id, invoice_url, invoice_total_sum, st = payment.new_invoice_plisio(settings['plisio_API'], amount)
+        if st is True:
+            text = f"""💲 مبلغ قابل پرداخت:
+{amount}$
+
+⚪️ برای پرداخت دکمه لینک پرداخت کلیک کنین و به درگاه منتقل میشین و ارز مورد نظرتون انتخاب کنین و پرداختو انجام بدین.
+
+🔴 حتما بعد از تموم شدن روند پرداخت کافیه دکمه 'بررسی پرداخت' کلیک کنین."""
+            cb = "Ptxnid_" + txn_id
+            try:
+                USERNAME = "@" + query.message.chat.username
+            except:
+                USERNAME = "Null"
+            name = query.message.chat.first_name
+            add_payment(chat_id, name, USERNAME, "plisio", price, txn_id, "new")
+            plisio_retry.append(txn_id)
+            plisio_retry_time.append(int(time()))
+            plisio_attemp.append(chat_id)
+            keyboard = [
+                [InlineKeyboardButton("لینک پرداخت 🔗", url=invoice_url)],
+                [InlineKeyboardButton("بررسی پرداخت 🔄", callback_data=cb)]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+        else:
+            keyboard = [[InlineKeyboardButton("<< Back", callback_data='UWM')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            query.edit_message_text(text=server_msg, reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('Ptxnid_'))
+def call_Ptxnid(bot, query):
+    settings = get_settings()
+    chat_id = query.message.chat.id
+    data = query.data
+    txn_id = data.split("Ptxnid_")[1]
+    ID, Name, Username, Payment, Value, Data, Status, Timer = get_payment_details(txn_id)
+    if Status == "cancelled":
+        query.answer("پرداخت شما کنسل شده", show_alert=True)
+    elif Status == "completed":
+        query.answer("پرداخت شما انجام شده.", show_alert=True)
+    else:
+        if txn_id in plisio_retry:
+            timer = int(time()) - plisio_retry_time[plisio_retry.index(txn_id)]
+            if timer <= 60:
+                query.answer(f"لطفا {str((60 + plisio_retry_time[plisio_retry.index(txn_id)]) - int(time()))} ثانیه دیگه دوباره تلاش کنین", show_alert=True)
+                return
+        else:
+            plisio_retry.append(txn_id)
+            plisio_retry_time.append(int(time()))
+        server_msg, tx_url, st = payment.check_status_invoice_plisio(settings['plisio_API'], txn_id)
+        if st is True:
+            keyboard = [[InlineKeyboardButton("💰کیف", callback_data='UWM')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            if server_msg == "new":
+                plisio_retry_time[plisio_retry.index(txn_id)] = int(time())
+                query.answer("هنوز پرداخت تایید نشده", show_alert=True)
+            elif server_msg == "pending":
+                plisio_retry_time[plisio_retry.index(txn_id)] = int(time())
+                query.answer("درحال بررسی تایید پرداخت لطفا چند ثانیه دیگه دوباره چک کنین", show_alert=True)
+            elif server_msg == "cancelled":
+                text = "✖️ پرداخت شما کنسل شده ✖️"
+                update_payment_details(txn_id, server_msg)
+                query.edit_message_text(text=text, reply_markup=reply_markup)
+                plisio_retry_time.remove(plisio_retry_time[plisio_retry.index(txn_id)])
+                plisio_retry.remove(txn_id)
+                plisio_attemp_del(chat_id)
+            elif server_msg == "completed":
+                text = "✅ پرداخت شما تایید مبلغ به حساب شما اضافه شد"
+                name, u, phone, old_value = get_full_user_data_id(chat_id)
+                new_value = Value + old_value
+                update_user_wallet(chat_id, new_value)
+                update_payment_details(txn_id, server_msg)
+                query.edit_message_text(text=text, reply_markup=reply_markup)
+                text = f"اطلاعات پرداخت کریپتو :\nنام: {name}\nآیدی عددی: {str(chat_id)}\nیوزرنیم: {u}\nتلفن: {phone}\nلینک تراکنش: {tx_url}\nآیدی تراکنش: {txn_id}"
+                for admin in admin_id:
+                    bot.send_message(admin, text, disable_web_page_preview=True)
+                plisio_retry_time.remove(plisio_retry_time[plisio_retry.index(txn_id)])
+                plisio_retry.remove(txn_id)
+                plisio_attemp_del(chat_id)
+        else:
+            query.answer(server_msg, show_alert=True)
 
 
 @app.on_callback_query(filters.regex('traffic'))
@@ -6003,6 +6093,7 @@ def call_XVPSS(bot, query):
         return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
+    query.answer("لطفا صبر کنین درحال بررسی...")
     data = query.data
     host = data.split("!")[1]
     settings = get_settings()
@@ -6911,7 +7002,7 @@ def call_CHSA(bot, query):
     add_cache(chat_id, "AST_" + panel)
     keyboard = [[InlineKeyboardButton("<<", callback_data='AST')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text='آدرس پنل سرور بفرستین | بدون هیچ پورت یا آدرس کاملی فقط خود آدرس مثل :\nsub.example.com\n\nحتما دقت کنین که پورت 80 برای پنل شاهان باز باشه و اینکه ssl فعال کردین تست کنین که با http وارد پنل میشه یا نه اگه شد ادامه بدین (تو آپدیتای بعدی این مشکل حل میشه)', reply_markup=reply_markup)
+    query.edit_message_text(text='آدرس پنل سرور بفرستین | بدون هیچ پورت یا آدرس کاملی فقط خود آدرس مثل :\nsub.example.com\n\nحتما برای xpanel باید cp باشه مسیر', reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('XESSP'))
@@ -7036,6 +7127,91 @@ def call_SDGXQ(bot, query):
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('archive'))
+def call_archive(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    keyboard = [
+        [InlineKeyboardButton("➖ حذف", callback_data='IVER'), InlineKeyboardButton("➕ افزودن", callback_data='IVEA')],
+        [InlineKeyboardButton("<<", callback_data='SMT')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    hosts, remarks = sshx.HOSTS()
+    archive = ""
+    for server in settings['server_archives']:
+        if server in hosts:
+            archive += f"{server}  {remarks[hosts.index(server)]}\n"
+        else:
+            server_archives = settings['server_archives']
+            server_archives.remove(server)
+            settings['server_archives'] = server_archives
+            update_settings(settings)
+    query.edit_message_text(text=f"میتونین با اضافه کردن سرور به لیست آرشیو دیگه از اون سرور استفاده نشه برای اکانت تست و نشون داده نشه به لیست سرور انتخاب کاربر.\n\narchive:\n{archive}", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('IVEA'))
+def call_IVEA(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای افزودن سرور به لیست آرشیو انتخاب کنین:", reply_markup=server_cb_creator("SRVEA_"))
+
+
+@app.on_callback_query(filters.regex('SRVEA_'))
+def call_SRVEA(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if host in settings['server_archives']:
+        query.answer("Already in archive ✅", show_alert=True)
+    else:
+        server_archives = settings['server_archives']
+        server_archives.append(host)
+        settings['server_archives'] = server_archives
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='archive')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('IVER'))
+def call_IVER(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای حذف سرور از لیست آرشیو کلیک کنین:", reply_markup=server_cb_creator("SRVER_"))
+
+
+@app.on_callback_query(filters.regex('SRVER_'))
+def call_SRVER(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if host not in settings['server_archives']:
+        query.answer("Already not in archive ✅", show_alert=True)
+    else:
+        server_archives = settings['server_archives']
+        server_archives.remove(host)
+        settings['server_archives'] = server_archives
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='archive')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('SMT'))
 def call_SMT(bot, query):
     chat_id = query.message.chat.id
@@ -7051,6 +7227,7 @@ def call_SMT(bot, query):
         [InlineKeyboardButton("تغییر پورت ssh", callback_data='XESSP'), InlineKeyboardButton("تغییر پورت udp", callback_data='UXEP')],
         [InlineKeyboardButton("🏳️تغییر نام سرور ", callback_data='FSLJC')],
         [InlineKeyboardButton("⚪️تغییر اولویت انتخاب سرور", callback_data='CGDJS')],
+        [InlineKeyboardButton("📂 آرشیو سرور ", callback_data='archive')],
         [InlineKeyboardButton("🔄 تغییر دامین و یوزر و پسورد و پورت پنل", callback_data='TST')],
         [InlineKeyboardButton("📩 ارسال پیام به کاربران خاص یک سرور", callback_data='MST')]
     ]
@@ -7345,7 +7522,9 @@ def call_test(bot, query):
                 else:
                     bot.send_message(chat_id, f"Error: {text}")
             except Exception as e:
-                bot.send_message(chat_id, "خطایی پیش اومد بعدا امتحان کنین😑")
+                keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                bot.send_message(chat_id, "خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
             bot.delete_messages(chat_id, msg)
         else:
             query.answer("شما قبلا از اکانت تست استفاده کردین", show_alert=True)
@@ -7470,7 +7649,7 @@ def call_UWPM(bot, query):
     if settings['buy'] == 'on':
         chat_id = query.message.chat.id
         delete_cache(chat_id)
-        text = "مبلغ مورد نظرتون به تومن بفرستین (حداقل 10000):"
+        text = "مبلغ مورد نظرتون به تومن بفرستین (حداقل 1000):"
         add_cache(chat_id, "userwpm")
         keyboard = [[InlineKeyboardButton("<< back", callback_data='UWM')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -7837,7 +8016,7 @@ def call_USD(bot, query):
     keyboard = [
         [InlineKeyboardButton("Edit Default✏️", callback_data='Edollar')],
     ]
-    status, value = GET_USD()
+    status, value = payment.GET_USD()
     if status is True:
         value = str(value) + " تومن"
     else:
@@ -7979,6 +8158,7 @@ def call_ZBSHP(bot, query):
         emoji_cb = "🟢"
     keyboard = [
         [InlineKeyboardButton("💵 ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳 کارت", callback_data='Card')],
+        [InlineKeyboardButton("📲 درگاه Plisio", callback_data='plisio')],
         [InlineKeyboardButton("🛒قیمت ترافیک", callback_data='ADTPR'), InlineKeyboardButton("🛒قیمت ها", callback_data='ADMINPRICES')],
         [InlineKeyboardButton("🚦 وضعیت خرید ترافیک", callback_data='BTOPtion'), InlineKeyboardButton("🔐وضعیت خرید اکانت", callback_data='BSOPtion')],
         [InlineKeyboardButton("🔄تنظیم تمدید کاربر ", callback_data='ZQUC')],
@@ -9766,7 +9946,6 @@ def image_users(bot, message):
                     pass
             update_code_status(code, "checkdeposit")
             message.reply_text(text='بزودی درخواستتون بررسی میکنیم🫡', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data="back")]]))
-
 
         delete_cache(chat_id)
 
