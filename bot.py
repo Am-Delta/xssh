@@ -4271,12 +4271,16 @@ def call_stats(bot, query):
                 traffic_data = info.split("Storage: ")[1].split('👤Clients')[0]
                 if "GB" in traffic_data.split('Clients Traffic')[0]:
                     server_traffic = float(traffic_data.split("Server Traffic: ")[1].split(" GB")[0])
-                else:
+                elif "TB" in traffic_data.split('Clients Traffic')[0]:
                     server_traffic = float(traffic_data.split("Traffic: ")[1].split(" TB")[0]) * 1024
+                else:
+                    server_traffic = 0.0
                 if "GB" in traffic_data.split('Clients Traffic')[1]:
                     client_traffic = float(traffic_data.split("Clients Traffic: ")[1].split(" GB")[0])
-                else:
+                elif "TB" in traffic_data.split('Clients Traffic')[1]:
                     client_traffic = float(traffic_data.split("Clients Traffic: ")[1].split(" TB")[0]) * 1024
+                else:
+                    client_traffic = 0.0
                 clients_traffic += client_traffic
                 servers_traffic += server_traffic
                 Clients = int(info.split("👤Clients: ")[1].split("\n")[0])
