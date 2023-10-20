@@ -38,8 +38,8 @@ def main():
                 except Exception as e:
                     logs.writelines("[-] Session Error: " + str(e) + "    " + str(datetime.now()) + "\n")
             else:
-                logs.writelines("[-] Session Error: " + str(e) + "    " + str(datetime.now()) + "\n")
+                logs.writelines("[-] Login Error: " + host + "    " + str(datetime.now()) + "\n")
 
 while True:
     main()
-    sleep(randint(300, 600))
+    sleep(randint(300, 500))
