@@ -113,6 +113,18 @@ c.execute("""CREATE TABLE Redeem (
             )""")
 
 
+c.execute("""CREATE TABLE Payments (
+            ID int,
+            Name text,
+            Username text,
+            Payment text,
+            Value int,
+            Data text,
+            Status text,
+            Timer int
+            )""")
+
+
 c.execute("""CREATE TABLE Settings (
             ID int,
             Settings text
@@ -171,7 +183,11 @@ settings = {
     "notification": "on",
     "before_start_msg": "None",
     "password_method": "number",
-    "password_length": 6
+    "password_length": 6,
+    "plisio": "off",
+    "plisio_API": "None",
+    "buy_notification": "on",
+    "server_archives": []
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
