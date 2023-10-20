@@ -81,16 +81,30 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+
+    if settings.get("plisio", None) is None:
+        add_dict = {
+            "plisio": "off",
+            "plisio_API": "None",
+            "buy_notification": "on",
+            "server_archives": []
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
     try:
-        cur.execute("SELECT * FROM Redeem")
+        cur.execute("SELECT * FROM Payments")
         records = cur.fetchall()
     except sqlite3.OperationalError:
-        cur.execute("""CREATE TABLE Redeem (
-            Code text,
+        cur.execute("""CREATE TABLE Payments (
+            ID int,
+            Name text,
+            Username text,
+            Payment text,
             Value int,
-            kind text,
-            Count int,
-            UserIDs text,
+            Data text,
+            Status text,
             Timer int
             )""")
     try:
