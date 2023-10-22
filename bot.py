@@ -3303,7 +3303,7 @@ def text_private(bot, message):
             delete_cache(chat_id)
 
         elif "XQEC_" in status:
-            if (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+            if ((sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True)) or ((sshx.OTX_Check(link) is True) and (sshx.ASCII_Check(link) is True)):
                 host = status.split("XQEC_")[1]
                 username = link
                 hosts, remarks = sshx.HOSTS()
@@ -3441,7 +3441,7 @@ def text_private(bot, message):
 
         elif status == "AllEdituser":
             link = fixed_link_json(link)
-            if (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+            if ((sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True)) or ((sshx.OTX_Check(link) is True) and (sshx.ASCII_Check(link) is True)):
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 message.reply_text("پسورد ؟")
                 cache_list.append(link)
@@ -3612,7 +3612,7 @@ def text_private(bot, message):
 
         elif status == "serveruser":
             link = fixed_link_json(link)
-            if (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+            if ((sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True)) or ((sshx.OTX_Check(link) is True) and (sshx.ASCII_Check(link) is True)):
                 cache_list, host_cahce = get_collector_cache(chat_id)
                 message.reply_text("پسورد ؟")
                 cache_list.append(link)
@@ -4096,7 +4096,7 @@ def call_checker(bot, query):
                     if status[i] != "فعال":
                         if (int(days_left[i]) <= -(settings['auto_delete'])) or (usernames[i] in test_usernames):
                             SessionDIS = sshx.PANNEL(host, username, password, port, panel, 'User', usernames[i])
-                            text = SessionDIS.Disable()
+                            text += SessionDIS.Disable()
                             if "❌Deleted" in Session.Delete(usernames[i]):
                                 text += f"❌Deleted user {usernames[i]} & Days: {str(days_left[i])} ❌\n\n"
                                 count_deleted_clients += 1
