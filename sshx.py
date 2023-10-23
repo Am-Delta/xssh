@@ -448,6 +448,8 @@ def Get_user_info_shahan(html, uname):
                         udgpw = (data.text()).split("badvpn")[0]
                     elif "localhost" in data.text():
                         udgpw = (data.text()).split("localhost")[0]
+                    elif "127.0.0.1" in data.text():
+                        udgpw = (data.text()).split("127.0.0.1")[0]
                     else:
                         try:
                             udgpw = data.text()
@@ -905,6 +907,8 @@ class PANNEL:
                                 udgpw = str(inp.attributes.get('value', None)).split("badvpn")[0]
                             elif "localhost" in inp.attributes.get('value', None):
                                 udgpw = str(inp.attributes.get('value', None)).split("localhost")[0]
+                            elif "127.0.0.1" in inp.attributes.get('value', None):
+                                udgpw = str(inp.attributes.get('value', None)).split("127.0.0.1")[0]
                             else:
                                 udgpw = str(inp.attributes.get('value', None))
             return port, udgpw
