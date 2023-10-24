@@ -32,7 +32,7 @@ Channel: https://t.me/delta_bcc
 
 
 ## Supported Panels
-- Shahan v6.7.1
+- Shahan v6.8.1
 - XPanel v3.8.3
 - Rocket v1.2.0
  
