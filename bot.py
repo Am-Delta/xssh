@@ -64,6 +64,7 @@ seller_id = []
 botusername = []
 process_codes = []
 backup_command = [False]
+search_spam = [False]
 password_retry = []
 password_retry_time = []
 plisio_retry = []
@@ -3145,6 +3146,82 @@ def text_private(bot, message):
             message.reply_text(text, reply_markup=reply_markup)
             delete_cache(chat_id)
 
+        elif status == "search":
+            if len(link) < 2:
+                message.reply_text("send more than one character or /cancel")
+                return
+            elif sshx.ASCII_Check(link) is False:
+                message.reply_text("only English & numbers or /cancel")
+                return
+            elif search_spam[0] is True:
+                message.reply_text("Please wait untill finish the pervious search then request again")
+                return
+            msg = message.reply_text("Wait this operation takes so much time...").id
+            search_spam[0] = True
+            hosts, remarks = sshx.HOSTS()
+            F_hosts = []
+            F_remarks = []
+            F_usernames = []
+            for i in range(len(hosts)):
+                port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(hosts[i])
+                try:
+                    Session = sshx.PANNEL(hosts[i], username, password, port, panel, 'Other', 'uname')
+                    expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions, server_traffic, online_c, done = Session.info()
+                    F_usernames_cache = []
+                    if link in usernames:
+                        F_usernames_cache.append(link)
+                        F_usernames.append(link)
+                        F_hosts.append(hosts[i])
+                        F_remarks.append(remark)
+                    link = link.lower()
+                    lower_usernames = []
+                    for username in usernames:
+                        lower_usernames.append(username.lower())
+                    for n in range(len(lower_usernames)):
+                        if link in lower_usernames[n]:
+                            if usernames[n] not in F_usernames_cache:
+                                F_usernames_cache.append(usernames[n])
+                                F_usernames.append(usernames[n])
+                                F_hosts.append(hosts[i])
+                                F_remarks.append(remark)
+                except Exception as e:
+                    message.reply_text(f"🔴 Got Error: {str(e)}")
+            keyboard = []
+            if len(F_hosts) >= 2:
+                if len(F_hosts) >= 10:
+                    if len(F_hosts) % 3 == 0:
+                        for i in range(0, len(F_hosts) - 1, 3):
+                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}"), InlineKeyboardButton(F_usernames[i + 2], callback_data=f"IDADMIN_{F_hosts[i + 2]}${F_usernames[i + 2]}")])
+                    else:
+                        for i in range(0, len(F_hosts) - 2, 3):
+                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}"), InlineKeyboardButton(F_usernames[i + 2], callback_data=f"IDADMIN_{F_hosts[i + 2]}${F_usernames[i + 2]}")])
+                        if (len(F_hosts) % 2 == 0) or ((len(F_hosts) % 2 == 1) and (len(F_hosts) % 3 == 2)):
+                            keyboard.append([InlineKeyboardButton(F_usernames[-2], callback_data=f"IDADMIN_{F_hosts[-2]}${F_usernames[-2]}"), InlineKeyboardButton(F_usernames[-1], callback_data=f"IDADMIN_{F_hosts[-1]}${F_usernames[-1]}")])
+                        else:
+                            keyboard.append([InlineKeyboardButton(F_usernames[-1], callback_data=f"IDADMIN_{F_hosts[-1]}${F_usernames[-1]}")])
+                else:
+                    if len(F_hosts) % 2 == 0:
+                        for i in range(0, len(F_hosts) - 1, 2):
+                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}")])
+                    else:
+                        for i in range(0, len(F_hosts) - 1, 2):
+                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}")])
+                        keyboard.append([InlineKeyboardButton(F_usernames[-1], callback_data=f"IDADMIN_{F_hosts[-1]}${F_usernames[-1]}")])
+            else:
+                if F_hosts == []:
+                    pass
+                else:
+                    keyboard.append([InlineKeyboardButton(F_usernames[0], callback_data=f"IDADMIN_{F_hosts[0]}${F_usernames[0]}")])
+            t0 = ""
+            for i in range(len(F_hosts)):
+                t0 += f"{str(i + 1)}. {F_usernames[i]} {F_remarks[i]}\n"
+            text = f"<b>Found : {str(len(F_hosts))}</b>\n\n{t0}"
+            keyboard.append([InlineKeyboardButton("<< Back", callback_data='Manager')])
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            bot.edit_message_text(chat_id, msg, text, parse_mode=enums.ParseMode.HTML, reply_markup=reply_markup)
+            search_spam[0] = False
+            delete_cache(chat_id)
+
         elif status == "AdminGiftDel":
             if check_gift_code_exist(link) is True:
                 delete_gift_code(link)
@@ -4052,7 +4129,7 @@ def call_checker(bot, query):
     keyboard = [[InlineKeyboardButton("🔙Back", callback_data="back_admin")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     if cache[0] is True:
-        query.edit_message_text(text="Processing Please wait this operation takes so much time..", reply_markup=reply_markup)
+        query.edit_message_text(text="Processing Please wait this operation takes so much time...", reply_markup=reply_markup)
         return
     settings = get_settings()
     maximum = settings['maximum']
@@ -6760,6 +6837,18 @@ def call_NGA(bot, query):
         query.edit_message_text(text="Please /cancel it first")
 
 
+@app.on_callback_query(filters.regex('search'))
+def call_search(bot, query):
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is False:
+        add_cache(chat_id, "search")
+        keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text='خب حالا یه اسم یا حروف بفرستین مثلا ho (حداقل 2 حروف)', reply_markup=reply_markup)
+    else:
+        query.edit_message_text(text="Please /cancel it first")
+
+
 @app.on_callback_query(filters.regex('Manager'))
 def call_Manager(bot, query):
     chat_id = query.message.chat.id
@@ -6775,7 +6864,7 @@ def call_Manager(bot, query):
         [InlineKeyboardButton("🚻ریست ترافیک", callback_data='TrfRes'), InlineKeyboardButton("➕افزایش ترافیک", callback_data='TrfPlus')],
         [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS'), InlineKeyboardButton("👝موجودی کاربر", callback_data='ADUB')],
         [InlineKeyboardButton("🛠ساخت اکانت یوزر تلگرام", callback_data='create'), InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none')],
-        [InlineKeyboardButton("💀Kill User", callback_data='AKill')]
+        [InlineKeyboardButton("💀Kill User", callback_data='AKill'), InlineKeyboardButton("🔎 جستجو کاربر ", callback_data='search')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
