@@ -5018,7 +5018,7 @@ def call_userconfigs(bot, query):
 @app.on_callback_query(filters.regex('MIOU_'))
 def call_MIOU(bot, query):
     chat_id = query.message.chat.id
-    if chat_id not in admin_id:
+    if chat_id in admin_id:
         query.answer("Access denied", show_alert=True)
         return
     delete_cache(chat_id)
