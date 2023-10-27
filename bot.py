@@ -1560,7 +1560,8 @@ def text_private(bot, message):
                 port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                 try:
                     Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                    text = Session.User_info(get_settings()['dropbear'])
+                    settings = get_settings()
+                    text = Session.User_info(settings['dropbear'], settings['tuic'])
                     cb = host + "$" + user
                     keyboard = [
                         [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
@@ -1602,7 +1603,7 @@ def text_private(bot, message):
                     if check_exist_user(host, user) is False:
                         try:
                             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                            text = Session.User_info(settings['dropbear'])
+                            text = Session.User_info(settings['dropbear'], settings['tuic'])
                             try:
                                 USERNAME = message.from_user.username
                             except:
@@ -1639,7 +1640,7 @@ def text_private(bot, message):
                         else:
                             try:
                                 Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                                text = Session.User_info(settings['dropbear'])
+                                text = Session.User_info(settings['dropbear'], settings['tuic'])
                             except:
                                 text = "چیزی پیدا نشد:("
                 else:
@@ -1679,7 +1680,7 @@ def text_private(bot, message):
                         else:
                             try:
                                 Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                                text = Session.User_info(settings['dropbear'])
+                                text = Session.User_info(settings['dropbear'], settings['tuic'])
                             except:
                                 text = "چیزی پیدا نشد:("
                 else:
@@ -1707,7 +1708,7 @@ def text_private(bot, message):
                     if check_exist_user(host, user) is False:
                         try:
                             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                            text = Session.User_info(settings['dropbear'])
+                            text = Session.User_info(settings['dropbear'], settings['tuic'])
                             try:
                                 USERNAME = message.from_user.username
                             except:
@@ -1744,7 +1745,7 @@ def text_private(bot, message):
                         else:
                             try:
                                 Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                                text = Session.User_info(settings['dropbear'])
+                                text = Session.User_info(settings['dropbear'], settings['tuic'])
                             except:
                                 text = "چیزی پیدا نشد:("
                 else:
@@ -2039,7 +2040,8 @@ def text_private(bot, message):
                 port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                 try:
                     Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                    text = Session.User_info(get_settings()['dropbear'])
+                    settings = get_settings()
+                    text = Session.User_info(settings['dropbear'], settings['tuic'])
                     if "Error" not in text:
                         message.reply_text("پسورد جدیدو بفرستین")
                         cache_list.append(link)
@@ -2127,7 +2129,8 @@ def text_private(bot, message):
                 port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                 try:
                     Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                    text = Session.User_info(get_settings()['dropbear'])
+                    settings = get_settings()
+                    text = Session.User_info(settings['dropbear'], settings['tuic'])
                     if "Error" not in text:
                         message.reply_text("نام کاربری جدیدو بفرستین")
                         cache_list.append(link)
@@ -2465,7 +2468,8 @@ def text_private(bot, message):
                             bot.edit_message_text(chat_id, msg, "نام کاربری پیدا نشد!", parse_mode=enums.ParseMode.HTML)
                             return
                 Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-                text = Session.User_info(get_settings()['dropbear'])
+                settings = get_settings()
+                text = Session.User_info(settings['dropbear'], settings['tuic'])
                 if check_seller_exist(chat_id) is False:
                     if check_exist_user(host, user) is True:
                         ID, Name, Username = get_all_user_data(host, user)
@@ -4556,7 +4560,8 @@ def call_VDSLF(bot, query):
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         try:
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-            query.edit_message_text(text=Session.User_info(get_settings()['dropbear']), reply_markup=reply_markup)
+            settings = get_settings()
+            query.edit_message_text(text=Session.User_info(settings['dropbear'], settings['tuic']), reply_markup=reply_markup)
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
     else:
@@ -5032,7 +5037,8 @@ def call_MIOU(bot, query):
         try:
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-            text = Session.User_info(get_settings()['dropbear'])
+            settings = get_settings()
+            text = Session.User_info(settings['dropbear'], settings['tuic'])
             query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
         except:
             query.answer("⚠️Error: بعدا تلا کنین یا به پشتیبانی پیام بدین", show_alert=True)
@@ -5055,7 +5061,8 @@ def call_IDADMIN(bot, query):
         cb = data.split("_")[1]
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-        text = Session.User_info(get_settings()['dropbear'])
+        settings = get_settings()
+        text = Session.User_info(settings['dropbear'], settings['tuic'])
         keyboard = [
             [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
             [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
@@ -5754,7 +5761,7 @@ def call_UTGB(bot, query):
         query.edit_message_text(text="wait...")
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-        text = "اطلاعات سرویس :\n\n" + Session.User_info(settings['dropbear'])
+        text = "اطلاعات سرویس :\n\n" + Session.User_info(settings['dropbear'], settings['tuic'])
         if "Error" in text:
             text = "مشکلی پیش اومده بعدا تلاش کنین یا به پشتیبانی اطلاع بدین"
         else:
@@ -6304,7 +6311,7 @@ def call_Confirmed(bot, query):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 bot.send_message(chat_id, settings['after_buy'], reply_markup=reply_markup)
                 delete_code_buy(code)
-                bot.edit_message_text(query.message.chat.id, msg, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back_admin')]]))
+                bot.edit_message_text(query.message.chat.id, msg, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("full info", callback_data=f"IDADMIN_{host}${user}")], [InlineKeyboardButton("<<", callback_data='back_admin')]]))
             else:
                 bot.edit_message_text(query.message.chat.id, msg, f"Error: {text}")
         except Exception as e:
@@ -6391,7 +6398,7 @@ def call_UPG(bot, query):
             settings = get_settings()
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-            text = "اطلاعات سرویس :\n\n" + Session.User_info(settings['dropbear'])
+            text = "اطلاعات سرویس :\n\n" + Session.User_info(settings['dropbear'], settings['tuic'])
             if "Error" in text:
                 text = "مشکلی پیش اومده بعدا تلاش کنین یا به پشتیبانی اطلاع بدین"
             else:
@@ -6474,7 +6481,7 @@ def call_UPKIF(bot, query):
             settings = get_settings()
             if settings['upgrade_days'] == "on":
                 try:
-                    data = Session.User_info(settings['dropbear'])
+                    data = Session.User_info(settings['dropbear'], settings['tuic'])
                     old_days = int((data.split('Days : ')[1]).split("\n")[0])
                     if old_days >= 1:
                         days += old_days
@@ -6613,7 +6620,7 @@ def call_Confirmed_UPGRADE(bot, query):
             settings = get_settings()
             if settings['upgrade_days'] == "on":
                 try:
-                    data = Session.User_info(settings['dropbear'])
+                    data = Session.User_info(settings['dropbear'], settings['tuic'])
                     old_days = int((data.split('Days : ')[1]).split("\n")[0])
                     if old_days >= 1:
                         days += old_days
@@ -7410,7 +7417,8 @@ def call_QRCODE(bot, query):
     try:
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
-        text = Session.User_info(get_settings()['dropbear']) + randomized_text()
+        settings = get_settings()
+        text = Session.User_info(settings['dropbear'], settings['tuic']) + randomized_text()
         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
         port, udgpw = Session.Ports()
         HOST = ((text.split("SSH Host : ")[1]).split("\n")[0])
@@ -7482,7 +7490,7 @@ def call_ID(bot, query):
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
             settings = get_settings()
-            text = Session.User_info(settings['dropbear']) + randomized_text()
+            text = Session.User_info(settings['dropbear'], settings['tuic']) + randomized_text()
             keyboard = [
                 [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('SELFCPA_' + cb))],
                 [InlineKeyboardButton("📲 کد QR و لینک اتصال", callback_data=f'QRCODE_{cb}')]
@@ -9620,17 +9628,42 @@ def call_RWUAD(bot, query):
         emoji_4 = "🔴"
         cb_4 = 'on'
         emoji_cb_4 = "🟢"
+    if settings['tuic'] == "on":
+        emoji_5 = "🟢"
+        cb_5 = 'off'
+        emoji_cb_5 = "🔴"
+    else:
+        emoji_5 = "🔴"
+        cb_5 = 'on'
+        emoji_cb_5 = "🟢"
     keyboard = [
         [InlineKeyboardButton(f"Delete: {cb} {emoji_cb}", callback_data=f'JDOSSK_{cb}')],
         [InlineKeyboardButton(f"Server selection: {cb_2} {emoji_cb_2}", callback_data=f'CJSLC_{cb_2}')],
         [InlineKeyboardButton(f"Dropbear Port: {cb_3} {emoji_cb_3}", callback_data=f'Dropbear_{cb_3}')],
-        [InlineKeyboardButton(f"Account info button: {cb_4} {emoji_cb_4}", callback_data=f'ISCSO_{cb_4}')]
+        [InlineKeyboardButton(f"Account info button: {cb_4} {emoji_cb_4}", callback_data=f'ISCSO_{cb_4}')],
+        [InlineKeyboardButton(f"Tuic: {cb_5} {emoji_cb_5}", callback_data=f'TCOAD_{cb_5}')]
     ]
-    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3 + "\nAccount info button: " + settings['info_service'] + " " + emoji_4
-    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته\n\nگزینه چهارم برای دکمه اطلاعات سرویس هست که نمایش داده بشه یا نه" + t0
+    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3 + "\nAccount info button: " + settings['info_service'] + " " + emoji_4 + "\nTuic 5: " + settings['tuic'] + " " + emoji_5
+    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته\n\nگزینه چهارم برای دکمه اطلاعات سرویس هست که نمایش داده بشه یا نه\n\nگزینه پنجم توییک هستش که فرستاده بشه یا نه (اگه روشن باشه هم برای کاربر هم برای ادمین و فروشنده ارسال میشه)" + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('TCOAD_'))
+def call_TCOAD(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    tuic = data.split("TCOAD_")[1]
+    settings = get_settings()
+    settings['tuic'] = tuic
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='RWUAD')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('ISCSO_'))
