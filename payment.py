@@ -1,6 +1,7 @@
 import json
 import requests
 from random import randint
+from unidecode import unidecode
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
 
