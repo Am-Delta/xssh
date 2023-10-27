@@ -417,6 +417,8 @@ def Get_user_info_shahan(html, uname):
     days_left = []
     days_left_trubleshoots = []
     descriptions = []
+    dropbears = []
+    tuics = []
     for data in html.css('td'):
         if data.attributes.get("name", None) is None:
             if 'روز' in data.text():
@@ -442,6 +444,10 @@ def Get_user_info_shahan(html, uname):
                 traffics.append(data.text())
             if 'ip' in data.attributes['name']:
                 ips.append(data.text())
+            if 'drop' in data.attributes['name']:
+                dropbears.append(data.text())
+            if 'tuic' in data.attributes['name']:
+                tuics.append(data.text())
             if 'port' in data.attributes['name']:
                 if (data.attributes['name']).split("port")[0] == "udp":
                     if "badvpn" in data.text():
@@ -493,7 +499,15 @@ def Get_user_info_shahan(html, uname):
                 days = days_left_trubleshoots[n]
             else:
                 days = days_left[n]
-            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n], expires[n], descriptions[n], ports[n], udgpws[n]
+            if len(ports) == len(dropbears):
+                dropbear = dropbears[n]
+            else:
+                dropbear = ""
+            if len(ports) == len(tuics):
+                tuic = tuics[n]
+            else:
+                tuic = ""
+            return passwords[n], traffics[n], int(connection_limits[n]), ips[n], days, status[n], usages[n], expires[n], descriptions[n], ports[n], udgpws[n], dropbear, tuic
 
 
 def Get_user_info_rocket(datas, uname, r, url):
@@ -868,7 +882,7 @@ class PANNEL:
                 s = self.r.get(self.url + "/p/index.php").text
                 html = HTMLParser(s)
                 self.req = self.url + "/p/newuser.php"
-                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description, self.SPort, self.Sudgpw = Get_user_info_shahan(html, uname)
+                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description, self.SPort, self.Sudgpw, self.dropbear, self.tuic = Get_user_info_shahan(html, uname)
 
             elif panel == "rocket":
                 self.uname = uname
@@ -1750,12 +1764,12 @@ class PANNEL:
                     try:
                         s = self.r.get(self.url + "/p/index.php").text
                         html = HTMLParser(s)
-                        PASSW, TRAFFIC, CONNECTION_LIMIT, IP, DAYS, STATUS, USAGE, DATE, DESCRIPTION, PORT, UDGPW = Get_user_info_shahan(html, uname)
+                        PASSW, TRAFFIC, CONNECTION_LIMIT, IP, DAYS, STATUS, USAGE, DATE, DESCRIPTION, PORT, UDGPW, DROP, TUIC = Get_user_info_shahan(html, uname)
                     except:
                         IP = self.host
                         PORT, UDGPW = self.Ports()
-                    #IP = self.host
-                    #PORT, UDGPW = self.Ports()
+                    #if UDGPW == "":
+                        #PORT, UDGPW = self.Ports()
                     return f"SSH Host : <pre>{IP}</pre>\nPort : <pre>{PORT}</pre>\nUdgpw : <pre>{UDGPW}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
@@ -2187,16 +2201,21 @@ class PANNEL:
             else:
                 return "🔴 Already Disabled"
 
-    def User_info(self, DROP):
+    def User_info(self, DROP, TUIC):
         if (DROP == "on") and (self.dropbear != ""):
             drop = f"\nDropbear Port : <pre>{self.dropbear}</pre>"
         else:
             drop = ""
         if self.panel == "shahan":
             try:
-                #port, udgpw = self.Ports()
+                if (TUIC == "on") and (self.tuic != ""):
+                    tuic = f"\nTuic5 : <pre>{self.tuic}</pre>"
+                else:
+                    tuic = ""
                 port = self.SPort
                 udgpw = self.Sudgpw
+                #if udgpw == "":
+                    #port, udgpw = self.Ports()
                 if str(self.days) == "9999":
                     days = "Unlimited♾"
                 else:
@@ -2207,7 +2226,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nتاریخ انقضا : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nتاریخ انقضا : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}{tuic}"
             except Exception as e:
                 return "Error: " + str(e)
 
