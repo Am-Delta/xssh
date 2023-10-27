@@ -187,7 +187,8 @@ settings = {
     "plisio": "off",
     "plisio_API": "None",
     "buy_notification": "on",
-    "server_archives": []
+    "server_archives": [],
+    "tuic": "off"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
