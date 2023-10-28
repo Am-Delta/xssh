@@ -3900,6 +3900,7 @@ def call_HSOU(bot, query):
     if chat_id not in admin_id:
         query.answer("Access denied", show_alert=True)
         return
+    query.answer("صبر کنین...", show_alert=True)
     rt = query.data
     host = rt.split("HSOU_")[1]
     chat_id = query.message.chat.id
@@ -3915,7 +3916,7 @@ def call_HSOU(bot, query):
                 text = f"🟢 {str(len(users))} کاربر آنلاین\n\n"
                 if len(users) >= 1:
                     for i in range(len(users)):
-                        text += f"{str(i + 1)}. {users[i]}  {ips[i]}\n"
+                        text += f"{str(i + 1)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
                     if len(text) > 4095:
                         for x in range(0, len(text), 4095):
                             sleep(0.2)
