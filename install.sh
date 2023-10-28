@@ -16,6 +16,7 @@ pip install requests
 pip install termcolor
 pip install Unidecode
 pip install jdatetime
+pip install ipaddress
 
 mkdir /root/botCh
 
