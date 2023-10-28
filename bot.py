@@ -3900,7 +3900,7 @@ def call_HSOU(bot, query):
     if chat_id not in admin_id:
         query.answer("Access denied", show_alert=True)
         return
-    query.answer("صبر کنین...", show_alert=True)
+    query.answer("صبر کنین...")
     rt = query.data
     host = rt.split("HSOU_")[1]
     chat_id = query.message.chat.id
