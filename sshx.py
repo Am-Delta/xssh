@@ -2,6 +2,7 @@ import requests, pickle
 import json
 import os
 import re
+import ipaddress
 import jdatetime
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -9,6 +10,27 @@ from selectolax.parser import HTMLParser
 from datetime import datetime
 from time import time
 from uuid import uuid4
+
+
+def ISP(target):
+    with open("ir.csv", "r", encoding="utf-8") as f:
+        for i in f.readlines():
+            if i != "\n":
+                data = i.replace("\n", "").split(",")
+                from_range = data[0]
+                to_range = data[1]
+                isp = data[4]
+                start_ip = ipaddress.IPv4Address(from_range)
+                end_ip = ipaddress.IPv4Address(to_range)
+                num_addresses = int(end_ip) - int(start_ip)
+                subnet_bits = 32 - num_addresses.bit_length()
+                ip_network = from_range + "/" + str(subnet_bits)
+                try:
+                    if ipaddress.ip_address(target) in ipaddress.ip_network(ip_network):
+                        return isp
+                except:
+                    pass
+    return ""
 
 
 def open_session(host, port):
