@@ -100,6 +100,18 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+    try:
+        cur.execute("SELECT * FROM Redeem")
+        records = cur.fetchall()
+    except sqlite3.OperationalError:
+        cur.execute("""CREATE TABLE Redeem (
+            Code text,
+            Value int,
+            kind text,
+            Count int,
+            UserIDs text,
+            Timer int
+            )""")
 
     try:
         cur.execute("SELECT * FROM Payments")
