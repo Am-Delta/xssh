@@ -5173,7 +5173,7 @@ def call_plisio(bot, query):
         status = "🔴 OFF"
     else:
         status = "🟢 ON"
-    text = f"💳plisio API: <pre>{settings['plisio_API']}</pre>\n\nStatus: {status}\n\nدرگاه پرداخت plisio.net\nبرای فعال کردن این قابلیت باید به داخل سایت برید و یه API بگیرین آموزش گرفتنشم : \n\nt.me/deltabots_gp/10"
+    text = f"💳plisio API: <pre>{settings['plisio_API']}</pre>\n\nStatus: {status}\n\nدرگاه پرداخت plisio.net\nبرای فعال کردن این قابلیت باید به داخل سایت برید و یه API بگیرین آموزش گرفتنشم : \n\nt.me/deltacommentsgp"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
 
 
@@ -7776,6 +7776,12 @@ def call_UWM(bot, query):
         code = data.split("UWM_")[1]
         delete_code_buy(code)
     delete_cache(chat_id)
+    if check_user_exists_in_clients_table(chat_id) is False:
+        try:
+            USERNAME = "@" + query.message.chat.username
+        except:
+            USERNAME = "Null"
+        add_client_db(chat_id, query.message.chat.first_name, USERNAME, 'None', 0)
     name, u, phone, old_value = get_full_user_data_id(chat_id)
     text = f"💰 موجودی کیف پول:\n{str(old_value)} تومن "
     keyboard = [
@@ -7936,7 +7942,7 @@ def call_backup(bot, query):
         backup_status = "OFF ❌"
     else:
         backup_status = "ON ✅"
-    text = '<b>Backup Settings</b>\n\n(فقط برای ادمینی که این گزینه رو روشن میکنه کار میکنه)' + "\n\n<a href='https://t.me/deltabots_gp/10/955'>آموزش انتقال ربات به سرور جدید</a>" + "\n\n🔄Status\n\n" + "Backup: " + backup_status + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
+    text = '<b>Backup Settings</b>\n\n(فقط برای ادمینی که این گزینه رو روشن میکنه کار میکنه)' + "\n\nآموزش انتقال ربات به سرور جدید:\n-اول کامند /backup داخل بات بزنید\n-وارد سروری که همین الان ربات رانه بشین و این کامندو بزنین:\npkill -9 python3\nوارد سرور جدید بشین و ربات نصب کنین اطلاعات ایدی عددی ادمین و توکن ربات...\nبعد برید به قسمت تنظیمات > بکاپ > آپلود بکاپ فایلای درخواستی رو فوروارد کنین" + "\n\n🔄Status\n\n" + "Backup: " + backup_status + "\n" + "🕔Timer: " + str(settings['backup']) + " hours"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -9738,7 +9744,7 @@ def call_HOW(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     keyboard = []
-    text = '<b>How to use?</b>\n\nبرای اینکه یه کاربر سریعتر مدیریت کنین کافیه کپی کانفیگی که داخل پنل زده بودین و به کاربر فرستادینو مستقیم به ربات بفرستین:\n\nSSH Host: domain\nUsername : username\n\n\nبرای درست کردن لیست قیمت کافیه دکمه قیمت ها رو بزنین\n\nکانال ربات :\n@delta_bcc\nگروه رفع باگ و سوالا:\n@deltabots_gp'
+    text = '<b>How to use?</b>\n\nبرای اینکه یه کاربر سریعتر مدیریت کنین کافیه کپی کانفیگی که داخل پنل زده بودین و به کاربر فرستادینو مستقیم به ربات بفرستین:\n\nSSH Host: domain\nUsername : username\n\n\nبرای درست کردن لیست قیمت کافیه دکمه قیمت ها رو بزنین\n\nکانال ربات :\n@delta_bcc\nگروه رفع باگ و سوالا:\n@deltacommentsgp'
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
