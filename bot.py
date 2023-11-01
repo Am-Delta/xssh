@@ -56,10 +56,7 @@ checked_filtering = []
 checked_connections = []
 checked_users = []
 checked_id = []
-old_hosts = []
 cache_list = []
-host_cache = []
-text_cache = []
 seller_id = []
 botusername = []
 process_codes = []
@@ -831,6 +828,16 @@ def get_all_gift_codes():
             pass
 
 
+def get_all_clients_bot():
+    for i in range(5):
+        try:
+            cur.execute("SELECT * FROM Clients")
+            records = cur.fetchall()
+            return records
+        except:
+            pass
+
+
 def get_card_info():
     for i in range(5):
         try:
@@ -1259,6 +1266,15 @@ def update_phone_number(chat_id, phone_number):
             pass
 
 
+def update_name_and_username(chat_id, name, username):
+    for i in range(5):
+        try:
+            cur.execute("UPDATE Clients SET Name = ?, Username = ? WHERE ID =?", (name, username, chat_id))
+            conn.commit()
+        except:
+            pass
+
+
 def update_host_users(host, new_host):
     for i in range(5):
         try:
@@ -1300,9 +1316,7 @@ def backup_cmd(bot, message):
 
 @app.on_message(filters.private & filters.command('cancel'))
 def cancel(bot, message):
-    host_cache.clear()
     cache_list.clear()
-    text_cache.clear()
     chat_id = message.chat.id
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
@@ -1468,6 +1482,10 @@ def start_user(bot, message):
     else:
         link = message.text
         name = message.from_user.first_name
+        try:
+            username = "@" + message.from_user.username
+        except:
+            username = 'None'
         if len(link) >= 7:
             try:
                 ref_chat_id = int(link.split('/start ')[1])
@@ -1484,16 +1502,8 @@ def start_user(bot, message):
             except:
                 pass
         if check_referral_exists(chat_id) is False:
-            try:
-                username = "@" + message.from_user.username
-            except:
-                username = 'None'
             add_referral(chat_id, name, username, [])
         if check_user_exists_in_clients_table(chat_id) is False:
-            try:
-                username = "@" + message.from_user.username
-            except:
-                username = 'None'
             add_client_db(chat_id, name, username, 'None', 0)
             if get_settings()['notification'] == "on":
                 for admin in admin_id:
@@ -1505,6 +1515,8 @@ def start_user(bot, message):
                         pass
             if get_settings()['before_start_msg'] != "None":
                 message.reply_text(get_settings()['before_start_msg'])
+        else:
+            update_name_and_username(chat_id, name, username)
         Buttons = [[KeyboardButton("ارسال شماره تلفن 📞", request_contact=True)]]
         reply_markup = ReplyKeyboardMarkup(Buttons, resize_keyboard=True)
         text = "لطفا برای استفاده از ربات دکمه پایین کلیک کنین و شمارتون بفرستین👇"
@@ -2594,6 +2606,41 @@ def text_private(bot, message):
                     bot.edit_message_text(chat_id, msg, Session.Enable(), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='Manager')]]))
             except Exception as e:
                 bot.edit_message_text(chat_id, msg, "Error: " + str(e), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='Manager')]]))
+            delete_cache(chat_id)
+
+        elif "AUR_" in status:
+            seller = int(status.split("_")[1])
+            if seller in seller_id:
+                keyboard = [
+                    [InlineKeyboardButton("➕افزودن مجدد", callback_data=status)],
+                    [InlineKeyboardButton("<<", callback_data=('SLM_' + str(seller)))]
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                ID, Name, USERNAME, Limit = get_seller_info(seller)
+                try:
+                    host, user = get_host_username(link)
+                except:
+                    host = None
+                    user = None
+                if host is not None:
+                    port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+                    settings = get_settings()
+                    if check_exist_user(host, user) is False:
+                        try:
+                            Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
+                            text = Session.User_info(settings['dropbear'], settings['tuic'])
+                            add_user_db(seller, Name, USERNAME, user, host)
+                            message.reply_text("Done✔️", reply_markup=reply_markup)
+                        except:
+                            message.reply_text("چیزی پیدا نشد:(", reply_markup=reply_markup)
+                    else:
+                        ID, Name, Username = get_all_user_data(host, user)
+                        text = f"ID: {str(ID)}\nName: {Name}\nUsername: {Username}"
+                        message.reply_text(f"این یوزر موجوده و برای این کاربره : \n{text}", reply_markup=reply_markup)
+                else:
+                    message.reply_text("این آدرس وجود نداره!", reply_markup=reply_markup)
+            else:
+                message.reply_text("این فروشنده وجود نداره!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='sellers')]]))
             delete_cache(chat_id)
 
         elif status == "limit_seller":
@@ -5458,6 +5505,21 @@ def call_ALS(bot, query):
         query.edit_message_text(text="پیدا نشد❌", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex("AUR_"))
+def call_AUR(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    delete_cache(chat_id)
+    data = query.data
+    add_cache(chat_id, data)
+    seller = int(data.split("AUR_")[1])
+    keyboard = [[InlineKeyboardButton("<<", callback_data=('SLM_' + str(seller)))]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="اکانتو به این صورت بفرستین ممکنه هر پنلی متفاوت باشه و ایرادی نداره درکل :\n\nHost : sub.domain.com\nUser : username", reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex("SLM_"))
 def call_SLM(bot, query):
     chat_id = query.message.chat.id
@@ -5481,6 +5543,7 @@ def call_SLM(bot, query):
         [InlineKeyboardButton("🗑حذف ", callback_data=('RLS_' + str(chat_id))), InlineKeyboardButton("✏️تغییر محدودیت", callback_data=("ELS_" + str(chat_id)))],
         [InlineKeyboardButton("💰 مدیریت موجودی", callback_data=("BLS_" + str(chat_id)))],
         [InlineKeyboardButton("👤اکانت های فروشنده", callback_data=("ALS_" + str(chat_id)))],
+        [InlineKeyboardButton("➕ افزودن اکانت", callback_data=("AUR_" + str(chat_id)))],
         [InlineKeyboardButton("<<", callback_data='sellers')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -6848,6 +6911,9 @@ def call_NGA(bot, query):
 @app.on_callback_query(filters.regex('search'))
 def call_search(bot, query):
     chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
     if check_cache(chat_id) is False:
         add_cache(chat_id, "search")
         keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
@@ -6855,6 +6921,33 @@ def call_search(bot, query):
         query.edit_message_text(text='خب حالا یه اسم یا حروف بفرستین مثلا ho (حداقل 2 حروف)', reply_markup=reply_markup)
     else:
         query.edit_message_text(text="Please /cancel it first")
+
+
+@app.on_callback_query(filters.regex('SABU'))
+def call_SABU(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    records = get_all_clients_bot()
+    text = f"⚪️ {str(len(records))} کاربر \n\n"
+    for i in range(len(records)):
+        phone = records[i][3]
+        if phone is not None:
+            if phone == "None":
+                phone = ""
+        else:
+            phone = ""
+        text += f"{str(i + 1)}. {records[i][1]} {records[i][2]} {phone}\n"
+    if len(text) > 4095:
+        for x in range(0, len(text), 4095):
+            sleep(0.2)
+            bot.send_message(chat_id, text[x:x+4095])
+    else:
+        bot.send_message(chat_id, text)
+    bot.send_message(chat_id, "Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('Manager'))
@@ -6872,7 +6965,8 @@ def call_Manager(bot, query):
         [InlineKeyboardButton("🚻ریست ترافیک", callback_data='TrfRes'), InlineKeyboardButton("➕افزایش ترافیک", callback_data='TrfPlus')],
         [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS'), InlineKeyboardButton("👝موجودی کاربر", callback_data='ADUB')],
         [InlineKeyboardButton("🛠ساخت اکانت یوزر تلگرام", callback_data='create'), InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none')],
-        [InlineKeyboardButton("💀Kill User", callback_data='AKill'), InlineKeyboardButton("🔎 جستجو کاربر ", callback_data='search')]
+        [InlineKeyboardButton("💀Kill User", callback_data='AKill'), InlineKeyboardButton("🔎 جستجو کاربر ", callback_data='search')],
+        [InlineKeyboardButton("🤖 See all bot users", callback_data='SABU')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -9520,11 +9614,20 @@ def call_NSCLS(bot, query):
         emoji = "🔴"
         cb = 'on'
         emoji_cb = "🟢"
+    if settings['phone_notification'] == "on":
+        emoji_2 = "🟢"
+        cb_2 = 'off'
+        emoji_cb_2 = "🔴"
+    else:
+        emoji_2 = "🔴"
+        cb_2 = 'on'
+        emoji_cb_2 = "🟢"
     keyboard = [
-        [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'NSCXZ_{cb}')],
+        [InlineKeyboardButton(f"New user: {cb} {emoji_cb}", callback_data=f'NSCXZ_{cb}')],
+        [InlineKeyboardButton(f"Phone: {cb_2} {emoji_cb_2}", callback_data=f'SVJLD_{cb_2}')],
         [InlineKeyboardButton("🗒پیام قبل استارت", callback_data='QPAEOI')]
     ]
-    text = '<b>Notification Settings</b>\n\n' + 'بهتون اطلاع میده کی عضو ربات شده \n\nگزینه دوم میتونین برای کاربر یه پیامی رو تنظیم کنین که بعد از استارت نمایش داده بشه و فقط یکبار نشون داده میشه' + "\n\nCurrent: " + settings['notification'] + " " + emoji
+    text = '<b>Notification Settings</b>\n\n' + 'بهتون اطلاع میده کی عضو ربات شده \n\nگزینه دوم وقتی کاربر شمارشو میده به شما اطلاع بده \n\nگزینه سوم میتونین برای کاربر یه پیامی رو تنظیم کنین که بعد از استارت نمایش داده بشه و فقط یکبار نشون داده میشه' + "\n\nCurrent: \nNotify New user: " + settings['notification'] + " " + emoji + "\nNotify phone number: " + settings['phone_notification'] + " " + emoji_2
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -9578,6 +9681,22 @@ def call_QPAEOI(bot, query):
     keyboard.append([InlineKeyboardButton("<<", callback_data='NSCLS')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('SVJLD_'))
+def call_SVJLD(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    phone_notification = data.split("SVJLD_")[1]
+    settings = get_settings()
+    settings['phone_notification'] = phone_notification
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='NSCLS')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('NSCXZ_'))
@@ -9779,20 +9898,38 @@ def call_settings(bot, query):
 def contact_update(bot, message):
     chat_id = message.chat.id
     phone_number = str(message.contact.phone_number)
+    settings = get_settings()
+    notify = False
+    if settings['phone_notification'] == 'on':
+        notify = True
     if chat_id == message.contact.user_id:
+        name = message.from_user.first_name
+        try:
+            username = "@" + message.from_user.username
+        except:
+            username = 'Null'
         if (get_settings()['irphone'] == 'on'):
             if ("+98" in phone_number) or ("+ 98" in phone_number) or (phone_number[0:3] == "+98"):
                 message.reply_text("‎✅", reply_markup=ReplyKeyboardRemove())
-                message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+                message.reply_text(settings['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
                 if check_user_phone_exist(chat_id) is False:
                     update_phone_number(chat_id, phone_number)
             else:
                 message.reply_text("فقط شماره های ایران مورد قبول هست", reply_markup=ReplyKeyboardRemove())
+                notify = False
         else:
             message.reply_text("‎✅", reply_markup=ReplyKeyboardRemove())
-            message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+            message.reply_text(settings['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
             if check_user_phone_exist(chat_id) is False:
                 update_phone_number(chat_id, phone_number)
+        if notify is True:
+            for admin in admin_id:
+                try:
+                    mention = "<a href='tg://user?id=" + str(chat_id) + "'>" + name + "</a>"
+                    text = f"⚪️Phone number\n{mention}\nID: <pre>{str(chat_id)}</pre>\nUsername: {username}\nPhone number: {phone_number}"
+                    bot.send_message(admin, text, parse_mode=enums.ParseMode.HTML)
+                except:
+                    pass
     else:
         message.reply_text("شماره فرستاده شده برای اکانت شما نیست!")
 
