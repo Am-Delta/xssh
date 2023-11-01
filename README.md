@@ -29,10 +29,11 @@ https://my.telegram.org/auth
 
 
 Channel: https://t.me/delta_bcc
+Group: https://t.me/deltacommentsgp
 
 
 ## Supported Panels
-- Shahan v6.8.1
+- Shahan v6.8.2
 - XPanel v3.8.3
 - Rocket v1.2.0
  
