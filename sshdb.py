@@ -187,6 +187,7 @@ settings = {
     "plisio": "off",
     "plisio_API": "None",
     "buy_notification": "on",
+    "phone_notification": "on",
     "server_archives": [],
     "tuic": "off"
 }
