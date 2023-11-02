@@ -8738,7 +8738,7 @@ def call_SNON(bot, query):
                 run_notify.clear()
                 run_notify.append(True)
                 while True:
-                    if run_filtering[0] is True:
+                    if run_notify[0] is True:
                         settings = get_settings()
                         test_usernames = get_test_usernames()
                         hosts, remarks = sshx.HOSTS()
@@ -8758,42 +8758,43 @@ def call_SNON(bot, query):
                                         for DB_username in DB_usernames:
                                             if DB_username not in usernames:
                                                 delete_user(host, DB_username)
-                                        if status[i] != "فعال":
-                                            if (int(days_left[i]) <= -(settings['auto_delete'])) or (usernames[i] in test_usernames):
-                                                SessionDIS = sshx.PANNEL(host, username, password, port, panel, 'User', usernames[i])
-                                                svs = SessionDIS.Disable()
-                                                if "❌Deleted" in Session.Delete(usernames[i]):
+                                        for i in range(len(usernames)):
+                                            if status[i] != "فعال":
+                                                if (int(days_left[i]) <= -(settings['auto_delete'])) or (usernames[i] in test_usernames):
+                                                    SessionDIS = sshx.PANNEL(host, username, password, port, panel, 'User', usernames[i])
+                                                    svs = SessionDIS.Disable()
+                                                    if "❌Deleted" in Session.Delete(usernames[i]):
+                                                        if check_exist_user(host, usernames[i]) is True:
+                                                            ID, Name, Username = get_all_user_data(host, usernames[i])
+                                                            if usernames[i] in test_usernames:
+                                                                NTX = f"❌اکانت: {usernames[i]} تست به اتمام رسید"
+                                                            else:
+                                                                NTX = f"❌اکانت: {usernames[i]}به علت گذشت چند روز و نشدن تمدید حذف شد"
+                                                            delete_user(host, usernames[i])
+                                                            if checker_notify(str(ID)) is True:
+                                                                try:
+                                                                    bot.send_message(ID, NTX)
+                                                                except:
+                                                                    pass
+                                            else:
+                                                if (0 < int(days_left[i]) <= 3) or ((("نامحدود" != traffics[i]) and (usages[i] != "0.0")) and (float(usages[i]) >= (float(traffics[i].split("گیگابایت")[0])) - 2.0)):
                                                     if check_exist_user(host, usernames[i]) is True:
                                                         ID, Name, Username = get_all_user_data(host, usernames[i])
-                                                        if usernames[i] in test_usernames:
-                                                            NTX = f"❌اکانت: {usernames[i]} تست به اتمام رسید"
-                                                        else:
-                                                            NTX = f"❌اکانت: {usernames[i]}به علت گذشت چند روز و نشدن تمدید حذف شد"
-                                                        delete_user(host, usernames[i])
-                                                        if checker_notify(str(ID)) is True:
+                                                        if (checker_notify(str(ID)) is True) and ((ID not in checked_id) or (usernames[i] not in checked_users)):
                                                             try:
-                                                                bot.send_message(ID, NTX)
+                                                                CB = "MIOU_" + host + "$" + usernames[i]
+                                                                Keyboard = [[InlineKeyboardButton("ℹ️اطلاعات بیشتر", callback_data=CB)]]
+                                                                Reply_markup = InlineKeyboardMarkup(Keyboard)
+                                                                if (traffics[i] == "نامحدود") and (usages[i] != "0.0"):
+                                                                    otherN = ""
+                                                                else:
+                                                                    otherN = " و " + traffics[i]
+                                                                NTX = f"⚠️اخطار\nاکانت:\n{usernames[i]}\n\n فقط {str(int(days_left[i]))} روز {otherN} مونده."
+                                                                bot.send_message(ID, NTX, reply_markup=Reply_markup)
+                                                                checked_users.append(usernames[i])
+                                                                checked_id.append(ID)
                                                             except:
                                                                 pass
-                                        else:
-                                            if (0 < int(days_left[i]) <= 3) or ((("نامحدود" != traffics[i]) and (usages[i] != "0.0")) and (float(usages[i]) >= (float(traffics[i].split("گیگابایت")[0])) - 2.0)):
-                                                if check_exist_user(host, usernames[i]) is True:
-                                                    ID, Name, Username = get_all_user_data(host, usernames[i])
-                                                    if (checker_notify(str(ID)) is True) and ((ID not in checked_id) or (usernames[i] not in checked_users)):
-                                                        try:
-                                                            CB = "MIOU_" + host + "$" + usernames[i]
-                                                            Keyboard = [[InlineKeyboardButton("ℹ️اطلاعات بیشتر", callback_data=CB)]]
-                                                            Reply_markup = InlineKeyboardMarkup(Keyboard)
-                                                            if (traffics[i] == "نامحدود") and (usages[i] != "0.0"):
-                                                                otherN = ""
-                                                            else:
-                                                                otherN = " و " + traffics[i]
-                                                            NTX = f"⚠️اخطار\nاکانت:\n{usernames[i]}\n\n فقط {str(int(days_left[i]))} روز {otherN} مونده."
-                                                            bot.send_message(ID, NTX, reply_markup=Reply_markup)
-                                                            checked_users.append(usernames[i])
-                                                            checked_id.append(ID)
-                                                        except:
-                                                            pass
                                 except:
                                     pass
                         sleep(1800)
