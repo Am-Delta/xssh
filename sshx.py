@@ -1905,6 +1905,12 @@ class PANNEL:
                     if traffic == 0:
                         traffic = "Unlimited♾"
                     port, udgpw = self.Ports()
+                    try:
+                        if "-" in Date:
+                            dt = jdatetime.datetime.strptime(Date, '%Y-%m-%d')
+                            Date = str(jdatetime.date.fromgregorian(day=dt.day, month=dt.month, year=dt.year))
+                    except:
+                        pass
                     return f"SSH Host : <pre>{self.host}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
@@ -2306,7 +2312,7 @@ class PANNEL:
                 else:
                     status += "🔴"
                 try:
-                    if "-" in self:
+                    if "-" in self.Date:
                         dt = jdatetime.datetime.strptime(self.Date, '%Y-%m-%d')
                         date = str(jdatetime.date.fromgregorian(day=dt.day, month=dt.month, year=dt.year))
                     else:
