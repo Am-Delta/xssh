@@ -189,7 +189,8 @@ settings = {
     "buy_notification": "on",
     "phone_notification": "on",
     "server_archives": [],
-    "tuic": "off"
+    "tuic": "off",
+    "online_access": "off"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
