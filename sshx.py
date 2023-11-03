@@ -239,14 +239,15 @@ def get_port_xpanel(host):
     return sshport, udgpw
 
 
-def Remove_Host(host):
+def Remove_Host(host, full):
     text = "Done:\n"
-    try:
-        session = "ssh/" + host + ".session"
-        os.remove(session)
-        text += "Session has been removed\n"
-    except Exception as e:
-        text += f"Error Session removing: {str(e)}\n"
+    if full is True:
+        try:
+            session = "ssh/" + host + ".session"
+            os.remove(session)
+            text += "Session has been removed\n"
+        except Exception as e:
+            text += f"Error Session removing: {str(e)}\n"
     with open("Pannels.txt", "r", encoding="utf-8") as f:
         lines = f.readlines()
     Line = None
@@ -280,7 +281,7 @@ def Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, 
 
 def host_to_end(host):
     port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(host)
-    if "host has been removed from the list" in Remove_Host(host):
+    if "host has been removed from the list" in Remove_Host(host, False):
         Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
@@ -289,7 +290,7 @@ def host_to_end(host):
 
 def Update_host(old_host, new_host):
     port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(old_host)
-    if "host has been removed from the list" in Remove_Host(old_host):
+    if "host has been removed from the list" in Remove_Host(old_host, True):
         Add_Host(new_host, port, username, password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
@@ -298,7 +299,7 @@ def Update_host(old_host, new_host):
 
 def Update_user_pass_port(host, new_port, new_username, new_password):
     port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(host)
-    if "host has been removed from the list" in Remove_Host(host):
+    if "host has been removed from the list" in Remove_Host(host, True):
         Add_Host(host, new_port, new_username, new_password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
@@ -306,7 +307,7 @@ def Update_user_pass_port(host, new_port, new_username, new_password):
 
 
 def Update_Host_All_info(old_host, host, port, username, password, panel, route_path, sshport, udgpw, remark):
-    if "host has been removed from the list" in Remove_Host(old_host):
+    if "host has been removed from the list" in Remove_Host(old_host, True):
         Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
@@ -316,7 +317,7 @@ def Update_Host_All_info(old_host, host, port, username, password, panel, route_
 def Change_udp_port(panel, host, udgpw):
     port, username, password, panel, route_path, sshport, old_udgpw, remark = HOST_INFO(host)
     if panel == "xpanel":
-        if "host has been removed from the list" in Remove_Host(host):
+        if "host has been removed from the list" in Remove_Host(host, False):
             Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
             return "Done✔️"
         else:
@@ -326,7 +327,7 @@ def Change_udp_port(panel, host, udgpw):
 def Change_ssh_port(panel, host, sshport):
     port, username, password, panel, route_path, old_sshport, udgpw, remark = HOST_INFO(host)
     if panel == "xpanel":
-        if "host has been removed from the list" in Remove_Host(host):
+        if "host has been removed from the list" in Remove_Host(host, False):
             Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
             return "Done✔️"
         else:
@@ -335,7 +336,7 @@ def Change_ssh_port(panel, host, sshport):
 
 def Change_remark(host, remark):
     port, username, password, panel, route_path, sshport, udgpw, old_remark = HOST_INFO(host)
-    if "host has been removed from the list" in Remove_Host(host):
+    if "host has been removed from the list" in Remove_Host(host, False):
         Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
     else:
