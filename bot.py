@@ -62,6 +62,7 @@ botusername = []
 process_codes = []
 backup_command = [False]
 search_spam = [False]
+online_check_spam = []
 password_retry = []
 password_retry_time = []
 plisio_retry = []
@@ -103,12 +104,13 @@ def Admin_Tools_keys():
 def Seller_Tools_keys():
     keyboard = [
         [InlineKeyboardButton("📊آمار", callback_data='stats'), InlineKeyboardButton("👤اطلاعات کاربر", callback_data='userinfo')],
-        [InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data='disable'), InlineKeyboardButton("🟢 فعال کاربر", callback_data='enable')],
+        [InlineKeyboardButton("✖️ غیر فعال کاربر", callback_data='disable'), InlineKeyboardButton("✔️ فعال کاربر", callback_data='enable')],
         [InlineKeyboardButton("🔄تمدید کاربر", callback_data='update'), InlineKeyboardButton("⬆️افزایش ترافیک", callback_data='TrfPlus')],
         [InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none'), InlineKeyboardButton("🗑حذف کاربر", callback_data='remove')],
-        [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS')],
+        [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS'), InlineKeyboardButton("🔎 جستجو کاربر ", callback_data='SQerch')],
         [InlineKeyboardButton("📦 اکانت های من", callback_data='service'), InlineKeyboardButton("ℹ️ اطلاعات سرویس", callback_data='config')],
-        [InlineKeyboardButton("🆘 آموزش", callback_data='help'), InlineKeyboardButton("💰کیف پول", callback_data='UWM')]
+        [InlineKeyboardButton("🆘 آموزش", callback_data='help'), InlineKeyboardButton("💰کیف پول", callback_data='UWM')],
+        [InlineKeyboardButton("🟢 کاربران آنلاین", callback_data='SOQUS')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
@@ -230,6 +232,38 @@ def Reply_action_sellers(hosts, users, job):
         else:
             keyboard.append([InlineKeyboardButton(users[0], callback_data=f"{job}{hosts[0]}${users[0]}")])
     keyboard.append([InlineKeyboardButton("<<", callback_data="back_seller")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+
+
+def Reply_Account_configuration(F_hosts, F_usernames, job):
+    keyboard = []
+    if len(F_hosts) >= 2:
+        if len(F_hosts) >= 10:
+            if len(F_hosts) % 3 == 0:
+                for i in range(0, len(F_hosts) - 1, 3):
+                    keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"{job}{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"{job}{F_hosts[i + 1]}${F_usernames[i + 1]}"), InlineKeyboardButton(F_usernames[i + 2], callback_data=f"{job}{F_hosts[i + 2]}${F_usernames[i + 2]}")])
+            else:
+                for i in range(0, len(F_hosts) - 2, 3):
+                    keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"{job}{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"{job}{F_hosts[i + 1]}${F_usernames[i + 1]}"), InlineKeyboardButton(F_usernames[i + 2], callback_data=f"{job}{F_hosts[i + 2]}${F_usernames[i + 2]}")])
+                if (len(F_hosts) % 2 == 0) or ((len(F_hosts) % 2 == 1) and (len(F_hosts) % 3 == 2)):
+                    keyboard.append([InlineKeyboardButton(F_usernames[-2], callback_data=f"{job}{F_hosts[-2]}${F_usernames[-2]}"), InlineKeyboardButton(F_usernames[-1], callback_data=f"{job}{F_hosts[-1]}${F_usernames[-1]}")])
+                else:
+                    keyboard.append([InlineKeyboardButton(F_usernames[-1], callback_data=f"{job}{F_hosts[-1]}${F_usernames[-1]}")])
+        else:
+            if len(F_hosts) % 2 == 0:
+                for i in range(0, len(F_hosts) - 1, 2):
+                    keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"{job}{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"{job}{F_hosts[i + 1]}${F_usernames[i + 1]}")])
+            else:
+                for i in range(0, len(F_hosts) - 1, 2):
+                    keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"{job}{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"{job}{F_hosts[i + 1]}${F_usernames[i + 1]}")])
+                keyboard.append([InlineKeyboardButton(F_usernames[-1], callback_data=f"{job}{F_hosts[-1]}${F_usernames[-1]}")])
+    else:
+        if F_hosts == []:
+            pass
+        else:
+            keyboard.append([InlineKeyboardButton(F_usernames[0], callback_data=f"{job}{F_hosts[0]}${F_usernames[0]}")])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
@@ -1577,9 +1611,11 @@ def text_private(bot, message):
                     cb = host + "$" + user
                     keyboard = [
                         [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
-                        [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
+                        [InlineKeyboardButton("✔️ فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("✖️ غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
                         [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))],
-                        [InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb)), InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))]
+                        [InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb)), InlineKeyboardButton("🟢 آنلاین ها", callback_data=('IDMNU&ONLINE_' + cb))],
+                        [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
+                        [InlineKeyboardButton("<<", callback_data='back_admin')]
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.edit_message_text(chat_id, msg, text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -1632,7 +1668,11 @@ def text_private(bot, message):
                                 if (settings['buy'] == 'on') or (chat_id in seller_id):
                                     keyboard[0].insert(1, InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb)))
                                 if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
-                                    keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
+                                    keyboard[1].insert(1, InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb)))
+                                if (settings['delete_user'] == 'on') or (chat_id in seller_id):
+                                    keyboard.append([InlineKeyboardButton("❌حذف اکانت ", callback_data=("DJVYS_" + cb))])
+                                if (settings['online_access'] == 'on') or (chat_id in seller_id):
+                                    keyboard.append([InlineKeyboardButton("🟢 کاربران آنلاین", callback_data=("BDKSC_" + cb))])
                                 keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
                                 password_retry_del(chat_id)
                             else:
@@ -1737,7 +1777,11 @@ def text_private(bot, message):
                                 if (settings['buy'] == 'on') or (chat_id in seller_id):
                                     keyboard[0].insert(1, InlineKeyboardButton("🔄تمدید", callback_data=("UPG_" + cb)))
                                 if (settings['buy-traffic'] == 'on') or (chat_id in seller_id):
-                                    keyboard.append([InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb))])
+                                    keyboard[1].insert(1, InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb)))
+                                if (settings['delete_user'] == 'on') or (chat_id in seller_id):
+                                    keyboard.append([InlineKeyboardButton("❌حذف اکانت ", callback_data=("DJVYS_" + cb))])
+                                if (settings['online_access'] == 'on') or (chat_id in seller_id):
+                                    keyboard.append([InlineKeyboardButton("🟢 کاربران آنلاین", callback_data=("BDKSC_" + cb))])
                                 keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
                                 password_retry_del(chat_id)
                             else:
@@ -3197,6 +3241,39 @@ def text_private(bot, message):
             message.reply_text(text, reply_markup=reply_markup)
             delete_cache(chat_id)
 
+        elif status == "SQerch":
+            if len(link) < 2:
+                message.reply_text("send more than one character or /cancel")
+                return
+            elif sshx.ASCII_Check(link) is False:
+                message.reply_text("only English & numbers or /cancel")
+                return
+            accounts, hosts, stat = get_all_accounts_by_chat_id(chat_id)
+            F_hosts = []
+            F_usernames = []
+            F_usernames_cache = []
+            for i in range(len(accounts)):
+                if link in accounts[i]:
+                    F_hosts.append(hosts[i])
+                    F_usernames.append(accounts[i])
+                    F_usernames_cache.append(accounts[i])
+            link = link.lower()
+            lower_usernames = []
+            for username in accounts:
+                lower_usernames.append(username.lower())
+            for n in range(len(lower_usernames)):
+                if link in lower_usernames[n]:
+                    if accounts[n] not in F_usernames_cache:
+                        F_usernames_cache.append(accounts[n])
+                        F_usernames.append(accounts[n])
+                        F_hosts.append(hosts[i])
+            t0 = ""
+            for i in range(len(F_hosts)):
+                t0 += f"{str(i + 1)}. {F_usernames[i]} {F_remarks[i]}\n"
+            text = f"<b>پیدا شد : {str(len(F_hosts))}</b>\n\n{t0}"
+            bot.edit_message_text(chat_id, msg, text, parse_mode=enums.ParseMode.HTML, reply_markup=Reply_Account_configuration(F_hosts, F_usernames, "ID_"))
+            delete_cache(chat_id)
+
         elif status == "search":
             if len(link) < 2:
                 message.reply_text("send more than one character or /cancel")
@@ -3237,39 +3314,11 @@ def text_private(bot, message):
                                 F_remarks.append(remark)
                 except Exception as e:
                     message.reply_text(f"🔴 Got Error: {str(e)}")
-            keyboard = []
-            if len(F_hosts) >= 2:
-                if len(F_hosts) >= 10:
-                    if len(F_hosts) % 3 == 0:
-                        for i in range(0, len(F_hosts) - 1, 3):
-                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}"), InlineKeyboardButton(F_usernames[i + 2], callback_data=f"IDADMIN_{F_hosts[i + 2]}${F_usernames[i + 2]}")])
-                    else:
-                        for i in range(0, len(F_hosts) - 2, 3):
-                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}"), InlineKeyboardButton(F_usernames[i + 2], callback_data=f"IDADMIN_{F_hosts[i + 2]}${F_usernames[i + 2]}")])
-                        if (len(F_hosts) % 2 == 0) or ((len(F_hosts) % 2 == 1) and (len(F_hosts) % 3 == 2)):
-                            keyboard.append([InlineKeyboardButton(F_usernames[-2], callback_data=f"IDADMIN_{F_hosts[-2]}${F_usernames[-2]}"), InlineKeyboardButton(F_usernames[-1], callback_data=f"IDADMIN_{F_hosts[-1]}${F_usernames[-1]}")])
-                        else:
-                            keyboard.append([InlineKeyboardButton(F_usernames[-1], callback_data=f"IDADMIN_{F_hosts[-1]}${F_usernames[-1]}")])
-                else:
-                    if len(F_hosts) % 2 == 0:
-                        for i in range(0, len(F_hosts) - 1, 2):
-                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}")])
-                    else:
-                        for i in range(0, len(F_hosts) - 1, 2):
-                            keyboard.append([InlineKeyboardButton(F_usernames[i], callback_data=f"IDADMIN_{F_hosts[i]}${F_usernames[i]}"), InlineKeyboardButton(F_usernames[i + 1], callback_data=f"IDADMIN_{F_hosts[i + 1]}${F_usernames[i + 1]}")])
-                        keyboard.append([InlineKeyboardButton(F_usernames[-1], callback_data=f"IDADMIN_{F_hosts[-1]}${F_usernames[-1]}")])
-            else:
-                if F_hosts == []:
-                    pass
-                else:
-                    keyboard.append([InlineKeyboardButton(F_usernames[0], callback_data=f"IDADMIN_{F_hosts[0]}${F_usernames[0]}")])
             t0 = ""
             for i in range(len(F_hosts)):
                 t0 += f"{str(i + 1)}. {F_usernames[i]} {F_remarks[i]}\n"
             text = f"<b>Found : {str(len(F_hosts))}</b>\n\n{t0}"
-            keyboard.append([InlineKeyboardButton("<< Back", callback_data='Manager')])
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            bot.edit_message_text(chat_id, msg, text, parse_mode=enums.ParseMode.HTML, reply_markup=reply_markup)
+            bot.edit_message_text(chat_id, msg, text, parse_mode=enums.ParseMode.HTML, reply_markup=Reply_Account_configuration(F_hosts, F_usernames, "IDADMIN_"))
             search_spam[0] = False
             delete_cache(chat_id)
 
@@ -3947,6 +3996,9 @@ def call_HSOU(bot, query):
     if chat_id not in admin_id:
         query.answer("Access denied", show_alert=True)
         return
+    if chat_id in online_check_spam:
+        query.answer("صبر کنین تا پروسه قبلی تموم شه", show_alert=True)
+        return
     query.answer("صبر کنین...")
     rt = query.data
     host = rt.split("HSOU_")[1]
@@ -3955,6 +4007,7 @@ def call_HSOU(bot, query):
     reply_markup = InlineKeyboardMarkup(keyboard)
     hosts, remarks = sshx.HOSTS()
     if host in hosts:
+        online_check_spam.append(chat_id)
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         try:
             Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
@@ -3979,6 +4032,7 @@ def call_HSOU(bot, query):
                 query.edit_message_text(text=response, reply_markup=reply_markup)
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
+        online_check_spam.remove(chat_id)
     else:
         query.edit_message_text(text="این سرور وجود نداره, احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
@@ -4293,7 +4347,10 @@ def call_stats(bot, query):
         return
     chat_id = query.message.chat.id
     if check_seller_exist(chat_id) is False:
-        keyboard = [[InlineKeyboardButton("🔙Back", callback_data="back_admin"), InlineKeyboardButton("⚫️Full Servers", callback_data='full')]]
+        keyboard = [
+            [InlineKeyboardButton("🤖Bot users", callback_data='SABU'), InlineKeyboardButton("⚫️Full Servers", callback_data='full')],
+            [InlineKeyboardButton("🔙Back", callback_data="back_admin")]
+        ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text="درحال انجام... ممکنه طول بکشه")
         start = int(time())
@@ -4590,6 +4647,33 @@ def call_enable(bot, query):
             query.answer("سرویسی پیدا نشد!", show_alert=True)
         else:
             query.edit_message_text(text="یکی از اکانت هارو انتخاب کن:", reply_markup=Reply_action_sellers(hosts, accounts, "EIXS_"))
+
+
+@app.on_callback_query(filters.regex('OQNLI'))
+def call_OQNLI(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای دیدن کاربرای آنلاین یه سرور انتخاب کنین:", reply_markup=server_cb_creator("HSOU_"))
+
+
+@app.on_callback_query(filters.regex('IQNAC'))
+def call_IQNAC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای دیدن کاربرای غیرفعال یکی از سرور هارو انتخاب کنین:", reply_markup=server_cb_creator("HSDU_"))
+
+
+@app.on_callback_query(filters.regex('CQLOSE'))
+def call_CQLOSE(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای دیدن کاربرای نزدیک اتمام یکی از سرورهارو انتخاب کنین:", reply_markup=server_cb_creator("HSCU_"))
 
 
 @app.on_callback_query(filters.regex('VDSLF_'))
@@ -5113,9 +5197,10 @@ def call_IDADMIN(bot, query):
         text = Session.User_info(settings['dropbear'], settings['tuic'])
         keyboard = [
             [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
-            [InlineKeyboardButton("🟢 فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
+            [InlineKeyboardButton("✔️ فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("✖️ غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
             [InlineKeyboardButton("🆕ریست ترافیک", callback_data=('IDMNU&Reset_' + cb)), InlineKeyboardButton("➕افزایش ترافیک", callback_data=('IDMNU&Traffic_' + cb))],
-            [InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb)), InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
+            [InlineKeyboardButton("💀Kill User", callback_data=('IDMNU&Kill_' + cb)), InlineKeyboardButton("🟢 آنلاین ها", callback_data=('IDMNU&ONLINE_' + cb))],
+            [InlineKeyboardButton("🔑تغییر پسورد", callback_data=('IDMNU&PASSWORD_' + cb))],
             [InlineKeyboardButton("<<", callback_data='back_admin')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -5140,7 +5225,7 @@ def call_IDMNU(bot, query):
         chat_id = query.message.chat.id
         status = (data.split("&")[1]).split("_")[0]
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-        if (status != "Update") and (status != "Remove") and (status != "PASSWORD") and (status != "Traffic") and (status != "Kill") and (status != "USERNAME"):
+        if (status != "Update") and (status != "Remove") and (status != "PASSWORD") and (status != "Traffic") and (status != "Kill") and (status != "USERNAME") and (status != "ONLINE"):
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
         if status == "Active":
             text = Session.Enable()
@@ -5156,6 +5241,33 @@ def call_IDMNU(bot, query):
             add_cache(chat_id, "plus-Traffic")
             text = "حجمو به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)"
             update_collector(chat_id, cache_list, [])
+
+        elif status == "ONLINE":
+            if chat_id not in online_check_spam:
+                online_check_spam.append(chat_id)
+                text = ""
+                count = 0
+                try:
+                    port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+                    Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
+                    response, users, ips = Session.Online_clients()
+                    if "Error:" not in response:
+                        if user in users:
+                            for i in range(len(users)):
+                                if users[i] == user:
+                                    count += 1
+                                    text += f"{str(i + 1)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
+                            text = f"🟢 {str(count)} کاربر آنلاین\n\n{text}"
+                        else:
+                            text = 'کسی آنلاین نیست ✖️'
+                    else:
+                        text = response
+                except Exception as e:
+                    text = "🔴Error: " + str(e)
+                online_check_spam.remove(chat_id)   
+            else:
+                query.answer("صبر کنین تا پروسه قبلی تموم شه", show_alert=True)
+                return
 
         elif status == "Kill":
             Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
@@ -6914,13 +7026,72 @@ def call_search(bot, query):
     if chat_id not in admin_id:
         query.answer("Access denied", show_alert=True)
         return
-    if check_cache(chat_id) is False:
-        add_cache(chat_id, "search")
-        keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text='خب حالا یه اسم یا حروف بفرستین مثلا ho (حداقل 2 حروف)', reply_markup=reply_markup)
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "search")
+    keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_admin')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text='خب حالا یه اسم یا حروف بفرستین مثلا ho (حداقل 2 حروف)', reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('SQerch'))
+def call_SQerch(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in seller_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "SQerch")
+    keyboard = [[InlineKeyboardButton("<< Back", callback_data='back_seller')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text='خب حالا یه اسم یا حروف بفرستین مثلا ho (حداقل 2 حروف)', reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('SOQUS'))
+def call_SOQUS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in seller_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    accounts, shosts, status = get_all_accounts_by_chat_id(chat_id)
+    if status is False:
+        query.answer("اکانتی پیدا نشد!", show_alert=True)
+        return
+    if chat_id not in online_check_spam:
+        query.answer("درحال انجام...", show_alert=True)
+        online_check_spam.append(chat_id)
+        hosts, remarks = sshx.HOSTS()
+        text = ""
+        count = 0
+        cache_h = []
+        for host in shosts:
+            if host not in cache_h:
+                cache_h.append(host)
+                try:
+                    port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+                    Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
+                    response, users, ips = Session.Online_clients()
+                    if "Error:" not in response:
+                        if len(users) >= 1:
+                            text += f"🖥 Server: {host}\n"
+                            for i in range(len(users)):
+                                if users[i] in accounts:
+                                    count += 1
+                                    text += f"{str(i + 1)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
+                            text += "\n"
+                except:
+                    pass
+        text += f"🟢 {str(count)} کاربر آنلاین"
+        if len(text) > 4095:
+            for x in range(0, len(text), 4095):
+                sleep(0.2)
+                bot.send_message(chat_id, text[x:x+4095])
+        else:
+            bot.send_message(chat_id, text)
+        online_check_spam.remove(chat_id)
     else:
-        query.edit_message_text(text="Please /cancel it first")
+        query.answer("صبر کن پروسه قبلی تموم شه", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('SABU'))
@@ -6959,14 +7130,15 @@ def call_Manager(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
-        [InlineKeyboardButton("🔴 غیر فعال کاربر", callback_data='disable'), InlineKeyboardButton("🟢 فعال کاربر", callback_data='enable')],
+        [InlineKeyboardButton("✖️ غیر فعال کاربر", callback_data='disable'), InlineKeyboardButton("✔️ فعال کاربر", callback_data='enable')],
         [InlineKeyboardButton("🔄تمدید کاربر ", callback_data='update'), InlineKeyboardButton("🗑حذف اکانت", callback_data='remove')],
         [InlineKeyboardButton("👤اطلاعات اکانت", callback_data='userinfo'), InlineKeyboardButton("📄اکانت های کاربر", callback_data='userconfigs')],
         [InlineKeyboardButton("🚻ریست ترافیک", callback_data='TrfRes'), InlineKeyboardButton("➕افزایش ترافیک", callback_data='TrfPlus')],
         [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS'), InlineKeyboardButton("👝موجودی کاربر", callback_data='ADUB')],
         [InlineKeyboardButton("🛠ساخت اکانت یوزر تلگرام", callback_data='create'), InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none')],
         [InlineKeyboardButton("💀Kill User", callback_data='AKill'), InlineKeyboardButton("🔎 جستجو کاربر ", callback_data='search')],
-        [InlineKeyboardButton("🤖 See all bot users", callback_data='SABU')]
+        [InlineKeyboardButton("🔴کاربران غیرفعال", callback_data="IQNAC"), InlineKeyboardButton("🟢کاربران آنلاین", callback_data="OQNLI")],
+        [InlineKeyboardButton("⚠️کاربران نزدیک اتمام", callback_data="CQLOSE")],
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -7412,7 +7584,7 @@ def call_SMT(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     keyboard = [
-        [InlineKeyboardButton("🔧 تنظیم و اطلاعات کامل یک سرور", callback_data='servers')],
+        [InlineKeyboardButton("🔧 مانیتور و اطلاعات کامل یک سرور", callback_data='servers')],
         [InlineKeyboardButton("⚫️ظرفیت سرورها", callback_data='full')],
         [InlineKeyboardButton("➖ حذف", callback_data='RST'), InlineKeyboardButton("➕ افزودن", callback_data='AST')],
         [InlineKeyboardButton("تغییر پورت ssh", callback_data='XESSP'), InlineKeyboardButton("تغییر پورت udp", callback_data='UXEP')],
@@ -7424,7 +7596,7 @@ def call_SMT(bot, query):
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = '<b>🖥 Server Manager</b>' + "\n\n-دکمه تنظیم و اطلاعات کامل یک سرور:\nمیتونین اطلاعات کامل سرور ببینین و کاربرای آنلاین و غیرفعال و نزدیک به منقضی شدن ببینین. اگه سرور شما لایسنس دار باشه امکانات بیشتری داره\n-دکمه ظرفیت سرورها:\nبهتون میگه رو هر سرور چند کاربر وجود داره\nتغییر تغییر پورت اس اس اچ و یو دی پی فقط برای ایکس پنل هست\n\nبرای تغییر سرور هم کافیه دکمه تغییر آدرس و یوزنیم و پسورد بزنین که کاربرارو انتقال بدین به اون آدرس... دقت کنین که فقط کاربرای داخل ربات آدرس سرورشون عوض میشه مواقعی که انتقال دادین کاربرا به ی سرور دیگه از این گزینه استفاده کنین یا یوزرنیم و پسورد یا آدرس سرور رو تغییر دادین"
+    text = '<b>🖥 Server Manager</b>' + "\n\n-دکمه مانیتور و اطلاعات کامل یک سرور:\nمیتونین اطلاعات کامل سرور ببینین و کاربرای آنلاین و غیرفعال و نزدیک به منقضی شدن ببینین. اگه سرور شما لایسنس دار باشه امکانات بیشتری داره\n-دکمه ظرفیت سرورها:\nبهتون میگه رو هر سرور چند کاربر وجود داره\nتغییر تغییر پورت اس اس اچ و یو دی پی فقط برای ایکس پنل هست\n\nبرای تغییر سرور هم کافیه دکمه تغییر آدرس و یوزنیم و پسورد بزنین که کاربرارو انتقال بدین به اون آدرس... دقت کنین که فقط کاربرای داخل ربات آدرس سرورشون عوض میشه مواقعی که انتقال دادین کاربرا به ی سرور دیگه از این گزینه استفاده کنین یا یوزرنیم و پسورد یا آدرس سرور رو تغییر دادین"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -7570,6 +7742,43 @@ def call_DJXVY(bot, query):
         query.edit_message_text(text='⚠️خطا لطفا بعدا تلاش کنین', reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('BDKSC_'))
+def call_BDKSC(bot, query):
+    chat_id = query.message.chat.id
+    data = query.data
+    if chat_id not in online_check_spam:
+        query.edit_message_text(text="درحال انجام...")
+        host = (data.split("_")[1]).split("$")[0]
+        user = data.split("$")[1]
+        cb = host + "$" + user
+        keyboard = [[InlineKeyboardButton("<<", callback_data=f'ID_{cb}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        online_check_spam.append(chat_id)
+        text = ""
+        count = 0
+        try:
+            port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+            Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
+            response, users, ips = Session.Online_clients()
+            if "Error:" not in response:
+                if user in users:
+                    for i in range(len(users)):
+                        if users[i] == user:
+                            count += 1
+                            text += f"{str(i + 1)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
+                    text = f"🟢 {str(count)} کاربر آنلاین\n\n{text}"
+                    query.edit_message_text(text=text, reply_markup=reply_markup)
+                else:
+                    query.edit_message_text(text='کسی آنلاین نیست ✖️', reply_markup=reply_markup)
+            else:
+                query.edit_message_text(text='⚠️ خطا ', reply_markup=reply_markup)
+        except:
+            query.edit_message_text(text='⚠️خطا لطفا بعدا تلاش کنین', reply_markup=reply_markup)
+        online_check_spam.remove(chat_id)
+    else:
+        query.answer("صبر کن پروسه قبلی تموم شه", show_alert=True)
+
+
 @app.on_callback_query(filters.regex('ID_'))
 def call_ID(bot, query):
     chat_id = query.message.chat.id
@@ -7596,6 +7805,8 @@ def call_ID(bot, query):
                 keyboard[1].insert(1, InlineKeyboardButton("🔁 خرید ترافیک", callback_data=("UTGB_" + cb)))
             if (settings['delete_user'] == 'on') or (chat_id in seller_id):
                 keyboard.append([InlineKeyboardButton("❌حذف اکانت ", callback_data=("DJVYS_" + cb))])
+            if (settings['online_access'] == 'on') or (chat_id in seller_id):
+                keyboard.append([InlineKeyboardButton("🟢 کاربران آنلاین", callback_data=("BDKSC_" + cb))])
             keyboard.append([InlineKeyboardButton("<<", callback_data='service')])
             reply_markup = InlineKeyboardMarkup(keyboard)
             query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -9763,18 +9974,43 @@ def call_RWUAD(bot, query):
         emoji_5 = "🔴"
         cb_5 = 'on'
         emoji_cb_5 = "🟢"
+    if settings['online_access'] == "on":
+        emoji_6 = "🟢"
+        cb_6 = 'off'
+        emoji_cb_6 = "🔴"
+    else:
+        emoji_6 = "🔴"
+        cb_6 = 'on'
+        emoji_cb_6 = "🟢"
     keyboard = [
         [InlineKeyboardButton(f"Delete: {cb} {emoji_cb}", callback_data=f'JDOSSK_{cb}')],
         [InlineKeyboardButton(f"Server selection: {cb_2} {emoji_cb_2}", callback_data=f'CJSLC_{cb_2}')],
         [InlineKeyboardButton(f"Dropbear Port: {cb_3} {emoji_cb_3}", callback_data=f'Dropbear_{cb_3}')],
         [InlineKeyboardButton(f"Account info button: {cb_4} {emoji_cb_4}", callback_data=f'ISCSO_{cb_4}')],
-        [InlineKeyboardButton(f"Tuic: {cb_5} {emoji_cb_5}", callback_data=f'TCOAD_{cb_5}')]
+        [InlineKeyboardButton(f"Tuic: {cb_5} {emoji_cb_5}", callback_data=f'TCOAD_{cb_5}')],
+        [InlineKeyboardButton(f"online access: {cb_6} {emoji_cb_6}", callback_data=f'PWFDI_{cb_6}')]
     ]
-    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3 + "\nAccount info button: " + settings['info_service'] + " " + emoji_4 + "\nTuic 5: " + settings['tuic'] + " " + emoji_5
-    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته\n\nگزینه چهارم برای دکمه اطلاعات سرویس هست که نمایش داده بشه یا نه\n\nگزینه پنجم توییک هستش که فرستاده بشه یا نه (اگه روشن باشه هم برای کاربر هم برای ادمین و فروشنده ارسال میشه)" + t0
+    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3 + "\nAccount info button: " + settings['info_service'] + " " + emoji_4 + "\nTuic 5: " + settings['tuic'] + " " + emoji_5 + "\nOnline access: " + settings['online_access'] + " " + emoji_6
+    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته\n\nگزینه چهارم برای دکمه اطلاعات سرویس هست که نمایش داده بشه یا نه\n\nگزینه پنجم توییک هستش که فرستاده بشه یا نه (اگه روشن باشه هم برای کاربر هم برای ادمین و فروشنده ارسال میشه)\n\nگزینه شیشم کاربرا میتونن آنلاینی های اکانتشون ببینن" + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('PWFDI_'))
+def call_PWFDI(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    online_access = data.split("PWFDI_")[1]
+    settings = get_settings()
+    settings['online_access'] = online_access
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='RWUAD')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('TCOAD_'))
