@@ -3461,7 +3461,7 @@ def text_private(bot, message):
             hosts, remarks = sshx.HOSTS()
             old_host = status.split("EDD_")[1]
             new_host = link
-            keyboard = [[InlineKeyboardButton("<<", callback_data=f'TTRS_{host}')]]
+            keyboard = [[InlineKeyboardButton("<<", callback_data=f'TTRS_{old_host}')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             if old_host in hosts:
                 if new_host not in hosts:
@@ -3470,8 +3470,11 @@ def text_private(bot, message):
                         message.reply_text("❌اطلاعات درستو بفرستین", reply_markup=reply_markup)
                         sshx.Login(username, password, old_host, port, panel)
                     else:
+                        keyboard = [[InlineKeyboardButton("<<", callback_data=f'TTRS_{new_host}')]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
                         sm = sshx.Update_host(old_host, new_host)
                         update_host_users(old_host, new_host)
+                        sshx.Login(username, password, new_host, port, panel)
                         message.reply_text(sm, reply_markup=reply_markup)
                 else:
                     message.reply_text("سروری که فرستادی توی لیست وجود داره", reply_markup=reply_markup)
@@ -3523,12 +3526,13 @@ def text_private(bot, message):
             reply_markup = InlineKeyboardMarkup(keyboard)
             hosts, remarks = sshx.HOSTS()
             if host in hosts:
-                old_port, old_username, old_password, panel, route_path, sshport, udgpw = sshx.HOST_INFO(old_host)
+                old_port, old_username, old_password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                 if sshx.Login(new_username, new_password, host, new_port, panel) is False:
                     message.reply_text("❌اطلاعات درستو بفرستین", reply_markup=reply_markup)
                     sshx.Login(old_username, old_password, host, old_port, panel)
                 else:
                     sm = sshx.Update_user_pass_port(host, new_port, new_username, new_password)
+                    sshx.Login(new_username, new_password, host, new_port, panel)
                     message.reply_text(sm, reply_markup=reply_markup)
             else:
                 message.reply_text("سرور پیدا نشد", reply_markup=reply_markup)
@@ -3650,6 +3654,7 @@ def text_private(bot, message):
                             message.reply_text("❌اطلاعات درستو بفرستین", reply_markup=reply_markup)
                         else:
                             sshx.Update_Host_All_info(old_host, host, port, username, password, panel, route_path, sshport, udgpw, remark)
+                            sshx.Login(username, password, host, port, panel)
                             message.reply_text("✅ سرور چنج شد", reply_markup=reply_markup)
                             update_host_users(old_host, host)
                     except Exception as e:
