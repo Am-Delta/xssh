@@ -2,6 +2,7 @@ import requests, pickle
 import json
 import os
 import re
+import ast
 import ipaddress
 import jdatetime
 from pathlib import Path
@@ -876,6 +877,26 @@ def get_traffic_xpanel(band_info):
     return server_traffic, clients_usage
 
 
+def get_real_days_shahan(stat, file, days, user):
+    if stat is True:
+        try:
+            with open(file, 'r', encoding='utf-8') as f:
+                for line in f.readlines():
+                    if "INSERT INTO `users` VALUES " in line:
+                        line = line.split("INSERT INTO `users` VALUES ")[1].replace("\n", "")[:-1]
+                        line = line.replace('Null', 'None').replace('NULL', 'None')
+                        datas = list(ast.literal_eval(line))
+                        for data in datas:
+                            if data[1] == user:
+                                days = data[14]
+                                break
+                        break
+            os.remove(file)
+        except Exception as e:
+            print("Function get_real_days_shahan Error: ", e)
+    return days
+
+
 def check_premium_spliter(html):
     for a in html.css('a.waves-effect'):
         href = a.attributes.get("href", None)
@@ -987,7 +1008,7 @@ class PANNEL:
                 html = BeautifulSoup(s, 'html.parser')
                 urls = []
                 for a in html.find_all('a', href=True):
-                    if ("/p/backup/" in a['href']) and ("20" in a['href']):
+                    if ("/p/backup/" in a['href']) and ("20" in a['href']) and ("sql" in a['href']):
                         urls.append(a['href'])
                 rec = self.r.get(self.url + urls[0]).content
                 return True, rec
@@ -1068,7 +1089,7 @@ class PANNEL:
         f = uuid4().hex[0:8] + ".sql"
         try:
             with open(f, 'wb') as file:
-                status, rec = Backup_content()
+                status, rec = self.Backup_content()
                 file.write(rec)
             return True, f
         except Exception as e:
@@ -1205,11 +1226,12 @@ class PANNEL:
                 onlines = info[1]
                 if "کاربر" in onlines:
                     onlines = onlines.replace("کاربر", "")
-                Bool, status = self.IP_Check()
+                #Bool, status = self.IP_Check()
                 stats = self.Stats()
                 if "Error" in stats:
                     stats = "Update your Panel to get the stats"
-                t0 = f"\n\nIP Check: {status}\n{stats}"
+                #t0 = f"\n\nIP Check: {status}\n{stats}"
+                t0 = "\n\n" + stats
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(info[0])}\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(onlines)}"
                 return text + t0
             except Exception as e:
@@ -1240,8 +1262,9 @@ class PANNEL:
                             band_info.append((sec.text()).replace(" ", "").replace("\n", "").replace(",", ""))
                 server_traffic, clients_usage = get_traffic_rocket(band_info)
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
-                Bool, status = self.IP_Check()
-                t0 = f"\n\nIP Check: {status}"
+                #Bool, status = self.IP_Check()
+                #t0 = f"\n\nIP Check: {status}"
+                t0 = ""
                 return text + t0
             except Exception as e:
                 return "Error: " + str(e)
@@ -1267,8 +1290,9 @@ class PANNEL:
                     band_info.append(t)
                 server_traffic, clients_usage = get_traffic_xpanel(band_info)
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
-                Bool, status = self.IP_Check()
-                t0 = f"\n\nIP Check: {status}"
+                #Bool, status = self.IP_Check()
+                #t0 = f"\n\nIP Check: {status}"
+                t0 = ""
                 return text + t0
             except Exception as e:
                 return "Error: " + str(e)
@@ -1891,6 +1915,9 @@ class PANNEL:
                 Traffic = int((self.traffic).replace("گیگابایت", ""))
             elif "نامحدود" in self.traffic:
                 Traffic = ""
+            if self.Date == "فعال نشده":
+                stat, file = self.Backup()
+                self.days = get_real_days_shahan(stat, file, self.days, self.uname)
             payload = {
                 'edituserusername': self.uname,
                 'edituserpassword': password,
@@ -2278,7 +2305,15 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                try:
+                    if "-" in self:
+                        dt = jdatetime.datetime.strptime(self.Date, '%Y-%m-%d')
+                        date = str(jdatetime.date.fromgregorian(day=dt.day, month=dt.month, year=dt.year))
+                    else:
+                        date = self.Date
+                except:
+                    date = self.Date
+                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2291,6 +2326,9 @@ class PANNEL:
             else:
                 if "گیگابایت" in self.traffic:
                     traffic = int((self.traffic).replace("گیگابایت", "")) + traffic
+            if self.Date == "فعال نشده":
+                stat, file = self.Backup()
+                self.days = get_real_days_shahan(stat, file, self.days, self.uname)
             payload = {
                 'edituserusername': self.uname,
                 'edituserpassword': self.passwd,
