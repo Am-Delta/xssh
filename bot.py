@@ -5947,7 +5947,7 @@ def call_UTGB(bot, query):
             text = "مشکلی پیش اومده بعدا تلاش کنین یا به پشتیبانی اطلاع بدین"
         else:
             if "نامحدود" in text:
-                text += "\n\nاکانت شما ترافیکش نامحدوده نمیتونید ترافیک اضافه بخرید"
+                text += "\n\n⛔️ اکانت شما ترافیکش نامحدوده نمیتونید ترافیک اضافه بخرید"
             else:
                 text += "\n\nبرای افزایش ترافیک یکی از گزینه هارو انتخاب کنین🙂"
                 if chat_id in seller_id:
@@ -7173,7 +7173,7 @@ def call_DTRS(bot, query):
     reply_markup = InlineKeyboardMarkup(keyboard)
     hosts, remarks = sshx.HOSTS()
     if host in hosts:
-        text = sshx.Remove_Host(host)
+        text = sshx.Remove_Host(host, True)
         if "Error host" not in text:
             delete_host_users_accounts(host)
         bot.send_message(chat_id, text, reply_markup=reply_markup)
