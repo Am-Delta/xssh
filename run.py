@@ -109,6 +109,14 @@ def db_update():
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
 
+    if settings.get("online_access", None) is None:
+        add_dict = {
+            "online_access": "off"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
