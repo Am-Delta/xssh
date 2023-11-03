@@ -305,7 +305,7 @@ def Update_user_pass_port(host, new_port, new_username, new_password):
         return "Error"
 
 
-def Update_Host_All_info(old_host, host, port, username, password, panel, route_path, sshport, udgpw):
+def Update_Host_All_info(old_host, host, port, username, password, panel, route_path, sshport, udgpw, remark):
     if "host has been removed from the list" in Remove_Host(old_host):
         Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
         return "Done✔️"
