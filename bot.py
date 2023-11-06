@@ -141,11 +141,17 @@ def User_Tools_keys():
         keyboard.insert(1, [InlineKeyboardButton("🔁 خرید ترافیک", callback_data='traffic')])
     if settings['proxy'] != "None":
         keyboard.insert(-1, [InlineKeyboardButton("🆓 پروکسی تلگرام", callback_data='FREEPX')])
+    inv = True
     if settings['invite'] == "on":
         for i in range(len(keyboard)):
             if InlineKeyboardButton("🆓 پروکسی تلگرام", callback_data='FREEPX') in keyboard[i]:
                 keyboard[i].insert(0, InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral'))
+                inv = True
                 break
+            else:
+                inv = False
+    if inv is False:
+        keyboard.append([InlineKeyboardButton("🎁 دریافت هدیه", callback_data='referral')])
     if settings['support_status'] == "on":
         for i in range(len(keyboard)):
             if InlineKeyboardButton("🆘 آموزش", callback_data='help') in keyboard[i]:
@@ -1947,10 +1953,12 @@ def text_private(bot, message):
                             cb_tr = "TUWPD_" + str(deposit)
                             cb_pl = "PUWPD_" + str(deposit)
                             keyboard = [
-                                [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)],
-                                [InlineKeyboardButton("درگاه ارزدیجیتال Plisio", callback_data=cb_pl)],
-                                [InlineKeyboardButton("<< back", callback_data='UWM')]
+                                [InlineKeyboardButton("💳کارت به کارت", callback_data=cb_cc), InlineKeyboardButton("💲ترون", callback_data=cb_tr)]
                             ]
+                            settings = get_settings()
+                            if (settings['plisio'] == "off") or (settings['plisio_API'] == "None"):
+                                keyboard.append([[InlineKeyboardButton("درگاه ارزدیجیتال Plisio", callback_data=cb_pl)]])
+                            keyboard.append([InlineKeyboardButton("<< back", callback_data='UWM')])
                             reply_markup = InlineKeyboardMarkup(keyboard)
                             message.reply_text("روش پرداختو انتخاب کن:", reply_markup=reply_markup)
                             update_collector(chat_id, cache_list, [])
@@ -2612,7 +2620,7 @@ def text_private(bot, message):
                         sent += 1
                     except:
                         continue
-            bot.send_message(chat_id, f"به {str(sent)} کاربر فرستاده شدد")
+            bot.send_message(chat_id, f"به {str(sent)} کاربر فرستاده شد")
             bot.delete_messages(chat_id, msg)
 
         elif status == "answer":
@@ -7231,7 +7239,10 @@ def call_SABU(bot, query):
                 phone = ""
         else:
             phone = ""
-        text += f"{str(i + 1)}. {records[i][1]} {records[i][2]} {phone}\n"
+        USERNAME = records[i][2]
+        if USERNAME == "None" or USERNAME is None:
+            USERNAME = ""
+        text += f"{str(i + 1)}. {records[i][1]} {USERNAME} {phone}\n"
     if len(text) > 4095:
         for x in range(0, len(text), 4095):
             sleep(0.2)
@@ -7952,23 +7963,24 @@ def call_support(bot, query):
             query.answer("🔴 پشتیبانی غیرفعال هست. ", show_alert=True)
             return
         keyboard = []
-        randomize = []
-        for i in range(len(admin_id)*100):
-            if len(admin_id) != len(randomize):
-                r = choice(admin_id)
-                if r not in randomize:
-                    randomize.append(r)
-            else:
-                break
-        for i in range(len(randomize)):
-            keyboard.append([InlineKeyboardButton(f"پشتیبانی {str(i + 1)}", callback_data=("SUPRT_" + str(randomize[i])))])
+        if settings['support_chat'] == "on":
+            randomize = []
+            for i in range(len(admin_id)*100):
+                if len(admin_id) != len(randomize):
+                    r = choice(admin_id)
+                    if r not in randomize:
+                        randomize.append(r)
+                else:
+                    break
+            for i in range(len(randomize)):
+                keyboard.append([InlineKeyboardButton(f"پشتیبانی {str(i + 1)}", callback_data=("SUPRT_" + str(randomize[i])))])
         keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         if settings['support'] == "None":
-            sm = ""
+            sm = "🫡یکی از گزینه هارو انتخاب کنین"
         else:
             sm = settings['support']
-        query.edit_message_text(text=f"{sm}\n\n🫡یکی از گزینه هارو انتخاب کنین", reply_markup=reply_markup)
+        query.edit_message_text(text=sm, reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('SUPRT_'))
@@ -9299,14 +9311,39 @@ def call_SID(bot, query):
         emoji = "🔴"
         cb = 'on'
         emoji_cb = "🟢"
+    if settings['support_chat'] == "on":
+        emoji_2 = "🟢"
+        cb_2 = 'off'
+        emoji_cb_2 = "🔴"
+    else:
+        emoji_2 = "🔴"
+        cb_2 = 'on'
+        emoji_cb_2 = "🟢"
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='EAID'), InlineKeyboardButton("Delete✖️", callback_data='DAID')],
-        [InlineKeyboardButton(f"Support: {cb} {emoji_cb}", callback_data=f'VSQBX_{cb}')]
+        [InlineKeyboardButton(f"Support: {cb} {emoji_cb}", callback_data=f'VSQBX_{cb}')],
+        [InlineKeyboardButton(f"Chat: {cb_2} {emoji_cb_2}", callback_data=f'DHKNNL_{cb_2}')]
     ]
-    text = '<b>Support Settings</b>\n\n' + "میتونین یه پیام پشتیبانی رو قرار بدین و وقتی کاربر دکمه پشتیبانی رو بزنه پیامی که تنظیم کردین نمایش داده بشه \n\nCurrent: " + settings['support'] + "\n\nStatus: " + settings['support_status'] + " " + emoji
+    text = '<b>Support Settings</b>\n\n' + "میتونین یه پیام پشتیبانی رو قرار بدین و وقتی کاربر دکمه پشتیبانی رو بزنه پیامی که تنظیم کردین نمایش داده بشه\n\nگزینه دوم خاموش باشه به کاربر گزینه پشتیبانی نمایش داده نمیشه\n\nگزینه سوم چت هست با خاموش کردن دیگه کاربر نمیتونه از داخل ربات بهتون پیام بده و فقط پیام پشتیبانی براش نمایش داده میشه\n\nCurrent: " + settings['support'] + "\n\nStatus: " + settings['support_status'] + " " + emoji + "\nChat: " + settings['support_chat'] + " " + emoji_2
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('DHKNNL_'))
+def call_DHKNNL(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    sups = data.split("DHKNNL_")[1]
+    settings = get_settings()
+    settings['support_chat'] = sups
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('VSQBX_'))
