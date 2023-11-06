@@ -516,6 +516,40 @@ def Check_in_hosts(host):
         return host, False
 
 
+def get_info_of_expiry(days):
+    if days % 365 == 0:
+        text = f"{str(days // 365)} ساله"
+    elif days % 365 <= 10 and (days >= 365):
+        text = f"{str(days // 365)} ساله"
+    elif days % 30 == 0:
+        text = f"{str(days // 30)} ماهه"
+    elif (days % 30 <= 11) and (days >= 30):
+        text = f"{str(days // 30)} ماهه"
+    else:
+        text = f"{str(days)} روزه"
+    return text
+
+
+def get_password_by_settings():
+    settings = get_settings()
+    if settings['default_password_status'] == "on":
+        password = settings['default_password']
+    else:
+        F, L = ("",)*2
+        password_length = settings['password_length']
+        if settings['password_method'] == "number":
+            for x in range(1, password_length + 1): F += str(x)
+            for x in range(1, password_length + 1): L += "9"
+            password = str(randint(int(F), int(L)))
+        elif settings['password_method'] == "letters":
+            chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+            for x in range(password_length): F += choice(chars)
+            password = F
+        elif settings['password_method'] == "number&letters":
+            password = uuid4().hex[:password_length]
+    return password
+
+
 def get_host_username(text):
     username = ""
     if "<pre>" in text:
@@ -2028,7 +2062,7 @@ def text_private(bot, message):
                     message.reply_text("ادمین ها بزودی درخواستتون بررسی میکنن.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back')]]))
                 else:
                     msg = message.reply_text("Wait...").id
-                    passw = str(randint(123456, 999999))
+                    passw = get_password_by_settings()
                     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                     try:
                         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
@@ -2281,7 +2315,7 @@ def text_private(bot, message):
                 user_id = cache_list[3]
                 name = cache_list[4]
                 Username = cache_list[5]
-                passw = str(randint(123456, 999999))
+                passw = get_password_by_settings()
                 port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                 try:
                     Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
@@ -2946,6 +2980,44 @@ def text_private(bot, message):
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
 
+        elif "default_password" == status:
+            link = fixed_link_json(link)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='DKSJJHJ')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            if len(link) >= 4:
+                if len(link) < 16:
+                    if (sshx.ASCII_Check(link) is True) and (sshx.Contains(link) is True):
+                        settings = get_settings()
+                        settings['default_password'] = link
+                        update_settings(settings)
+                        message.reply_text("Done✔️", reply_markup=reply_markup)
+                        delete_cache(chat_id)
+                    else:
+                        message.reply_text("فقط حروف و اعداد انگلیسی میتونی بفرستی", reply_markup=reply_markup)
+                else:
+                    message.reply_text("پسورد خیلی طولانیه حداکثر 16 کاراکتر بفرستین", reply_markup=reply_markup)
+            else:
+                message.reply_text("پسورد خیلی کوتاهه حداقل 4 کاراکتر بفرستین", reply_markup=reply_markup)
+
+        elif "password_length" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='DKSJJHJ')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            try:
+                if int(link) >= 4:
+                    if int(link) < 16:
+                        password_length = int(link)
+                        settings = get_settings()
+                        settings['password_length'] = password_length
+                        update_settings(settings)
+                        message.reply_text("Done✔️", reply_markup=reply_markup)
+                        delete_cache(chat_id)
+                    else:
+                        message.reply_text("خیلی طولانیه حداکثر عدد 16 بفرستین", reply_markup=reply_markup)
+                else:
+                    message.reply_text("پسورد خیلی کوتاهه حداقل عدد 4 بفرستین", reply_markup=reply_markup)
+            except:
+                message.reply_text("فقط عدد بفرست بین 4 تا 16", reply_markup=reply_markup)
+
         elif "S_Traffic_price" == status:
             try:
                 price = int(link)
@@ -2960,21 +3032,23 @@ def text_private(bot, message):
 
         elif "S_Traffic_GB" == status:
             try:
-                int(link)
-                cache_list, host_cahce = get_collector_cache(chat_id)
-                settings = get_settings()
-                prices = settings['seller_plus_prices']
-                prices.append(cache_list[0])
-                settings['seller_plus_prices'] = prices
-                traffic = settings['seller_plus_traffic']
-                traffic.append(int(link))
-                settings['seller_plus_traffic'] = traffic
-                update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='ADTPR')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                message.reply_text("Done✔️", reply_markup=reply_markup)
-                delete_cache(chat_id)
-                delete_collector(chat_id)
+                if int(link) <= 0:
+                    cache_list, host_cahce = get_collector_cache(chat_id)
+                    settings = get_settings()
+                    prices = settings['seller_plus_prices']
+                    prices.append(cache_list[0])
+                    settings['seller_plus_prices'] = prices
+                    traffic = settings['seller_plus_traffic']
+                    traffic.append(int(link))
+                    settings['seller_plus_traffic'] = traffic
+                    update_settings(settings)
+                    keyboard = [[InlineKeyboardButton("<<", callback_data='ADTPR')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    message.reply_text("Done✔️", reply_markup=reply_markup)
+                    delete_cache(chat_id)
+                    delete_collector(chat_id)
+                else:
+                    message.reply_text("عدد بزرگتر از 0 بفرستین")
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
 
@@ -2992,21 +3066,23 @@ def text_private(bot, message):
 
         elif "Traffic_GB" == status:
             try:
-                int(link)
-                cache_list, host_cahce = get_collector_cache(chat_id)
-                settings = get_settings()
-                prices = settings['plus-prices']
-                prices.append(cache_list[0])
-                settings['plus-prices'] = prices
-                traffic = settings['plus-traffic']
-                traffic.append(int(link))
-                settings['plus-traffic'] = traffic
-                update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='ADTPR')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                message.reply_text("Done✔️", reply_markup=reply_markup)
-                delete_cache(chat_id)
-                delete_collector(chat_id)
+                if int(link) <= 0:
+                    cache_list, host_cahce = get_collector_cache(chat_id)
+                    settings = get_settings()
+                    prices = settings['plus-prices']
+                    prices.append(cache_list[0])
+                    settings['plus-prices'] = prices
+                    traffic = settings['plus-traffic']
+                    traffic.append(int(link))
+                    settings['plus-traffic'] = traffic
+                    update_settings(settings)
+                    keyboard = [[InlineKeyboardButton("<<", callback_data='ADTPR')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    message.reply_text("Done✔️", reply_markup=reply_markup)
+                    delete_cache(chat_id)
+                    delete_collector(chat_id)
+                else:
+                    message.reply_text("عدد بزرگتر از 0 بفرستین")
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
 
@@ -3025,12 +3101,15 @@ def text_private(bot, message):
         elif "A_connections" == status:
             try:
                 connections = int(link)
-                cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("تعداد روز بفرستین")
-                cache_list.append(connections)
-                delete_cache(chat_id)
-                add_cache(chat_id, "A_days")
-                update_collector(chat_id, cache_list, host_cahce)
+                if connections >= 1:
+                    cache_list, host_cahce = get_collector_cache(chat_id)
+                    message.reply_text("تعداد روز بفرستین")
+                    cache_list.append(connections)
+                    delete_cache(chat_id)
+                    add_cache(chat_id, "A_days")
+                    update_collector(chat_id, cache_list, host_cahce)
+                else:
+                    message.reply_text("عدد بین 1 تا بی نهایت بفرستین")
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
 
@@ -3087,12 +3166,15 @@ def text_private(bot, message):
         elif "S_connections" == status:
             try:
                 connections = int(link)
-                cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("تعداد روز بفرستین")
-                cache_list.append(connections)
-                delete_cache(chat_id)
-                add_cache(chat_id, "S_days")
-                update_collector(chat_id, cache_list, host_cahce)
+                if connections >= 1:
+                    cache_list, host_cahce = get_collector_cache(chat_id)
+                    message.reply_text("تعداد روز بفرستین")
+                    cache_list.append(connections)
+                    delete_cache(chat_id)
+                    add_cache(chat_id, "S_days")
+                    update_collector(chat_id, cache_list, host_cahce)
+                else:
+                    message.reply_text("عدد بین 1 تا بی نهایت بفرستین")
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
 
@@ -6058,6 +6140,17 @@ def call_LTPB(bot, query):
                 keyboard = [[InlineKeyboardButton("آموزش اتصال📡", callback_data='help')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 query.edit_message_text(text=f"🥰ترافیک اکانتتون با موفقیت افزایش پیدا کرد\n{user}\n\nبرای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
+                settings = get_settings()
+                if settings['buy_notification'] == "on":
+                    name, USERNAME, phone, old_value = get_full_user_data_id(chat_id)
+                    keyboard = [[InlineKeyboardButton("ℹ️ اطلاعات کامل", callback_data=f"IDADMIN_{host}${user}")], [InlineKeyboardButton("<<", callback_data='back')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    for admin in admin_id:
+                        try:
+                            mention = f"<a href='tg://user?id={str(chat_id)}'>{name}</a>"
+                            bot.send_message(admin, f"↕️ اطلاعات ترافیک اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPrice: {str(price)} Toman\nTraffic: {str(GB)} GB", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        except:
+                            pass
             else:
                 query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
         except:
@@ -6123,8 +6216,8 @@ def call_buy(bot, query):
                     traffic = "نامحدود"
                 else:
                     traffic = str(settings['seller_traffic'][i]) + " گیگ"
-                #text += f"{str(i + 1)}. {traffic} - {str(settings['seller_connections'][i])} کاربر - {str(settings['seller_days'][i])} روزه - {str(settings['seller_prices'][i])} تومن\n"
-                tcb = f"{str(settings['seller_days'][i])} روزه - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
+                #text += f"{str(i + 1)}. {traffic} - {str(settings['seller_connections'][i])} کاربر - {get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_prices'][i])} تومن\n"
+                tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
                 cb = f"BU_{str(settings['seller_days'][i])}-{str(settings['seller_traffic'][i])}#{str(settings['seller_connections'][i])}&{str(settings['seller_prices'][i])}"
                 keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         else:
@@ -6134,7 +6227,7 @@ def call_buy(bot, query):
                 else:
                     traffic = str(settings['traffic'][i]) + " گیگ"
                 #text += f"{str(i + 1)}. {traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن\n"
-                tcb = f"{str(settings['days'][i])} روزه - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i])} تومن"
+                tcb = f"{get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i])} تومن"
                 cb = f"BU_{str(settings['days'][i])}-{str(settings['traffic'][i])}#{str(settings['connections'][i])}&{str(settings['prices'][i])}"
                 keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
@@ -6264,7 +6357,7 @@ def call_BL(bot, query):
             settings = get_settings()
             query.edit_message_text(text="درحال ساخت...")
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-            passw = str(randint(214254, 999999))
+            passw = get_password_by_settings()
             try:
                 Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
                 if UNAME == "random":
@@ -6306,6 +6399,15 @@ def call_BL(bot, query):
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, settings['after_buy'], reply_markup=reply_markup)
+                    if settings['buy_notification'] == "on":
+                        keyboard = [[InlineKeyboardButton("ℹ️ اطلاعات کامل", callback_data=f"IDADMIN_{host}${user}")], [InlineKeyboardButton("<<", callback_data='back')]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        for admin in admin_id:
+                            try:
+                                mention = f"<a href='tg://user?id={str(chat_id)}'>{name}</a>"
+                                bot.send_message(admin, f"📃 اطلاعات اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                            except:
+                                pass
                 else:
                     query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
             except:
@@ -6313,7 +6415,10 @@ def call_BL(bot, query):
         else:
             query.edit_message_text(text="ظرفیت پر شده بعدا امتحان کنین😑", reply_markup=reply_markup)
             for admin in admin_id:
-                bot.send_message(admin, "Error to creating account for user: Add a host or change the maximum number in the settings imminently")
+                try:
+                    bot.send_message(admin, "Error to creating account for user: Add a host or change the maximum number in the settings imminently")
+                except:
+                    pass
 
 
 @app.on_callback_query(filters.regex('Uname?'))
@@ -6462,7 +6567,7 @@ def call_Confirmed(bot, query):
                         user = UNAME + str(randint(12, 350))
                 else:
                     user = UNAME + str(randint(123, 350))
-            passw = str(randint(214254, 999999))
+            passw = get_password_by_settings()
             t0 = "🥰مرسی از خریدتون\n\n"
             if chat_id in seller_id:
                 creator = "SELLER"
@@ -6591,7 +6696,7 @@ def call_UPG(bot, query):
                             traffic = "نامحدود"
                         else:
                             traffic = str(settings['seller_traffic'][i]) + " گیگ"
-                        tcb = f"{str(settings['seller_days'][i])} روزه - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
+                        tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
                         cb = f"UPKIF_{str(settings['seller_days'][i])}-{str(settings['seller_traffic'][i])}#{str(settings['seller_connections'][i])}&{str(settings['seller_prices'][i])}:{user}@{host}"
                         keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
                 else:
@@ -6600,7 +6705,7 @@ def call_UPG(bot, query):
                             traffic = "نامحدود"
                         else:
                             traffic = str(settings['traffic'][i]) + " گیگ"
-                        tcb = f"{str(settings['days'][i])} روزه - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i])} تومن"
+                        tcb = f"{get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i])} تومن"
                         cb = f"UPB_{str(settings['days'][i])}-{str(settings['traffic'][i])}#{str(settings['connections'][i])}&{str(settings['prices'][i])}:{user}@{host}"
                         keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         except:
@@ -6681,6 +6786,16 @@ def call_UPKIF(bot, query):
                         checked_id.remove(checked_id[checked_users.index(user)])
                 except Exception as e:
                     print("Error (line checked_id) : ", str(e))
+                if settings['buy_notification'] == "on":
+                    name, USERNAME, phone, old_value = get_full_user_data_id(chat_id)
+                    keyboard = [[InlineKeyboardButton("ℹ️ اطلاعات کامل", callback_data=f"IDADMIN_{host}${user}")], [InlineKeyboardButton("<<", callback_data='back')]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    for admin in admin_id:
+                        try:
+                            mention = f"<a href='tg://user?id={str(chat_id)}'>{name}</a>"
+                            bot.send_message(admin, f"↕️ اطلاعات ترافیک اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                        except:
+                            pass
             else:
                 query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
         except:
@@ -7648,6 +7763,9 @@ def call_service(bot, query):
 
 @app.on_callback_query(filters.regex('SELFCPA_'))
 def call_SELFCPA(bot, query):
+    if get_settings()['change_password'] == "off":
+        query.answer("Access denied", show_alert=True)
+        return
     chat_id = query.message.chat.id
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
@@ -7898,7 +8016,7 @@ def call_test(bot, query):
                 except:
                     USERNAME = "None"
                 user = host.split('.')[0] + "a" + str(randint(1243, 6523))
-                passw = str(randint(214254, 999999))
+                passw = get_password_by_settings()
                 port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                 Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
                 t0 = "اکانت تست شما ❤️\n\n"
@@ -8593,7 +8711,74 @@ def call_DKSJJHJ(bot, query):
     if chat_id not in admin_id:
         query.answer("Access denied", show_alert=True)
         return
-    query.answer("Soon...", show_alert=True)
+    data = query.data
+    settings = get_settings()
+    if "_" in data:
+        data = data.split("_")[1]
+        if data in ["on", "off"]:
+            settings['default_password_status'] = data
+        elif "PM" in data:
+            if settings['password_method'] == "number":
+                settings['password_method'] = "letters"
+            elif settings['password_method'] == "letters":
+                settings['password_method'] = "number&letters"
+            elif settings['password_method'] == "number&letters":
+                settings['password_method'] = "number"
+        update_settings(settings)
+    settings = get_settings()
+    if settings['default_password_status'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+    else:
+        emoji = "🔴"
+        cb = 'on'
+    if settings['password_method'] == "number":
+        cb_c = "عدد"
+    elif settings['password_method'] == "letters":
+        cb_c = "حروف"
+    elif settings['password_method'] == "number&letters":
+        cb_c = "عدد و حروف"
+    keyboard = [
+        [InlineKeyboardButton(f"پسورد پیشفرض: {settings['default_password_status']} {emoji}", callback_data=f'DKSJJHJ_{cb}')],
+        [InlineKeyboardButton("🔄 تغییر پسورد پیشفرض", callback_data='MPCDQ')],
+        [InlineKeyboardButton(f"🗝متود پسورد: {cb_c}", callback_data='DKSJJHJ_PM')],
+        [InlineKeyboardButton("🔢 تغییر اندازه پسورد", callback_data='PFSKDk')]
+    ]
+    t0 = "\n\nDefault password status: " + settings['default_password_status'] + " " + emoji + "\nDefault password: " + settings['default_password'] + "\nPassword method: " + settings['password_method'] + "\nPassword length: " + str(settings['password_length'])
+    text = '<b>Password Settings</b>\n\n' + "میتونین با خاموش و روشن کردن گزینه اول ربات برای ساخت اکانت از پسورد پیشفرضی که شما تعیین کردین استفاده کنه \n\nگزینه دوم میتونین پسورد پیشفرض خودتون بفرستین\n\nگزینه سوم متود پسورده (فقط عدد, فقط حروف, عدد و حرف) با کلیک رو دکمه تغییر میکنه\n\nگزینه چهارم اندازه پسورده که میتونین تغییر بدین (عدد بین 4 تا 16)" + t0
+    keyboard.append([InlineKeyboardButton("<<", callback_data='ZBSHP')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('PFSKDk'))
+def call_PFSKDk(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "password_length")
+    text = "مقدار اندازه پسورد بصورت عدد بفرست مثلا 6 (حداقل 4 و حداکثر 16)"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='DKSJJHJ')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('MPCDQ'))
+def call_MPCDQ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "default_password")
+    text = "خب پسورد پیشفرضتون بفرستین (حداقل 4 یا حداکثر 16 کاراکتر و عددو حرف به انگلیسی)"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='DKSJJHJ')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex('VKDLS_'))
@@ -8670,7 +8855,7 @@ def call_ADMINPRICES(bot, query):
             traffic = "نامحدود"
         else:
             traffic = str(settings['traffic'][i]) + " گیگ"
-        currnet += f"{str(i + 1)}. {traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن\n"
+        currnet += f"{str(i + 1)}. {get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i])} تومن\n"
     text = '<b>Prices Settings</b>\n\n' + "Current: \n" + currnet
     keyboard.append([InlineKeyboardButton("<<", callback_data='ZBSHP')])
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -8706,7 +8891,7 @@ def call_DAPR(bot, query):
                 traffic = "نامحدود"
             else:
                 traffic = str(settings['traffic'][i]) + " گیگ"
-            tcb = f"{traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن"
+            tcb = f"{get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i])} تومن"
             cb = "DSELP_" + str(i)
             keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         keyboard.append([InlineKeyboardButton("<<", callback_data='ADMINPRICES')])
@@ -9745,7 +9930,7 @@ def call_SPBAL(bot, query):
             traffic = "نامحدود"
         else:
             traffic = str(settings['seller_traffic'][i]) + " گیگ"
-        currnet += f"{str(i + 1)}. {traffic} - {str(settings['seller_connections'][i])} کاربر - {str(settings['seller_days'][i])} روزه - {str(settings['seller_prices'][i])} تومن\n"
+        currnet += f"{str(i + 1)}. {traffic} - {str(settings['seller_connections'][i])} کاربر - {get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_prices'][i])} تومن\n"
     text = '<b>Sellers Prices Settings</b>\n\n' + "Current: \n" + currnet
     keyboard.append([InlineKeyboardButton("<<", callback_data='XSM')])
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -9781,7 +9966,7 @@ def call_DSPR(bot, query):
                 traffic = "نامحدود"
             else:
                 traffic = str(settings['seller_traffic'][i]) + " گیگ"
-            tcb = f"{traffic} - {str(settings['seller_connections'][i])} کاربر - {str(settings['seller_days'][i])} روزه - {str(settings['seller_prices'][i])} تومن"
+            tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
             cb = "DelSELP_" + str(i)
             keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         keyboard.append([InlineKeyboardButton("<<", callback_data='XSM')])
@@ -9839,12 +10024,22 @@ def call_NSCLS(bot, query):
         emoji_2 = "🔴"
         cb_2 = 'on'
         emoji_cb_2 = "🟢"
+    if settings['buy_notification'] == "on":
+        emoji_3 = "🟢"
+        cb_3 = 'off'
+        emoji_cb_3 = "🔴"
+    else:
+        emoji_3 = "🔴"
+        cb_3 = 'on'
+        emoji_cb_3 = "🟢"
     keyboard = [
         [InlineKeyboardButton(f"New user: {cb} {emoji_cb}", callback_data=f'NSCXZ_{cb}')],
         [InlineKeyboardButton(f"Phone: {cb_2} {emoji_cb_2}", callback_data=f'SVJLD_{cb_2}')],
+        [InlineKeyboardButton(f"Buy: {cb_3} {emoji_cb_3}", callback_data=f'SWHFlN_{cb_3}')],
         [InlineKeyboardButton("🗒پیام قبل استارت", callback_data='QPAEOI')]
     ]
-    text = '<b>Notification Settings</b>\n\n' + 'بهتون اطلاع میده کی عضو ربات شده \n\nگزینه دوم وقتی کاربر شمارشو میده به شما اطلاع بده \n\nگزینه سوم میتونین برای کاربر یه پیامی رو تنظیم کنین که بعد از استارت نمایش داده بشه و فقط یکبار نشون داده میشه' + "\n\nCurrent: \nNotify New user: " + settings['notification'] + " " + emoji + "\nNotify phone number: " + settings['phone_notification'] + " " + emoji_2
+    t0 = "\n\nCurrent: \nNotify New user: " + settings['notification'] + " " + emoji + "\nNotify phone number: " + settings['phone_notification'] + " " + emoji_2 + "\nBuy Notify: " + settings['buy_notification'] + " " + emoji_3
+    text = '<b>Notification Settings</b>\n\n' + 'بهتون اطلاع میده کی عضو ربات شده \n\nگزینه دوم وقتی کاربر شمارشو میده به شما اطلاع بده\n\nگزینه سوم وقتی کاربر یا فروشنده از طریق کیف پول خریدی انجام دادن به شما اطلاع رسانی بشه فرقی نداره که خرید یا تمدید باشه\n\nگزینه چهارم میتونین برای کاربر یه پیامی رو تنظیم کنین که بعد از استارت نمایش داده بشه و فقط یکبار نشون داده میشه' + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -9898,6 +10093,22 @@ def call_QPAEOI(bot, query):
     keyboard.append([InlineKeyboardButton("<<", callback_data='NSCLS')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('SWHFlN_'))
+def call_SWHFlN(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    buy_notification = data.split("SWHFlN_")[1]
+    settings = get_settings()
+    settings['buy_notification'] = buy_notification
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='NSCLS')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('SVJLD_'))
@@ -9987,19 +10198,44 @@ def call_RWUAD(bot, query):
         emoji_6 = "🔴"
         cb_6 = 'on'
         emoji_cb_6 = "🟢"
+    if settings['change_password'] == "on":
+        emoji_7 = "🟢"
+        cb_7 = 'off'
+        emoji_cb_7 = "🔴"
+    else:
+        emoji_7 = "🔴"
+        cb_7 = 'on'
+        emoji_cb_7 = "🟢"
     keyboard = [
         [InlineKeyboardButton(f"Delete: {cb} {emoji_cb}", callback_data=f'JDOSSK_{cb}')],
         [InlineKeyboardButton(f"Server selection: {cb_2} {emoji_cb_2}", callback_data=f'CJSLC_{cb_2}')],
         [InlineKeyboardButton(f"Dropbear Port: {cb_3} {emoji_cb_3}", callback_data=f'Dropbear_{cb_3}')],
         [InlineKeyboardButton(f"Account info button: {cb_4} {emoji_cb_4}", callback_data=f'ISCSO_{cb_4}')],
         [InlineKeyboardButton(f"Tuic: {cb_5} {emoji_cb_5}", callback_data=f'TCOAD_{cb_5}')],
-        [InlineKeyboardButton(f"online access: {cb_6} {emoji_cb_6}", callback_data=f'PWFDI_{cb_6}')]
+        [InlineKeyboardButton(f"online access: {cb_6} {emoji_cb_6}", callback_data=f'PWFDI_{cb_6}')],
+        [InlineKeyboardButton(f"Change Password: {cb_7} {emoji_cb_7}", callback_data=f'KJGNSD_{cb_7}')]
     ]
-    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3 + "\nAccount info button: " + settings['info_service'] + " " + emoji_4 + "\nTuic 5: " + settings['tuic'] + " " + emoji_5 + "\nOnline access: " + settings['online_access'] + " " + emoji_6
-    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته\n\nگزینه چهارم برای دکمه اطلاعات سرویس هست که نمایش داده بشه یا نه\n\nگزینه پنجم توییک هستش که فرستاده بشه یا نه (اگه روشن باشه هم برای کاربر هم برای ادمین و فروشنده ارسال میشه)\n\nگزینه شیشم کاربرا میتونن آنلاینی های اکانتشون ببینن" + t0
+    t0 = "\n\nCurrent: \nDelete by user: " + settings['delete_user'] + " " + emoji + "\nServer selection: " + settings['select_server_users'] + " " + emoji_2 + "\nDropbear Port: " + settings['dropbear'] + " " + emoji_3 + "\nAccount info button: " + settings['info_service'] + " " + emoji_4 + "\nTuic 5: " + settings['tuic'] + " " + emoji_5 + "\nOnline access: " + settings['online_access'] + " " + emoji_6 + "\nChange Password: " + settings['change_password'] + " " + emoji_7
+    text = '<b>Users Access Settings</b>\n\n' + "با گزینه اول میتونین دسترسی کاربر برای دلیت اکانت محدود کنین که خاموش باشه دکمه حذف اکانت برای کاربر نمایش داده نمیشه و نمیتونه حذف کنه اکانت خودشو و اگه روشن باشه میتونه اینکارو انجام بده\n\nگزینه دوم اگه روشن باشه کاربر میتونه سرور دلبخواه رو انتخاب کنه و اگه خاموش باشه بصورت رندوم بهش داده میشه (هیچ آدرسی فرستاده نمیشه قبل خرید)\n\nگزینه سوم برای پورت دراپ بیر هست که اگه روشن باشه پورت دراپ بیر برای کاربر میفرسته\n\nگزینه چهارم برای دکمه اطلاعات سرویس هست که نمایش داده بشه یا نه\n\nگزینه پنجم توییک هستش که فرستاده بشه یا نه (اگه روشن باشه هم برای کاربر هم برای ادمین و فروشنده ارسال میشه)\n\nگزینه شیشم کاربرا میتونن آنلاینی های اکانتشون ببینن\n\nگزینه هفتم مجوز تغییر پسورد توسط کاربر " + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('KJGNSD_'))
+def call_KJGNSD(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    change_password = data.split("KJGNSD_")[1]
+    settings = get_settings()
+    settings['change_password'] = change_password
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='RWUAD')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="Done✔️", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('PWFDI_'))
