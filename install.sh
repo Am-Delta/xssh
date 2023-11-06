@@ -20,8 +20,9 @@ pip install ipaddress
 
 mkdir /root/botCh
 
-pkill -9 python3
-pkill -9 python
+pkill -9 -f "backup-ssh.py"
+pkill -9 -f "bot.py"
+pkill -9 -f "session-updater.py"
 
 mv /root/bot/Pannels.txt /root/botCh
 mv /root/bot/backup /root/botCh
