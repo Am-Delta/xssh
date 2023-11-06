@@ -190,7 +190,10 @@ settings = {
     "phone_notification": "on",
     "server_archives": [],
     "tuic": "off",
-    "online_access": "off"
+    "online_access": "off",
+    "default_password_status": "off",
+    "default_password": "123456",
+    "change_password": "on"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
