@@ -6039,7 +6039,7 @@ def call_LTPB(bot, query):
         data = query.data
         data = data.split("LTPB_")[1]
         GB = int(data.split("-")[0])
-        price = data.split("-")[1].split(":")[0]
+        price = int(data.split("-")[1].split(":")[0])
         user = (data.split("@")[0]).split(":")[1]
         host = data.split("@")[1]
         if old_value - price < 0:
