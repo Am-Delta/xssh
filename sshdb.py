@@ -193,7 +193,8 @@ settings = {
     "online_access": "off",
     "default_password_status": "off",
     "default_password": "123456",
-    "change_password": "on"
+    "change_password": "on",
+    "support_chat": "on"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
