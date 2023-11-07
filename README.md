@@ -1,3 +1,4 @@
+[![Telegram Group](https://raw.githubusercontent.com/gauravghongde/social-icons/9d939e1c5b7ea4a24ac39c3e4631970c0aa1b920/SVG/Color/Telegram.svg)](https://t.me/deltacommentsgp)
 # SSH Panel Telegram bot
 
 ربات تلگرام فروش و منیجر پنل اس اس اچ برای پنل های شاهان و ایکس پنل و راکت (پایین تر ورژن های ساپورت نوشته شده)
