@@ -30,7 +30,7 @@ def db_update():
     s = s.replace("\'", "\"")
     p = re.compile('(?<!\\\\)\'')
     s = p.sub('\"', s)
-    s = s.replace(u'\\xa0', u' ')
+    s = s.replace(u'\\xa0', u' ').replace(u"\u00A0", " ").replace(u"\\u", " ").replace(u'\\U', u' ')
     settings = json.loads(s, strict=False)
     if settings.get("phone", None) is None:
         add_dict = {
@@ -130,6 +130,23 @@ def db_update():
     if settings.get("support_chat", None) is None:
         add_dict = {
             "support_chat": "on",
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
+    if settings.get("addresses", None) is None:
+        add_dict = {
+            "addresses": {},
+            "random_price": "off",
+            "random_price_min": 100,
+            "random_price_max": 1000,
+            "zarinpal": "off",
+            "zarinpal_address": "None",
+            "idpay": "off",
+            "idpay_address": "None",
+            "nextpay": "off",
+            "nextpay_address": "None"
         }
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
