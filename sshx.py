@@ -13,6 +13,39 @@ from time import time
 from uuid import uuid4
 
 
+shortcut_isp_json = {
+    "Mobile Communication Company of Iran PLC": "همراه اول",
+    "Information Technology Company (ITC)": "مخابرات",
+    "Iran Cell Service and Communication Company": "ایرانسل",
+    '"Rightel Communication Service Company PJS"': "رایتل",
+    'Rightel Communication Service Company PJS': "رایتل",
+    "Iran Telecommunication Company PJS": "مخابرات",
+    "Aria Shatel Company Ltd": "شاتل",
+    "Shiraz Hamyar Co.": "همیارنت",
+    "Pars Online PJS": "پارس آنلاین",
+    "Pishgaman Toseeh Ertebatat Company (Private Joint Stock)": "پیشگامان",
+    "Asiatech Data Transmission company": "آسیاتک",
+    "Sefroyek Pardaz Engineering PJSC": "صفرویک",
+    "Datak Company LLC": "رهام داتک",
+    "Parvaresh Dadeha Co. Private Joint Stock": "صبانت",
+    "ANDISHE SABZ KHAZAR CO. P.J.S.": "اندیشه سبز",
+    "Dade Samane Fanava Company (PJS)": "فن آوا",
+    "Rayaneh Danesh Golestan Complex P.J.S. Co.": "های وب",
+    "Mobin Net Communication Company (Private Joint Stock)": "مبین نت",
+    "Noyan Abr Arvan Co. ( Private Joint Stock)": "آروان",
+    "Afranet": "افرانت",
+    "Sepanta Communication Development Co. Ltd": "سپنتا",
+    "Fanava Group": "فن آوا"
+}
+
+
+def Shortcut_isp(isp):
+    if shortcut_isp_json.get(isp, None) is not None:
+        return shortcut_isp_json[isp]
+    else:
+        return isp
+
+
 def ISP(target):
     with open("ir.csv", "r", encoding="utf-8") as f:
         for i in f.readlines():
@@ -28,7 +61,7 @@ def ISP(target):
                 ip_network = from_range + "/" + str(subnet_bits)
                 try:
                     if ipaddress.ip_address(target) in ipaddress.ip_network(ip_network):
-                        return isp
+                        return Shortcut_isp(isp)
                 except:
                     pass
     return ""
@@ -1432,7 +1465,7 @@ class PANNEL:
                             count += 1
                     except:
                         pass
-                if count >= 3:
+                if count >= 4:
                     return True, "Offline ❌"
                 else:
                     return False, "Online ✅"
@@ -1807,7 +1840,7 @@ class PANNEL:
                 s = self.r.post(self.url + "/p/newuser.php", data=payload)
                 if s.status_code == 200:
                     if traffic == '':
-                        traffic = "Unlimited♾"
+                        traffic = "نامحدود"
                     try:
                         s = self.r.get(self.url + "/p/index.php").text
                         html = HTMLParser(s)
@@ -1817,7 +1850,7 @@ class PANNEL:
                         PORT, UDGPW = self.Ports()
                     #if UDGPW == "":
                         #PORT, UDGPW = self.Ports()
-                    return f"SSH Host : <pre>{IP}</pre>\nPort : <pre>{PORT}</pre>\nUdgpw : <pre>{UDGPW}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+                    return f"SSH Host : <code>{IP}</code>\nPort : <code>{PORT}</code>\nUdgpw : <code>{UDGPW}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -1864,7 +1897,7 @@ class PANNEL:
                     if traffic == 0:
                         traffic = "نامحدود"
                     port, udgpw = self.Ports()
-                    return f"SSH Host : <pre>{self.host}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
+                    return f"SSH Host : <code>{self.host}</code>\nPort : <code>{port}</code>\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -1912,7 +1945,7 @@ class PANNEL:
                             Date = str(jdatetime.date.fromgregorian(day=dt.day, month=dt.month, year=dt.year))
                     except:
                         pass
-                    return f"SSH Host : <pre>{self.host}</pre>\nPort : <pre>{port}</pre>\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{uname}</pre>\nPassword : <pre>{passw}</pre>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
+                    return f"SSH Host : <code>{self.host}</code>\nPort : <code>{port}</code>\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2259,13 +2292,13 @@ class PANNEL:
 
     def User_info(self, DROP, TUIC):
         if (DROP == "on") and (self.dropbear != ""):
-            drop = f"\nDropbear Port : <pre>{self.dropbear}</pre>"
+            drop = f"\nDropbear Port : <code>{self.dropbear}</code>"
         else:
             drop = ""
         if self.panel == "shahan":
             try:
                 if (TUIC == "on") and (self.tuic != ""):
-                    tuic = f"\nTuic5 : <pre>{self.tuic}</pre>"
+                    tuic = f"\nTuic5 : <code>{self.tuic}</code>"
                 else:
                     tuic = ""
                 port = self.SPort
@@ -2282,7 +2315,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nتاریخ انقضا : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}{tuic}"
+                return f"SSH Host : <code>{self.ip}</code>\nPort : <code>{port}</code>{drop}\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{self.uname}</code>\nPassword : <code>{self.passwd}</code>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nتاریخ انقضا : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}{tuic}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2295,7 +2328,7 @@ class PANNEL:
                     status += "🟢"
                 else:
                     status += "🔴"
-                return f"SSH Host :  <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}\nPublic Link: {self.public_link}"
+                return f"SSH Host :  <code>{self.ip}</code>\nPort : <code>{port}</code>{drop}\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{self.uname}</code>\nPassword : <code>{self.passwd}</code>\n\nConnection limit: {str(self.connection_limit)}\nDays : {str(self.days)}\nExpiry : {self.Date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}\nPublic Link: {self.public_link}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2320,7 +2353,7 @@ class PANNEL:
                         date = self.Date
                 except:
                     date = self.Date
-                return f"SSH Host : <pre>{self.ip}</pre>\nPort : <pre>{port}</pre>{drop}\nUdgpw : <pre>{udgpw}</pre>\nUsername : <pre>{self.uname}</pre>\nPassword : <pre>{self.passwd}</pre>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+                return f"SSH Host : <code>{self.ip}</code>\nPort : <code>{port}</code>{drop}\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{self.uname}</code>\nPassword : <code>{self.passwd}</code>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
             except Exception as e:
                 return "Error: " + str(e)
 
