@@ -1434,6 +1434,16 @@ class PANNEL:
                     data.append(td.text())
                 for i in range(2, len(data), 5):
                     users.append(data[i - 1])
+                if users == []:
+                    s = self.r.post(self.url + "/ajax/users/list").text
+                    if "<br" in s:
+                        s = s.split("<br")[0]
+                    datas = json.loads(s)
+                    for data in datas['data']:
+                        for i in range(len(data['online_users'])):
+                            if data['online_users'][i].get("ip", None) is not None:
+                                ips.append(data['online_users'][i]['ip'])
+                                users.append(data['username'])
                 return "Good", users, ips
             except Exception as e:
                 return "Error: " + str(e), [], []
