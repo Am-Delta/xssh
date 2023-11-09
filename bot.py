@@ -575,7 +575,7 @@ def get_another_address_if_exists(host):
 
 
 def change_infos_user_info(text):
-    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "").replace(" ", "")
+    host = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
     HOST = get_another_address_if_exists(host)
     print(host, HOST)
     if HOST != host:
@@ -2141,7 +2141,7 @@ def text_private(bot, message):
                         description = f"[ Bot - Admin ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} )"
                         text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False))
                         port, udgpw = Session.Ports()
-                        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
+                        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
                         url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}#{cache_list[1]}'
                         photo = QR_Maker(url)
                         text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -2394,7 +2394,7 @@ def text_private(bot, message):
                     description = f"[ Bot - Admin ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} ), userID: {str(user_id)}, Username: {Username}"
                     text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False))
                     port, udgpw = Session.Ports()
-                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
+                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
                     url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}#{cache_list[1]}'
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -6880,7 +6880,7 @@ def call_BL(bot, query):
                 text = t0 + change_infos_user_info(Session.Create(user, passw, connection_limit, days, GB, description, first_connect))
                 if "Error" not in text:
                     port, udgpw = Session.Ports()
-                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
+                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
                     url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -7090,7 +7090,7 @@ def call_Confirmed(bot, query):
             if "Error" not in text:
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 port, udgpw = Session.Ports()
-                HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
+                HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
                 url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                 photo = QR_Maker(url)
                 text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -8530,7 +8530,7 @@ def call_QRCODE(bot, query):
         text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])) + randomized_text()
         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
         port, udgpw = Session.Ports()
-        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
+        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
         passw = ((text.split("Password : ")[1]).split("\n")[0])
         url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
         photo = QR_Maker(url)
@@ -8746,7 +8746,7 @@ def call_test(bot, query):
                 if "Error" not in text:
                     add_test_user(chat_id, user)
                     port, udgpw = Session.Ports()
-                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
+                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
                     url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<code>" + url + "</code>"
