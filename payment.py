@@ -5,7 +5,7 @@ from unidecode import unidecode
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
 
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 headers_json = {"Content-Type": "application/json"}
 headers = {"user-agent": user_agent}
 
@@ -66,6 +66,30 @@ def check_status_invoice_plisio(API, txn_id):
             return "Error: " + data['status'], "", False
     else:
         return "Error: " + str(r.status_code), "", False
+
+
+def check_valid_zarinpal(name):
+    try:
+        url = f"https://zarinp.al/api/v4/personalLink/{name}.json"
+        r = requests.get(url, headers=headers)
+        if r.status_code == 200:
+            return True, "Good"
+        else:
+            return False, "Error: HTTP " + str(r.status_code)
+    except Exception as e:
+        return False, "Error: " + str(e)
+
+
+def check_valid_idpay(name):
+    try:
+        url = "https://idpay.ir/" + name
+        r = requests.get(url, headers=headers)
+        if r.status_code == 200:
+            return True, "Good"
+        else:
+            return False, "Error: HTTP " + str(r.status_code)
+    except Exception as e:
+        return False, "Error: " + str(e)
 
 
 def API_0():
