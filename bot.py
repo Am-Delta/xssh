@@ -570,17 +570,14 @@ def get_another_address_if_exists(host):
     settings = get_settings()
     if settings['addresses'].get(host, None) is not None:
         host = settings['addresses'][host]
-    print(host)
     return host
 
 
 def change_infos_user_info(text):
     host = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
     HOST = get_another_address_if_exists(host)
-    print(host, HOST)
     if HOST != host:
         text = text.replace(host, HOST)
-        print("here")
     return text
 
 
