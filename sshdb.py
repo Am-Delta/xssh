@@ -194,7 +194,17 @@ settings = {
     "default_password_status": "off",
     "default_password": "123456",
     "change_password": "on",
-    "support_chat": "on"
+    "support_chat": "on",
+    "addresses": {},
+    "random_price": "off",
+    "random_price_min": 100,
+    "random_price_max": 1000,
+    "zarinpal": "off",
+    "zarinpal_address": "None",
+    "idpay": "off",
+    "idpay_address": "None",
+    "nextpay": "off",
+    "nextpay_address": "None"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
