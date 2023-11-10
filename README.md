@@ -34,8 +34,8 @@ Group: https://t.me/deltacommentsgp
 
 
 ## Supported Panels
-- Shahan v6.8.2
-- XPanel v3.8.3
+- Shahan v6.9
+- XPanel v3.8.5
 - Rocket v1.2.0
  
 
