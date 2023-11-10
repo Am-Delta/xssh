@@ -3173,7 +3173,7 @@ def text_private(bot, message):
 
         elif "S_Traffic_GB" == status:
             try:
-                if int(link) <= 0:
+                if int(link) > 0:
                     cache_list, host_cahce = get_collector_cache(chat_id)
                     settings = get_settings()
                     prices = settings['seller_plus_prices']
@@ -3207,7 +3207,7 @@ def text_private(bot, message):
 
         elif "Traffic_GB" == status:
             try:
-                if int(link) <= 0:
+                if int(link) > 0:
                     cache_list, host_cahce = get_collector_cache(chat_id)
                     settings = get_settings()
                     prices = settings['plus-prices']
