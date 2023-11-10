@@ -491,8 +491,11 @@ def get_random_server():
     hosts, remarks = sshx.HOSTS()
     for host in hosts:
         if host not in settings['server_archives']:
-            if check_domain_reached_maximum(host) is False:
-                return host
+            try:
+                if check_domain_reached_maximum(host) is False:
+                    return host
+            except:
+                pass
     return None
 
 
