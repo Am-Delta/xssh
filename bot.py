@@ -9922,6 +9922,7 @@ def call_SNON(bot, query):
                                 try:
                                     Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
                                     expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions, server_traffic, online_c, done = Session.info()
+                                    text = f"ℹ️. server info \n🔗url: {host}\nUsername: {username}\nPass: {password}\n🔵 Clients: {str(len(usernames))}\n\n"
                                     if done is True:
                                         DB_usernames = get_db(host)
                                         for DB_username in DB_usernames:
@@ -9931,8 +9932,9 @@ def call_SNON(bot, query):
                                             if status[i] != "فعال":
                                                 if (int(days_left[i]) <= -(settings['auto_delete'])) or (usernames[i] in test_usernames):
                                                     SessionDIS = sshx.PANNEL(host, username, password, port, panel, 'User', usernames[i])
-                                                    svs = SessionDIS.Disable()
+                                                    text += SessionDIS.Disable()
                                                     if "❌Deleted" in Session.Delete(usernames[i]):
+                                                        text += f"❌Deleted user {usernames[i]} & Days: {str(days_left[i])} ❌\n\n"
                                                         if check_exist_user(host, usernames[i]) is True:
                                                             ID, Name, Username = get_all_user_data(host, usernames[i])
                                                             if usernames[i] in test_usernames:
@@ -9964,6 +9966,12 @@ def call_SNON(bot, query):
                                                                 checked_id.append(ID)
                                                             except:
                                                                 pass
+                                        if "❌" in text:
+                                            for admin in admin_id:
+                                                try:
+                                                    bot.send_message(admin, text, parse_mode=enums.ParseMode.HTML)
+                                                except:
+                                                    pass
                                 except:
                                     pass
                         sleep(1800)
