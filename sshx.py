@@ -606,7 +606,18 @@ def Get_user_info_rocket(datas, uname, r, url):
                 if a.attributes.get("href", None) is not None:
                     if "/account/" in a.attributes['href']:
                         public_link = a.attributes['href']
-            return data['password'], traffic, int(data['limit_users']), int(days), data['status_label'], usage, data['id'], kind, Date, description, public_link
+            port = ""
+            udgpw = ""
+            for button in html.css('button'):
+                if button.attributes.get("data-config", None) is not None:
+                    try:
+                        data_config = json.loads(button.attributes['data-config'].replace("\\", ""))
+                        port = data_config['ssh_port']
+                        udgpw = data_config['udp_port']
+                        break
+                    except:
+                        pass
+            return data['password'], traffic, int(data['limit_users']), int(days), data['status_label'], usage, data['id'], kind, Date, description, public_link, port, udgpw
 
 
 def Get_user_info_xpanel(html, uname):
@@ -968,7 +979,7 @@ class PANNEL:
                     s = s.split("<br")[0]
                 datas = json.loads(s)
                 self.req = self.url + "/ajax/users/"
-                self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.uid, self.kind, self.Date, self.description, self.public_link = Get_user_info_rocket(datas, uname, self.r, self.url)
+                self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.uid, self.kind, self.Date, self.description, self.public_link, self.SPort, self.Sudgpw = Get_user_info_rocket(datas, uname, self.r, self.url)
                 self.ip = host
 
             elif self.panel == "xpanel":
@@ -986,6 +997,7 @@ class PANNEL:
             html = HTMLParser(s)
             port = ""
             udgpw = ""
+            dropbear = ""
             for inp in html.css('input'):
                 alt = inp.attributes.get("name", None)
                 if alt is not None:
@@ -1002,7 +1014,9 @@ class PANNEL:
                                 udgpw = str(inp.attributes.get('value', None)).split("127.0.0.1")[0]
                             else:
                                 udgpw = str(inp.attributes.get('value', None))
-            return port, udgpw
+                    elif 'dropport' == inp.attributes['name']:
+                        dropbear = str(inp.attributes.get('value', None))
+            return port, udgpw, dropbear
 
         elif self.panel == "rocket":
             s = self.r.get(self.url + "/settings").text
@@ -1015,11 +1029,11 @@ class PANNEL:
                         port = inp.attributes['value']
                     if inp.attributes['name'] == "udp_port":
                         udgpw = inp.attributes['value']
-            return port, udgpw
+            return port, udgpw, ""
 
         elif self.panel == "xpanel":
             port, udgpw = get_port_xpanel(self.host)
-            return port, udgpw
+            return port, udgpw, ""
 
     def Backup_content(self):
         if self.panel == "shahan":
@@ -1465,52 +1479,70 @@ class PANNEL:
 
     def IP_Check(self):
         if self.panel == "shahan":
-            try:
-                s = self.r.get(self.url + "/p/checkip.php").text
-                html = HTMLParser(s)
-                count = 0
-                for td in html.css('td.checkip'):
-                    try:
-                        if "فیلتر شده" in td.text():
-                            count += 1
-                    except:
-                        pass
-                if count >= 4:
-                    return True, "Offline ❌"
-                else:
-                    return False, "Online ✅"
-            except Exception as e:
-                return False, "Error: " + str(e)
+            for i in range(2):
+                if i == 1:
+                    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(self.host)
+                    Login(username, password, self.host, port, panel)
+                    self.url, self.r = open_session(self.host, port)
+                try:
+                    s = self.r.get(self.url + "/p/checkip.php").text
+                    html = HTMLParser(s)
+                    count = 0
+                    for td in html.css('td.checkip'):
+                        try:
+                            if "فیلتر شده" in td.text():
+                                count += 1
+                        except:
+                            pass
+                    if count >= 4:
+                        return True, "Offline ❌"
+                    else:
+                        return False, "Online ✅"
+                except Exception as e:
+                    if i == 1:
+                        return False, "Error: " + str(e)
 
         elif self.panel == "rocket":
-            try:
-                s = self.r.get(self.url + "/ajax/pages/filtering?_=" + str(int(time()))).text
-                datas = json.loads(s)
-                world = False
-                for data in datas:
-                    if (data['flag'] != 'ir') and (world is False):
-                        world = True
-                    elif (data['flag'] == 'ir'):
-                        if data['status'] == 'online':
-                            return False, "Online ✅"
-                return True, "Offline ❌"
-            except Exception as e:
-                return False, "Error: " + str(e)
+            for i in range(2):
+                if i == 1:
+                    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(self.host)
+                    Login(username, password, self.host, port, panel)
+                    self.url, self.r = open_session(self.host, port)
+                try:
+                    s = self.r.get(self.url + "/ajax/pages/filtering?_=" + str(int(time()))).text
+                    datas = json.loads(s)
+                    world = False
+                    for data in datas:
+                        if (data['flag'] != 'ir') and (world is False):
+                            world = True
+                        elif (data['flag'] == 'ir'):
+                            if data['status'] == 'online':
+                                return False, "Online ✅"
+                    return True, "Offline ❌"
+                except Exception as e:
+                    if i == 1:
+                        return False, "Error: " + str(e)
 
         elif self.panel == "xpanel":
-            try:
-                s = self.r.get(self.url + "/cp/checkip").text
-                html = HTMLParser(s)
-                checked = []
-                for div in html.css('div.col-6'):
-                    if ("Online" in div.text()) or ("Filter" in div.text()):
-                        checked.append((div.text()).replace(' ', "").replace('\n', ''))
-                if checked.count('Filter') >= 4:
-                    return True, "Offline ❌"
-                else:
-                    return False, "Online ✅"
-            except Exception as e:
-                return False, "Error: " + str(e)
+            for i in range(2):
+                if i == 1:
+                    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(self.host)
+                    Login(username, password, self.host, port, panel)
+                    self.url, self.r = open_session(self.host, port)
+                try:
+                    s = self.r.get(self.url + "/cp/checkip").text
+                    html = HTMLParser(s)
+                    checked = []
+                    for div in html.css('div.col-6'):
+                        if ("Online" in div.text()) or ("Filter" in div.text()):
+                            checked.append((div.text()).replace(' ', "").replace('\n', ''))
+                    if checked.count('Filter') >= 4:
+                        return True, "Offline ❌"
+                    else:
+                        return False, "Online ✅"
+                except Exception as e:
+                    if i == 1:
+                        return False, "Error: " + str(e)
 
     def Stats(self):
         if self.panel == "shahan":
@@ -1813,7 +1845,11 @@ class PANNEL:
             except Exception as e:
                 return "Error: " + str(e)
 
-    def Create(self, uname, passw, connection_limit, days, traffic, description, first):
+    def Create(self, uname, passw, connection_limit, days, traffic, description, first, DP):
+        if DP == "on":
+            drop = True
+        else:
+            drop = False
         if self.panel == "shahan":
             if traffic == 0:
                 traffic = ""
@@ -1848,6 +1884,8 @@ class PANNEL:
                 }
             try:
                 s = self.r.post(self.url + "/p/newuser.php", data=payload)
+                DROP = ""
+                dropbear = ""
                 if s.status_code == 200:
                     if traffic == '':
                         traffic = "نامحدود"
@@ -1857,10 +1895,14 @@ class PANNEL:
                         PASSW, TRAFFIC, CONNECTION_LIMIT, IP, DAYS, STATUS, USAGE, DATE, DESCRIPTION, PORT, UDGPW, DROP, TUIC = Get_user_info_shahan(html, uname)
                     except:
                         IP = self.host
-                        PORT, UDGPW = self.Ports()
-                    #if UDGPW == "":
-                        #PORT, UDGPW = self.Ports()
-                    return f"SSH Host : <code>{IP}</code>\nPort : <code>{PORT}</code>\nUdgpw : <code>{UDGPW}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+                        PORT, UDGPW, DROP = self.Ports()
+                    if UDGPW == "":
+                        PORT, UDGPW, DROP = self.Ports()
+                    if (drop is True):
+                        if DROP == "":
+                            PORT, UDGPW, DROP = self.Ports()
+                        dropbear = f"\nDropbear Port: <code>{DROP}</code>"
+                    return f"SSH Host : <code>{IP}</code>\nPort : <code>{PORT}</code>{dropbear}\nUdgpw : <code>{UDGPW}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -1906,7 +1948,12 @@ class PANNEL:
                 if s.status_code == 200:
                     if traffic == 0:
                         traffic = "نامحدود"
-                    port, udgpw = self.Ports()
+                    port, udgpw, dropbear = self.Ports()
+                    if (port == "") or (udgpw == ""):
+                        s = self.r.post(self.url + "/ajax/users/list").text
+                        if "<br" in s:
+                            s = s.split("<br")[0]
+                        PASS, TRAFFIC, CONNECTION_LIMIT, DAYS, STATUS, USAGE, UID, KIND, DATE, DESCRIPTION, PUBLIC_LINK, port, udgpw = Get_user_info_rocket(json.loads(s), uname, self.r, self.url)
                     return f"SSH Host : <code>{self.host}</code>\nPort : <code>{port}</code>\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
             except Exception as e:
                 return "Error: " + str(e)
@@ -1948,7 +1995,7 @@ class PANNEL:
                 if s.status_code <= 302:
                     if traffic == 0:
                         traffic = "Unlimited♾"
-                    port, udgpw = self.Ports()
+                    port, udgpw, dropbear = self.Ports()
                     try:
                         if "-" in Date:
                             dt = jdatetime.datetime.strptime(Date, '%Y-%m-%d')
@@ -2313,8 +2360,11 @@ class PANNEL:
                     tuic = ""
                 port = self.SPort
                 udgpw = self.Sudgpw
-                #if udgpw == "":
-                    #port, udgpw = self.Ports()
+                if udgpw == "":
+                    port, udgpw, self.dropbear = self.Ports()
+                if (DROP == "on") and (self.dropbear == ""):
+                    port, udgpw, self.dropbear = self.Ports()
+                    drop = f"\nDropbear Port : <code>{self.dropbear}</code>"
                 if str(self.days) == "9999":
                     days = "Unlimited♾"
                 else:
@@ -2331,7 +2381,10 @@ class PANNEL:
 
         elif self.panel == "rocket":
             try:
-                port, udgpw = self.Ports()
+                port, udgpw, dropbear = self.Ports()
+                if (port == "") or (udgpw == ""):
+                    port = self.SPort
+                    udgpw = self.Sudgpw
                 usage = self.usage + " GB"
                 status = self.status
                 if "فعال" == status:
@@ -2344,7 +2397,7 @@ class PANNEL:
 
         elif self.panel == "xpanel":
             try:
-                port, udgpw = self.Ports()
+                port, udgpw, dropbear = self.Ports()
                 if str(self.days) == "9999":
                     days = "Unlimited♾ or not started yet"
                 else:
