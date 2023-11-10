@@ -6860,6 +6860,7 @@ def call_BL(bot, query):
                             user = UNAME + str(randint(12, 350))
                     else:
                         user = UNAME + str(randint(123, 350))
+                user = user.lower()
                 t0 = "🥰مرسی از خریدتون\n\n"
                 if chat_id in seller_id:
                     creator = "SELLER"
@@ -7071,6 +7072,7 @@ def call_Confirmed(bot, query):
                         user = UNAME + str(randint(12, 350))
                 else:
                     user = UNAME + str(randint(123, 350))
+            user = user.lower()
             passw = get_password_by_settings()
             t0 = "🥰مرسی از خریدتون\n\n"
             if chat_id in seller_id:
@@ -8732,6 +8734,7 @@ def call_test(bot, query):
                 except:
                     USERNAME = "None"
                 user = host.split('.')[0] + "a" + str(randint(1243, 6523))
+                user = user.lower()
                 passw = get_password_by_settings()
                 port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                 Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
