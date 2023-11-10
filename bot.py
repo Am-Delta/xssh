@@ -45,30 +45,8 @@ conn = sqlite3.connect('ssh.db', check_same_thread=False)
 cur = conn.cursor()
 
 folder = 'backup'
-cache = [False]
-backup = [False]
-run_backup = [False]
-Filtering_system = [False]
-run_filtering = [False]
-notify_system = [False]
-run_notify = [False]
-checked_filtering = []
-checked_connections = []
-checked_users = []
-checked_id = []
-cache_list = []
-seller_id = []
-botusername = []
-process_codes = []
-backup_command = [False]
-search_spam = [False]
-online_check_spam = []
-spam_session = []
-password_retry = []
-password_retry_time = []
-plisio_retry = []
-plisio_retry_time = []
-plisio_attemp = []
+checked_filtering, checked_connections, checked_users, checked_id, cache_list, seller_id, botusername, process_codes, online_check_spam, spam_session, password_retry, password_retry_time, plisio_retry, plisio_retry_time, plisio_attemp = ([] for i in range(15))
+cache, backup, run_backup, Filtering_system, run_filtering, notify_system, run_notify, backup_command, search_spam = ([False] for i in range(9))
 filter_name = ['root', 'Root', 'ROOT', 'ubuntu', 'Ubuntu', 'UBUNTU', 'centos', 'Centos', 'CentOS', 'user', 'User', 'Username', 'username']
 
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
@@ -466,9 +444,12 @@ def check_host_api(host):
                 for result in results[node4][0]:
                     if result[0] == "OK":
                         return True
+            else:
+                return False
+        else:
+            return False
     except:
-        return True
-    return True
+        return False
 
 
 def Toman_USD():
@@ -1685,7 +1666,11 @@ def text_private(bot, message):
                 try:
                     Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
                     settings = get_settings()
-                    text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic']))
+                    t0 = "\n\nServer: " + remark
+                    if check_exist_user(host, user) is True:
+                        ID, Name, Username = get_all_user_data(host, user)
+                        t0 += f"\nID: <code>{str(ID)}</code>\nName: {Name}\nUsername: {Username}"
+                    text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])) + t0
                     cb = host + "$" + user
                     keyboard = [
                         [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
@@ -2136,9 +2121,9 @@ def text_private(bot, message):
                     try:
                         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
                         description = f"[ Bot - Admin ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} )"
-                        text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False))
-                        port, udgpw = Session.Ports()
-                        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
+                        text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False, get_settings()['dropbear']))
+                        port, udgpw, dropbear = Session.Ports()
+                        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                         url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}#{cache_list[1]}'
                         photo = QR_Maker(url)
                         text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -2389,9 +2374,9 @@ def text_private(bot, message):
                 try:
                     Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
                     description = f"[ Bot - Admin ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} ), userID: {str(user_id)}, Username: {Username}"
-                    text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False))
-                    port, udgpw = Session.Ports()
-                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
+                    text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False, get_settings()['dropbear']))
+                    port, udgpw, dropbear = Session.Ports()
+                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                     url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}#{cache_list[1]}'
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -2697,14 +2682,18 @@ def text_private(bot, message):
             delete_collector(chat_id)
 
         elif status == "change_wallet":
-            name = message.from_user.first_name
-            try:
-                username = message.from_user.username
-            except:
-                username = 'Null'
-            update_wallet(name, username, link)
-            delete_cache(chat_id)
-            message.reply_text("✔️ انجام شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='wallet')]]))
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='wallet')]])
+            if sshx.ASCII_Check(link) is True:
+                name = message.from_user.first_name
+                try:
+                    username = message.from_user.username
+                except:
+                    username = 'Null'
+                update_wallet(name, username, link)
+                delete_cache(chat_id)
+                message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+            else:
+                message.reply_text("آدرس ولت درستو بفرستین", reply_markup=reply_markup)
 
         elif "ipv6_" in status:
             host = status.split("_")[1]
@@ -5430,7 +5419,11 @@ def call_IDADMIN(bot, query):
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
         settings = get_settings()
-        text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic']))
+        t0 = "\n\nServer: " + remark
+        if check_exist_user(host, user) is True:
+            ID, Name, Username = get_all_user_data(host, user)
+            t0 += f"\nID: <code>{str(ID)}</code>\nName: {Name}\nUsername: {Username}"
+        text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])) + t0
         keyboard = [
             [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
             [InlineKeyboardButton("✔️ فعال کاربر", callback_data=('IDMNU&Active_' + cb)), InlineKeyboardButton("✖️ غیر فعال کاربر", callback_data=('IDMNU&Disable_' + cb))],
@@ -6874,10 +6867,10 @@ def call_BL(bot, query):
                     first_connect = True
                 else:
                     first_connect = False
-                text = t0 + change_infos_user_info(Session.Create(user, passw, connection_limit, days, GB, description, first_connect))
+                text = t0 + change_infos_user_info(Session.Create(user, passw, connection_limit, days, GB, description, first_connect, settings['dropbear']))
                 if "Error" not in text:
-                    port, udgpw = Session.Ports()
-                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
+                    port, udgpw, dropbear = Session.Ports()
+                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                     url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -6971,8 +6964,6 @@ def call_XVPSS(bot, query):
     query.answer("لطفا صبر کنین درحال بررسی...")
     data = query.data
     host = data.split("!")[1]
-    settings = get_settings()
-    maximum = settings['maximum']
     if check_domain_reached_maximum(host) is False:
         data = data.split("XVPSS_")[1]
         cb_custom = "Uname?C_" + data
@@ -6987,7 +6978,12 @@ def call_XVPSS(bot, query):
         except:
             query.edit_message_text(text="📃نام کاربری ؟\nمیتونید نام کاربری دلخواه خودتون بفرستین یا بصورت رندوم انتخاب میشه\n\nیکی از گزینه هارو انتخاب کنین:", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
-        query.answer("⚠️ظرفیت این سرور پر شده. یه سرور دیگه انتخاب کنین", show_alert=True)
+        data = data.split("!")[0].split("XVPSS_")[1]
+        try:
+            query.edit_message_text(text=f"⚠️ظرفیت این سرور پر شده. یه سرور دیگه انتخاب کنین", reply_markup=server_cb_creator_user("XVPSS_", data))
+        except:
+            query.edit_message_text(text=f"⚠️ظرفیت این سرور پر شده.", reply_markup=server_cb_creator_user("XVPSS_", data))
+        #query.answer(, show_alert=True)
 
 
 @app.on_callback_query(filters.regex('BU_'))
@@ -7083,11 +7079,11 @@ def call_Confirmed(bot, query):
                 first_connect = True
             else:
                 first_connect = False
-            text = t0 + change_infos_user_info(Session.Create(user, passw, connection_limit, days, GB, description, first_connect))
+            text = t0 + change_infos_user_info(Session.Create(user, passw, connection_limit, days, GB, description, first_connect, settings['dropbear']))
             if "Error" not in text:
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
-                port, udgpw = Session.Ports()
-                HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
+                port, udgpw, dropbear = Session.Ports()
+                HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                 url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                 photo = QR_Maker(url)
                 text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -8316,13 +8312,13 @@ def call_VDNKHF(bot, query):
                         sshx.Login(username, password, host, port, panel)
                         if Path(session).is_file() is False:
                             remove(session)
-                        logs += f"[+] Login: {host} {panel}\n"
+                        logs += f"🟢Login: {host} {panel}\n"
                     else:
-                        logs += f"[*] 🟢Good: {host} {panel}\n"
+                        logs += f"⚪️Good: {host} {panel}\n"
                 except Exception as e:
-                    logs += f"[-] Session Error: {host} {panel}\n"
+                    logs += f"🔴Session Error: {host} {panel}\n"
             else:
-                logs += f"[-] Login Error: {host} {panel}\n"
+                logs += f"🔴Login Error: {host} {panel}\n"
         keyboard = [[InlineKeyboardButton("<<", callback_data='SMT')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot.send_message(chat_id, logs, reply_markup=reply_markup)
@@ -8526,8 +8522,8 @@ def call_QRCODE(bot, query):
         settings = get_settings()
         text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])) + randomized_text()
         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
-        port, udgpw = Session.Ports()
-        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
+        port, udgpw, dropbear = Session.Ports()
+        HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
         passw = ((text.split("Password : ")[1]).split("\n")[0])
         url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
         photo = QR_Maker(url)
@@ -8739,11 +8735,11 @@ def call_test(bot, query):
                 t0 = "اکانت تست شما ❤️\n\n"
                 GB = float(str("{:.2f}".format(float((settings['test-traffic'] / 1024)))))
                 description = f"[ BOT - TEST ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} ), userID: {str(chat_id)}, Username: {USERNAME}"
-                text = t0 + change_infos_user_info(Session.Create(user, passw, 1, 1, GB, description, False))
+                text = t0 + change_infos_user_info(Session.Create(user, passw, 1, 1, GB, description, False, settings['dropbear']))
                 if "Error" not in text:
                     add_test_user(chat_id, user)
-                    port, udgpw = Session.Ports()
-                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "")
+                    port, udgpw, dropbear = Session.Ports()
+                    HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                     url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                     photo = QR_Maker(url)
                     text += "\n\nURL: " + "<code>" + url + "</code>"
@@ -9752,15 +9748,16 @@ def call_FLCHON(bot, query):
                                                     bot.send_message(admin, text)
                                         else:
                                             if host not in checked_connections:
-                                                text = "🔴Connection Error: " + host + "\nLog:\n" + content
+                                                text = "🔴Connection Error from the panel not such a big deal: " + host + "\nLog:\n" + content
                                                 checked_connections.append(host)
                                                 for admin in admin_id:
                                                     bot.send_message(admin, text)
                                 except:
-                                    if host not in checked_connections:
-                                        text = "🔴Connection Error: " + host
-                                        checked_connections.append(host)
-                                        bot.send_message(chat_id, text)
+                                    pass
+                                    #if host not in checked_connections:
+                                        #text = "🔴Connection Error: " + host
+                                        #checked_connections.append(host)
+                                        #bot.send_message(chat_id, text)
                         sleep(300)
                     else:
                         break
@@ -11177,7 +11174,7 @@ def contact_update(bot, message):
         except:
             username = 'Null'
         if (get_settings()['irphone'] == 'on'):
-            if ("+98" in phone_number) or ("+ 98" in phone_number) or (phone_number[0:3] == "+98"):
+            if ("+98" in phone_number) or ("+ 98" in phone_number) or (phone_number[0:3] == "+98") or (phone_number[0:2] == "98"):
                 message.reply_text("‎✅", reply_markup=ReplyKeyboardRemove())
                 message.reply_text(settings['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
                 if check_user_phone_exist(chat_id) is False:
