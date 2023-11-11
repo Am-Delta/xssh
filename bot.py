@@ -8395,6 +8395,10 @@ def call_VDNKHF(bot, query):
             if Path(session).is_file() is False:
                 if sshx.Login(username, password, host, port, panel) is False:
                     do = False
+            elif os.stat(session).st_size == 0:
+                os.remove(session)
+                if sshx.Login(username, password, host, port, panel) is False:
+                    do = False
             if (Path("protocol-cache.txt").is_file() is False) or (sshx.get_protocol_cache(host) is None):
                 protocol = sshx.check_panel_protocol(host)
                 sshx.add_protocol_cache(host, protocol)
@@ -8408,8 +8412,6 @@ def call_VDNKHF(bot, query):
                     url, r = sshx.open_session(host, port)
                     if sshx.Test(r, host, port, panel, 'updater') is False:
                         sshx.Login(username, password, host, port, panel)
-                        if Path(session).is_file() is False:
-                            remove(session)
                         logs += f"🟢Login: {host} {panel}\n"
                     else:
                         logs += f"⚪️Good: {host} {panel}\n"
