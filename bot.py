@@ -3584,9 +3584,9 @@ def text_private(bot, message):
                         F_hosts.append(hosts[i])
             t0 = ""
             for i in range(len(F_hosts)):
-                t0 += f"{str(i + 1)}. {F_usernames[i]} {F_remarks[i]}\n"
+                t0 += f"{str(i + 1)}. {F_usernames[i]} {F_hosts[i]}\n"
             text = f"<b>پیدا شد : {str(len(F_hosts))}</b>\n\n{t0}"
-            bot.edit_message_text(chat_id, msg, text, parse_mode=enums.ParseMode.HTML, reply_markup=Reply_Account_configuration(F_hosts, F_usernames, "ID_"))
+            message.reply_text(text, parse_mode=enums.ParseMode.HTML, reply_markup=Reply_Account_configuration(F_hosts, F_usernames, "ID_"))
             delete_cache(chat_id)
 
         elif status == "search":
@@ -3775,7 +3775,7 @@ def text_private(bot, message):
         elif "EDD_" in status:
             hosts, remarks = sshx.HOSTS()
             old_host = status.split("EDD_")[1]
-            new_host = link
+            new_host = link.lower()
             keyboard = [[InlineKeyboardButton("<<", callback_data=f'TTRS_{old_host}')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             if old_host in hosts:
@@ -3857,7 +3857,7 @@ def text_private(bot, message):
         elif "ELIP_" in status:
             link = fixed_link_json(link)
             if (sshx.ASCII_Check(link) is True):
-                new_host = link
+                new_host = link.lower()
                 old_host = status.split(":")[1]
                 panel = status.split("_")[1].split(":")[0]
                 hosts, remarks = sshx.HOSTS()
@@ -4033,7 +4033,7 @@ def text_private(bot, message):
         elif "AST_" in status:
             link = fixed_link_json(link)
             if (sshx.ASCII_Check(link) is True):
-                host = link
+                host = link.lower()
                 hosts, remarks = sshx.HOSTS()
                 if host not in hosts:
                     delete_cache(chat_id)
