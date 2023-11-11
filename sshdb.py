@@ -204,7 +204,17 @@ settings = {
     "idpay": "off",
     "idpay_address": "None",
     "nextpay": "off",
-    "nextpay_address": "None"
+    "nextpay_address": "None",
+    "filtering_checker_minutes": 30,
+    "SSH_custom": {},
+    "Maxium_servers": {},
+    "tutorial_windows": "on",
+    "tutorial_android": "on",
+    "tutorial_ios": "on",
+    "tutorial_mac": "on",
+    "tutorial_custom": "off",
+    "tutorial_custom_button_name": [],
+    "tutorial_custom_button_data": []
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
