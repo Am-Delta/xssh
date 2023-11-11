@@ -152,6 +152,22 @@ def db_update():
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
 
+    if settings.get("filtering_checker_minutes", None) is None:
+        add_dict = {
+            "filtering_checker_minutes": 30,
+            "SSH_custom": {},
+            "Maxium_servers": {},
+            "tutorial_windows": "on",
+            "tutorial_android": "on",
+            "tutorial_ios": "on",
+            "tutorial_mac": "on",
+            "tutorial_custom": "off",
+            "tutorial_custom_button_name": [],
+            "tutorial_custom_button_data": []
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
