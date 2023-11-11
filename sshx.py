@@ -1488,6 +1488,8 @@ class PANNEL:
                     s = self.r.get(self.url + "/p/checkip.php").text
                     html = HTMLParser(s)
                     count = 0
+                    if "checkip" not in s:
+                        raise
                     for td in html.css('td.checkip'):
                         try:
                             if "فیلتر شده" in td.text():
