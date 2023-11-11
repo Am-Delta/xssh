@@ -1,12 +1,12 @@
+import os
 import sshx
 from pathlib import Path
-from os import remove
 from time import sleep
 from datetime import datetime
 from random import randint
 
 if Path('logs.txt').is_file() is True:
-    remove('logs.txt')
+    os.remove('logs.txt')
 
 
 def main():
@@ -17,6 +17,10 @@ def main():
             do = True
             session = 'ssh/' + host + ".session"
             if Path(session).is_file() is False:
+                if sshx.Login(username, password, host, port, panel) is False:
+                    do = False
+            elif os.stat(session).st_size == 0:
+                os.remove(session)
                 if sshx.Login(username, password, host, port, panel) is False:
                     do = False
             if (Path("protocol-cache.txt").is_file() is False) or (sshx.get_protocol_cache(host) is None):
@@ -33,8 +37,6 @@ def main():
                         url, r = sshx.open_session(host, port)
                         if sshx.Test(r, host, port, panel, 'updater') is False:
                             sshx.Login(username, password, host, port, panel)
-                            if Path(session).is_file() is False:
-                                remove(session)
                             logs.writelines("[+] Login: " + host + "  " + panel + "  " + str(datetime.now()) + "\n")
                         break
                     except Exception as e:
