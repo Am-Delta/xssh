@@ -420,7 +420,9 @@ def check_host_api(host):
         node2 = "ir3.node.check-host.net"
         node3 = "ir4.node.check-host.net"
         node4 = "de1.node.check-host.net"
-        url = f"https://check-host.net/check-ping?host={host}&node={node1}&node={node2}&node={node3}&node={node4}"
+        node5 = "fr2.node.check-host.net"
+        node6 = "us1.node.check-host.net"
+        url = f"https://check-host.net/check-ping?host={host}&node={node1}&node={node2}&node={node3}&node={node4}&node={node5}&node={node6}"
         headers = {
             'accept': 'application/json',
             'user-agent': user_agent
@@ -442,6 +444,12 @@ def check_host_api(host):
                     if result[0] == "OK":
                         return False
                 for result in results[node4][0]:
+                    if result[0] == "OK":
+                        return True
+                for result in results[node5][0]:
+                    if result[0] == "OK":
+                        return True
+                for result in results[node6][0]:
                     if result[0] == "OK":
                         return True
             else:
@@ -557,11 +565,22 @@ def get_another_address_if_exists(host):
     return host
 
 
+def get_another_port_if_exists(host, port):
+    settings = get_settings()
+    if settings['SSH_custom'].get(host, None) is not None:
+        port = settings['SSH_custom'][host]
+    return port
+
+
 def change_infos_user_info(text):
     host = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
+    port = ((text.split("Port : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
     HOST = get_another_address_if_exists(host)
+    PORT = get_another_port_if_exists(host, port)
     if HOST != host:
         text = text.replace(host, HOST)
+    if port != PORT:
+        text = text.replace(f"Port : <code>{port}</code>", f"Port : <code>{PORT}</code>")
     return text
 
 
@@ -645,9 +664,18 @@ def get_host_username(text):
             return None, None
 
 
+def get_the_main_maximum(host):
+    settings = get_settings()
+    if settings['Maxium_servers'].get(host, None) is not None:
+        maximum = settings['Maxium_servers'][host]
+    else:
+        maximum = settings['maximum']
+    return int(maximum)
+
+
 def check_domain_reached_maximum(host):
     settings = get_settings()
-    maximum = settings['maximum']
+    maximum = get_the_main_maximum(host)
     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
     Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
     try:
@@ -1672,7 +1700,7 @@ def text_private(bot, message):
                     t0 = "\n\nServer: " + remark
                     if check_exist_user(host, user) is True:
                         ID, Name, Username = get_all_user_data(host, user)
-                        t0 += f"\nID: <code>{str(ID)}</code>\nName: {Name}\nUsername: {Username}"
+                        t0 += f"\nID: <code>{str(ID)}</code>\nName: {Name}\nUsername: @{Username}"
                     text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])) + t0
                     cb = host + "$" + user
                     keyboard = [
@@ -2126,6 +2154,7 @@ def text_private(bot, message):
                         description = f"[ Bot - Admin ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} )"
                         text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False, get_settings()['dropbear']))
                         port, udgpw, dropbear = Session.Ports()
+                        port = get_another_port_if_exists(host, port)
                         HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                         url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}#{cache_list[1]}'
                         photo = QR_Maker(url)
@@ -2379,6 +2408,7 @@ def text_private(bot, message):
                     description = f"[ Bot - Admin ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} ), userID: {str(user_id)}, Username: {Username}"
                     text = change_infos_user_info(Session.Create(cache_list[1], passw, int(cache_list[-1]), int(link), int(cache_list[2]), description, False, get_settings()['dropbear']))
                     port, udgpw, dropbear = Session.Ports()
+                    port = get_another_port_if_exists(host, port)
                     HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                     url = f'ssh://{cache_list[1]}:{passw}@{HOST}:{port}#{cache_list[1]}'
                     photo = QR_Maker(url)
@@ -2716,6 +2746,52 @@ def text_private(bot, message):
                 message.reply_text("این سرور وجود نداره!", reply_markup=reply_markup)
             delete_cache(chat_id)
 
+        elif "SSHCUSTOM_" in status:
+            host = status.split("_")[1]
+            keyboard = [[InlineKeyboardButton("<<", callback_data='JUQSTC')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            hosts, remarks = sshx.HOSTS()
+            try:
+                if 1 <= int(link) <= 65535:
+                    if host in hosts:
+                        settings = get_settings()
+                        if settings['SSH_custom'].get(host, None) is None:
+                            link = (fixed_link_json(link)).replace(" ", "")
+                            settings['SSH_custom'].update({host: link})
+                            update_settings(settings)
+                            message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+                        else:
+                            message.reply_text("این سرور تو این لیست وجود داره برای اینکه پورت جدید اضافه کنین باید اول حذف کنین ", reply_markup=reply_markup)
+                    else:
+                        message.reply_text("این سرور وجود نداره!", reply_markup=reply_markup)
+                    delete_cache(chat_id)
+                else:
+                    message.reply_text("این پورت وجود نداره باید عددی بین 1 تا 65535 باشه :", reply_markup=reply_markup)
+            except:
+                message.reply_text("فقط عدد میتونی بفرستی:", reply_markup=reply_markup)
+
+        elif "Maxiumservers_" in status:
+            host = status.split("_")[1]
+            keyboard = [[InlineKeyboardButton("<<", callback_data='MCXV')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            hosts, remarks = sshx.HOSTS()
+            try:
+                int(link)
+                if host in hosts:
+                    settings = get_settings()
+                    if settings['Maxium_servers'].get(host, None) is None:
+                        link = (fixed_link_json(link)).replace(" ", "")
+                        settings['Maxium_servers'].update({host: link})
+                        update_settings(settings)
+                        message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+                    else:
+                        message.reply_text("این سرور تو این لیست وجود داره برای اینکه محدودیت جدید اعمال کنین باید اول حذف کنین ", reply_markup=reply_markup)
+                else:
+                    message.reply_text("این سرور وجود نداره!", reply_markup=reply_markup)
+                delete_cache(chat_id)
+            except:
+                message.reply_text("فقط عدد میتونی بفرستی:", reply_markup=reply_markup)
+
         elif status == "change":
             try:
                 card = int(link)
@@ -2898,6 +2974,22 @@ def text_private(bot, message):
                     message.reply_text("مقدار خیلی بالاست بین 1 تا 72 بفرستین")
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
+
+        elif "filtering_checker_minutes" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='FILCH')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            try:
+                mins = int(link)
+                if 5 <= mins <= 720:
+                    settings = get_settings()
+                    settings['filtering_checker_minutes'] = mins
+                    update_settings(settings)
+                    message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+                    delete_cache(chat_id)
+                else:
+                    message.reply_text("فقط یه عدد بین 5 تا 720 بفرستین !", reply_markup=reply_markup)
+            except:
+                message.reply_text("فقط میتونی عدد بفرستی", reply_markup=reply_markup)
 
         elif "ETM" == status:
             if len(link) <= 3900:
@@ -3183,7 +3275,7 @@ def text_private(bot, message):
                     traffic.append(int(link))
                     settings['seller_plus_traffic'] = traffic
                     update_settings(settings)
-                    keyboard = [[InlineKeyboardButton("<<", callback_data='ADTPR')]]
+                    keyboard = [[InlineKeyboardButton("<<", callback_data='SPBTL')]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                     delete_cache(chat_id)
@@ -4466,7 +4558,6 @@ def call_checker(bot, query):
         query.edit_message_text(text="Processing Please wait this operation takes so much time...", reply_markup=reply_markup)
         return
     settings = get_settings()
-    maximum = settings['maximum']
     cache[0] = True
     msg = query.edit_message_text(text="درحال انجام...").id
     chat_id = query.message.chat.id
@@ -4478,6 +4569,7 @@ def call_checker(bot, query):
     hosts, remarks = sshx.HOSTS()
     for host in hosts:
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+        maximum = get_the_main_maximum(host)
         do = True
         count_servers += 1
         try:
@@ -4590,10 +4682,9 @@ def call_stats(bot, query):
                 accounts, hosts, status = get_all_accounts_by_chat_id(sellers[i][0])
                 sales += len(accounts)
         count_servers, checked_servers, online_servers, offline_servers, full_servers, count_clients, count_active_clients, count_online_clients, count_inactive_clients, servers_traffic, clients_traffic, remain_clients = (0,)*12
-        settings = get_settings()
-        maximum = settings['maximum']
         hosts, remarks = sshx.HOSTS()
         for host in hosts:
+            maximum = get_the_main_maximum(host)
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             count_servers += 1
             try:
@@ -4704,9 +4795,9 @@ def call_full(bot, query):
     logs = ""
     count_servers, checked_servers, full_servers, remain_clients, count_clients = (0,)*5
     settings = get_settings()
-    maximum = settings['maximum']
     hosts, remarks = sshx.HOSTS()
     for host in hosts:
+        maximum = get_the_main_maximum(host)
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
         count_servers += 1
         try:
@@ -4921,7 +5012,7 @@ def call_VDSLF(bot, query):
         try:
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
             settings = get_settings()
-            query.edit_message_text(text=change_infos_user_info(Session.User_info(settings['dropbear']), settings['tuic']), reply_markup=reply_markup)
+            query.edit_message_text(text=change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])), reply_markup=reply_markup)
         except Exception as e:
             query.edit_message_text(text=f"Error: {str(e)}", reply_markup=reply_markup)
     else:
@@ -5113,7 +5204,7 @@ def call_DM(bot, query):
         data = query.data
         domain = data.split("DM_")[1]
         settings = get_settings()
-        maximum = settings['maximum']
+        maximum = get_the_main_maximum(domain)
         if check_domain_reached_maximum(domain) is False:
             cache_list = []
             cache_list.append(domain)
@@ -5149,7 +5240,7 @@ def call_DMNONE(bot, query):
         data = query.data
         domain = data.split("DMNONE_")[1]
         settings = get_settings()
-        maximum = settings['maximum']
+        maximum = get_the_main_maximum(domain)
         if check_domain_reached_maximum(domain) is False:
             cache_list = []
             cache_list.append(domain)
@@ -5425,7 +5516,7 @@ def call_IDADMIN(bot, query):
         t0 = "\n\nServer: " + remark
         if check_exist_user(host, user) is True:
             ID, Name, Username = get_all_user_data(host, user)
-            t0 += f"\nID: <code>{str(ID)}</code>\nName: {Name}\nUsername: {Username}"
+            t0 += f"\nID: <code>{str(ID)}</code>\nName: {Name}\nUsername: @{Username}"
         text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])) + t0
         keyboard = [
             [InlineKeyboardButton("🔄تمدید کاربر", callback_data=('IDMNU&Update_' + cb)), InlineKeyboardButton("🗑حذف کاربر", callback_data=('IDMNU&Remove_' + cb))],
@@ -6874,6 +6965,7 @@ def call_BL(bot, query):
                 text = t0 + change_infos_user_info(Session.Create(user, passw, connection_limit, days, GB, description, first_connect, settings['dropbear']))
                 if "Error" not in text:
                     port, udgpw, dropbear = Session.Ports()
+                    port = get_another_port_if_exists(host, port)
                     HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                     url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                     photo = QR_Maker(url)
@@ -7088,6 +7180,7 @@ def call_Confirmed(bot, query):
             if "Error" not in text:
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
                 port, udgpw, dropbear = Session.Ports()
+                port = get_another_port_if_exists(host, port)
                 HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                 url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                 photo = QR_Maker(url)
@@ -8328,6 +8421,7 @@ def call_VDNKHF(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot.send_message(chat_id, logs, reply_markup=reply_markup)
         bot.delete_messages(chat_id, msg)
+        spam_session.remove(chat_id)
 
 
 @app.on_callback_query(filters.regex('ipv6'))
@@ -8411,6 +8505,168 @@ def call_SAipv(bot, query):
         query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('JUQSTC'))
+def call_JUQSTC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    keyboard = [
+        [InlineKeyboardButton("➖ حذف", callback_data='rJUQ'), InlineKeyboardButton("➕ افزودن", callback_data='aJUQ')],
+        [InlineKeyboardButton("<<", callback_data='SMT')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    hosts, remarks = sshx.HOSTS()
+    plus_host = ""
+    for host in hosts:
+        if settings['SSH_custom'].get(host, None) is not None:
+            plus_host += f"{host} {settings['SSH_custom'][host]}"
+    query.edit_message_text(text=f"این گزینه برای اینه که برای مثلا یه سرور بجای اینکه ssh پورت اصلیو بفرسته پورتی که شما تعیین میکنین رو میده.\n\n{plus_host}", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('aJUQ'))
+def call_aJUQ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای افزودن پورت جداگانه یکی از سرور هارو انتخاب کنین:", reply_markup=server_cb_creator("SAJUQ_"))
+
+
+@app.on_callback_query(filters.regex('SAJUQ_'))
+def call_SAJUQ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if settings['SSH_custom'].get(host, None) is not None:
+        query.answer("واسه اینکه برای این سرور پورت جایگزین اضافه کنین باید اول حذف کنین.", show_alert=True)
+    else:
+        keyboard = [[InlineKeyboardButton("<<", callback_data='JUQSTC')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        hosts, remarks = sshx.HOSTS()
+        if host in hosts:
+            if check_cache(chat_id) is True:
+                delete_cache(chat_id)
+            add_cache(chat_id, "SSHCUSTOM_" + host)
+            query.edit_message_text(text="خب پورت جایگزین بصورت عدد بفرستین:", reply_markup=reply_markup)
+        else:
+            query.edit_message_text(text="این سرور وجود نداره!", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('rJUQ'))
+def call_rJUQ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای حذف سرور از این لیست کلیک کنین:", reply_markup=server_cb_creator("SRJUQ_"))
+
+
+@app.on_callback_query(filters.regex('SRJUQ_'))
+def call_SRJUQ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if settings['SSH_custom'].get(host, None) is None:
+        query.answer("این سرور توی این لیست وجود نداره!", show_alert=True)
+    else:
+        del settings['SSH_custom'][host]
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='JUQSTC')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('MCXV'))
+def call_MCXV(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    keyboard = [
+        [InlineKeyboardButton("➖ حذف", callback_data='rCXV'), InlineKeyboardButton("➕ افزودن", callback_data='aCXV')],
+        [InlineKeyboardButton("<<", callback_data='SMT')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    hosts, remarks = sshx.HOSTS()
+    plus_host = ""
+    for host in hosts:
+        if settings['Maxium_servers'].get(host, None) is not None:
+            plus_host += f"{host} {settings['Maxium_servers'][host]}"
+    query.edit_message_text(text=f"این گزینه برای اینه که برای مثلا یه سرور بجای اینکه مکسیموم باشه 50 برای همه میتونین تعیین کنین 100 باشه فقط اون سرور مورد نظر\n\n{plus_host}", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('aCXV'))
+def call_aCXV(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای افزودن محدودیت یکی از سرور هارو انتخاب کنین:", reply_markup=server_cb_creator("SACXV_"))
+
+
+@app.on_callback_query(filters.regex('SACXV_'))
+def call_SACXV(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if settings['Maxium_servers'].get(host, None) is not None:
+        query.answer("برای اعمال محدودیت جدید باید اول حذف کنین سرورو از لیست.", show_alert=True)
+    else:
+        keyboard = [[InlineKeyboardButton("<<", callback_data='MCXV')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        hosts, remarks = sshx.HOSTS()
+        if host in hosts:
+            if check_cache(chat_id) is True:
+                delete_cache(chat_id)
+            add_cache(chat_id, "Maxiumservers_" + host)
+            query.edit_message_text(text="خب محدودیت تعداد بصورت عدد بفرستین:", reply_markup=reply_markup)
+        else:
+            query.edit_message_text(text="این سرور وجود نداره!", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('rCXV'))
+def call_rCXV(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای حذف سرور از این لیست کلیک کنین:", reply_markup=server_cb_creator("SRCXV_"))
+
+
+@app.on_callback_query(filters.regex('SRCXV_'))
+def call_SRJUQ(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if settings['Maxium_servers'].get(host, None) is None:
+        query.answer("این سرور توی این لیست وجود نداره!", show_alert=True)
+    else:
+        del settings['Maxium_servers'][host]
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='MCXV')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('SMT'))
 def call_SMT(bot, query):
     chat_id = query.message.chat.id
@@ -8424,12 +8680,14 @@ def call_SMT(bot, query):
         [InlineKeyboardButton("⚫️ظرفیت سرورها", callback_data='full')],
         [InlineKeyboardButton("➖ حذف", callback_data='RST'), InlineKeyboardButton("➕ افزودن", callback_data='AST')],
         [InlineKeyboardButton("تغییر پورت ssh", callback_data='XESSP'), InlineKeyboardButton("تغییر پورت udp", callback_data='UXEP')],
+        [InlineKeyboardButton("↪️پورت SSH کاستوم ", callback_data='JUQSTC')],
         [InlineKeyboardButton("🌐 IPv6", callback_data='ipv6'), InlineKeyboardButton("⚡️ Session", callback_data='VDNKHF')],
-        [InlineKeyboardButton("🏳️تغییر نام سرور ", callback_data='FSLJC')],
-        [InlineKeyboardButton("⚪️تغییر اولویت انتخاب سرور", callback_data='CGDJS')],
+        [InlineKeyboardButton("🏳️تغییر نام سرور ", callback_data='FSLJC'), InlineKeyboardButton("⚪️تغییر اولویت انتخاب سرور", callback_data='CGDJS')],
         [InlineKeyboardButton("📂 آرشیو سرور ", callback_data='archive')],
         [InlineKeyboardButton("🔄 تغییر دامین و یوزر و پسورد و پورت پنل", callback_data='TST')],
-        [InlineKeyboardButton("📩 ارسال پیام به کاربران خاص یک سرور", callback_data='MST')]
+        [InlineKeyboardButton("📩 ارسال پیام به کاربران خاص یک سرور", callback_data='MST')],
+        [InlineKeyboardButton("👥محدودیت تعداد کاربر در هر سرور", callback_data='maximum')],
+        [InlineKeyboardButton("👤محدودیت تعداد کاربر فقط یک سرور", callback_data='MCXV')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -8528,6 +8786,7 @@ def call_QRCODE(bot, query):
         text = change_infos_user_info(Session.User_info(settings['dropbear'], settings['tuic'])) + randomized_text()
         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
         port, udgpw, dropbear = Session.Ports()
+        port = get_another_port_if_exists(host, port)
         HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
         passw = ((text.split("Password : ")[1]).split("\n")[0])
         url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
@@ -8745,6 +9004,7 @@ def call_test(bot, query):
                 if "Error" not in text:
                     add_test_user(chat_id, user)
                     port, udgpw, dropbear = Session.Ports()
+                    port = get_another_port_if_exists(host, port)
                     HOST = ((text.split("SSH Host : ")[1]).split("\n")[0]).replace("<pre>", "").replace("</pre>", "").replace("<code>", "").replace("</code>", "").replace(" ", "")
                     url = f"ssh://{user}:{passw}@{HOST}:{port}#{user}"
                     photo = QR_Maker(url)
@@ -8966,7 +9226,9 @@ def call_bkon(bot, query):
         if True:
             if backup[0] is False:
                 chat_id = query.message.chat.id
-                query.edit_message_text(text=f"Starting... delay every {str(get_settings()['backup'])}h")
+                keyboard = [[InlineKeyboardButton("<<", callback_data='Backup')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                query.edit_message_text(text=f"Starting... delay every {str(get_settings()['backup'])}h", reply_markup=reply_markup)
                 backup.clear()
                 backup.append(True)
                 run_backup.clear()
@@ -9304,7 +9566,7 @@ def call_maximum(bot, query):
     ]
     settings = get_settings()
     text = '<b>Maximum Settings</b>\n\n' + "کاربرد این گزینه : وقتی شما مثلا عدد 50  کاربر تنظیم میکنین برای هر سرور... وقتی که فروش فعال باشه و کاربر اکانت بخره. سرور وقتی رسید به 50 تا کاربر دیگه اکانت نمیسازه و میره از سرور بعدی میسازه ولی وقتی که هیچ سرور دیگه ای نباشه یا همه سرورا رسیده باشن به 50 کاربر شما باید سرور جدید به ربات اضافه کنین یا مقدارو تغییر بدین هر موقع که خواستین و این هم برای گزینه برای دکمه ظرفیت سرور ها کاربرد داره و میگه که کدوم سرورا رسیدن به 50 تا اکانت. برای تغییر مقدار دکمه ادیت بزنین\n\nCurrent: " + str(settings['maximum']) + " Clients"
-    keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='smt')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
@@ -9316,7 +9578,7 @@ def call_EMXM(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     add_cache(chat_id, "maximum")
-    text = "OK send only number"
+    text = "خب یه عدد بفرستین:"
     keyboard = [[InlineKeyboardButton("<<", callback_data='maximum')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -9712,59 +9974,65 @@ def call_FLCHON(bot, query):
                 Filtering_system.append(True)
                 run_filtering.clear()
                 run_filtering.append(True)
+                first = True
+                start_time = 1
                 while True:
                     if run_filtering[0] is True:
-                        hosts, remarks = sshx.HOSTS()
-                        for host in hosts:
-                            port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-                            do = True
-                            session = 'ssh/' + host + ".session"
-                            if Path(session).is_file() is False:
-                                if sshx.Login(username, password, host, port, panel) is False:
-                                    do = False
-                            if do is True:
-                                try:
-                                    Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
-                                    status, content = Session.IP_Check()
-                                    if (status is True) and (host not in checked_filtering):
-                                        # try again
-                                        for i in range(2):
-                                            status, content = Session.IP_Check()
-                                            if (status is True) and (i == 1):
-                                                if check_host_api(host) is True:
-                                                    text = "🔴Blocked in IRAN: " + host
-                                                    checked_filtering.append(host)
+                        if ((int(time()) - start_time) < (get_settings()['filtering_checker_minutes'] * 60)) and (first is False):
+                            sleep(3)
+                        else:
+                            hosts, remarks = sshx.HOSTS()
+                            for host in hosts:
+                                port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
+                                do = True
+                                session = 'ssh/' + host + ".session"
+                                if Path(session).is_file() is False:
+                                    if sshx.Login(username, password, host, port, panel) is False:
+                                        do = False
+                                if do is True:
+                                    try:
+                                        Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
+                                        status, content = Session.IP_Check()
+                                        if (status is True) and (host not in checked_filtering):
+                                            # try again
+                                            for i in range(2):
+                                                status, content = Session.IP_Check()
+                                                if (status is True) and (i == 1):
+                                                    if check_host_api(host) is True:
+                                                        text = "🔴Blocked in IRAN: " + host
+                                                        checked_filtering.append(host)
+                                                        for admin in admin_id:
+                                                            bot.send_message(admin, text)
+                                                        break
+                                                elif status is False:
+                                                    break
+                                                sleep(1)
+                                        else:
+                                            if "Error" not in content:
+                                                if host in checked_filtering:
+                                                    checked_filtering.remove(host)
+                                                    text = "🟢Back online [IP Check]: " + host
                                                     for admin in admin_id:
                                                         bot.send_message(admin, text)
-                                                    break
-                                            elif status is False:
-                                                break
-                                            sleep(1)
-                                    else:
-                                        if "Error" not in content:
-                                            if host in checked_filtering:
-                                                checked_filtering.remove(host)
-                                                text = "🟢Back online [IP Check]: " + host
-                                                for admin in admin_id:
-                                                    bot.send_message(admin, text)
-                                            if host in checked_connections:
-                                                checked_connections.remove(host)
-                                                text = "🟢Back online [Bot Connection]: " + host
-                                                for admin in admin_id:
-                                                    bot.send_message(admin, text)
-                                        else:
-                                            if host not in checked_connections:
-                                                text = "🔴Connection Error from the panel not such a big deal: " + host + "\nLog:\n" + content
-                                                checked_connections.append(host)
-                                                for admin in admin_id:
-                                                    bot.send_message(admin, text)
-                                except:
-                                    pass
-                                    #if host not in checked_connections:
-                                        #text = "🔴Connection Error: " + host
-                                        #checked_connections.append(host)
-                                        #bot.send_message(chat_id, text)
-                        sleep(300)
+                                                if host in checked_connections:
+                                                    checked_connections.remove(host)
+                                                    text = "🟢Back online [Bot Connection]: " + host
+                                                    for admin in admin_id:
+                                                        bot.send_message(admin, text)
+                                            else:
+                                                if host not in checked_connections:
+                                                    text = "🔴Connection Error from the panel not such a big deal: " + host + "\nLog:\n" + content
+                                                    checked_connections.append(host)
+                                                    for admin in admin_id:
+                                                        bot.send_message(admin, text)
+                                    except:
+                                        pass
+                                        #if host not in checked_connections:
+                                            #text = "🔴Connection Error: " + host
+                                            #checked_connections.append(host)
+                                            #bot.send_message(chat_id, text)
+                            start_time = int(time())
+                            first = False
                     else:
                         break
             else:
@@ -9789,6 +10057,21 @@ def call_FLCHOFF(bot, query):
         query.answer("Already OFF", show_alert=True)
 
 
+@app.on_callback_query(filters.regex('FLCHTI'))
+def call_FLCHTI(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "filtering_checker_minutes")
+    text = "خب یه عدد بین 5 تا 720 بفرستین (این دقایق مشخص شده برای سیستم چکر فیلترینگه)"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='FILCH')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
 @app.on_callback_query(filters.regex('FILCH'))
 def call_FILCH(bot, query):
     chat_id = query.message.chat.id
@@ -9796,14 +10079,15 @@ def call_FILCH(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     keyboard = [
-        [InlineKeyboardButton("ON 🟢", callback_data='FLCHON')],
-        [InlineKeyboardButton("OFF 🔴", callback_data='FLCHOFF')]
+        [InlineKeyboardButton("OFF 🔴", callback_data='FLCHOFF'), InlineKeyboardButton("ON 🟢", callback_data='FLCHON')],
+        [InlineKeyboardButton("🕔 تغییر تایم چکر", callback_data='FLCHTI')]
     ]
     if Filtering_system[0] is False:
         status = "OFF ❌"
     else:
         status = "ON ✅"
-    text = '<b>Filtering System Checker Settings</b>\n\nهر 5 دقیقه یه بار بررسی میشه و بهت اطلاع میده که کدوم سرور فیلتر شده (فقط برای ادمینی که این گزینه رو روشن میکنه کار میکنه)\nنکته باید ICMP فعال باشه وگرنه سرور ممکنه فیلتر نباشه و بهت میگه فیلتره و اینکه بصورت دیفالت فعال هست ولی اگه غیرفعال بود باید فعال کنین برای تستم برین به سایت check-host.net پینگ بگیرین اگه از همه کشورا تایم اوت داد یعنی اینکه غیرفعاله' + "\n\n🔄Status: " + status
+    t0 = "\n⏰ Time: " + str(get_settings()['filtering_checker_minutes']) + " Minutes"
+    text = '<b>Filtering System Checker Settings</b>\n\nهر چند دقیقه یه بار بررسی میشه و بهت اطلاع میده که کدوم سرور فیلتر شده.\nنکته باید ICMP فعال باشه وگرنه سرور ممکنه فیلتر نباشه و بهت میگه فیلتره و اینکه بصورت دیفالت فعال هست ولی اگه غیرفعال بود باید فعال کنین برای تستم برین به سایت check-host.net پینگ بگیرین اگه از همه کشورا تایم اوت داد یعنی اینکه غیرفعاله' + "\n\n🔄Status: " + status + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -11164,8 +11448,7 @@ def call_settings(bot, query):
         [InlineKeyboardButton("🌐چکر فیلترینگ", callback_data='FILCH'), InlineKeyboardButton("📥بکاپ", callback_data='Backup')],
         [InlineKeyboardButton("🆘راهنما", callback_data='HOW'), InlineKeyboardButton("🎁دعوت کاربر", callback_data='INVS')],
         [InlineKeyboardButton("🆓 اکانت تست ", callback_data='TASET'), InlineKeyboardButton("📞شماره تلفن", callback_data='PNS')],
-        [InlineKeyboardButton("ℹ️ چکر و اطلاع رسانی حجم و تاریخ به کاربر", callback_data='NUSYS')],
-        [InlineKeyboardButton("👤محدودیت تعداد کاربر در هر سرور", callback_data='maximum')]
+        [InlineKeyboardButton("ℹ️ چکر و اطلاع رسانی حجم و تاریخ به کاربر", callback_data='NUSYS')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
