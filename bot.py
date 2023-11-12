@@ -529,6 +529,19 @@ def get_info_of_expiry(days):
     return text
 
 
+def get_shortcut_of_price(price):
+    if price >= 1000:
+        price = price / 1000
+        if price.is_integer() is True:
+            price = str(int(price))
+        else:
+            price = str('{:.1f}'.format(float(price)))
+        text = price + " هزار تومن"
+    else:
+        text = str(price) + " تومن"
+    return text
+
+
 def get_random_number_if_on():
     settings = get_settings()
     if settings['random_price'] == "on":
@@ -2802,7 +2815,7 @@ def text_private(bot, message):
                     username = 'Null'
                 update_card(name, username, card)
                 delete_cache(chat_id)
-                message.reply_text("✔️ انجام شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='wallet')]]))
+                message.reply_text("✔️ انجام شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='Card')]]))
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
 
@@ -4630,7 +4643,7 @@ def call_checker(bot, query):
                                         if (traffics[i] == "نامحدود") and (usages[i] != "0.0"):
                                             otherN = ""
                                         else:
-                                            otherN = " و " + traffics[i]
+                                            otherN = "و " + str('{:.2f}'.format((float(traffics[i].split("گیگابایت")[0])) - float(usages[i]))) + " گیگ"
                                         NTX = f"⚠️اخطار\nاکانت:\n{usernames[i]}\n\n فقط {str(int(days_left[i]))} روز {otherN} مونده."
                                         bot.send_message(ID, NTX, reply_markup=Reply_markup)
                                         notify += 1
@@ -5911,7 +5924,7 @@ def call_wallet(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     keyboard = [
-        [InlineKeyboardButton("🔧Change", callback_data='ChangeWallet')],
+        [InlineKeyboardButton("🔧تغییر", callback_data='ChangeWallet')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFT'), InlineKeyboardButton("🟢 On", callback_data='ONT')],
         [InlineKeyboardButton("<< Back", callback_data='ZBSHP')]
     ]
@@ -5967,9 +5980,9 @@ def call_card(bot, query):
         query.answer("Access denied", show_alert=True)
         return
     keyboard = [
-        [InlineKeyboardButton("🔧Change", callback_data='Change')],
+        [InlineKeyboardButton("🔧تغییر", callback_data='Change')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFC'), InlineKeyboardButton("🟢 On", callback_data='ONC')],
-        [InlineKeyboardButton("<< Back", callback_data='ZBSHP')]
+        [InlineKeyboardButton("<<", callback_data='ZBSHP')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     name, username, card = get_card_info()
@@ -5978,7 +5991,7 @@ def call_card(bot, query):
         status = "🔴 OFF"
     else:
         status = "🟢 ON"
-    text = f"💳Card: <code>{str(card)}</code>\n\n👤Last admin changed the info \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
+    text = f"💳Card: <code>{str(card)}</code>\n\n👤آخرین ادمینی که اطلاعاتو ادیت کرد \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -6475,12 +6488,12 @@ def call_UTGB(bot, query):
                 text += "\n\nبرای افزایش ترافیک یکی از گزینه هارو انتخاب کنین🙂"
                 if chat_id in seller_id:
                     for i in range(len(settings['seller_plus_traffic'])):
-                        tcb = f"{str(settings['seller_plus_traffic'][i])} گیگابایت - {str(settings['seller_plus_prices'][i])} تومن"
+                        tcb = f"{str(settings['seller_plus_traffic'][i])} گیگابایت - {get_shortcut_of_price(settings['seller_plus_prices'][i])}"
                         cb = f"LTPB_{str(settings['seller_plus_traffic'][i])}-{str(settings['seller_plus_prices'][i])}:{user}@{host}"
                         keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
                 else:
                     for i in range(len(settings['plus-traffic'])):
-                        tcb = f"{str(settings['plus-traffic'][i])} گیگابایت - {str(settings['plus-prices'][i])} تومن"
+                        tcb = f"{str(settings['plus-traffic'][i])} گیگابایت - {get_shortcut_of_price(settings['plus-prices'][i])}"
                         cb = f"TBP_{str(settings['plus-traffic'][i])}-{str(settings['plus-prices'][i])}:{user}@{host}"
                         keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
@@ -6731,7 +6744,7 @@ def call_buy(bot, query):
                 else:
                     traffic = str(settings['seller_traffic'][i]) + " گیگ"
                 #text += f"{str(i + 1)}. {traffic} - {str(settings['seller_connections'][i])} کاربر - {get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_prices'][i])} تومن\n"
-                tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
+                tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {get_shortcut_of_price(settings['seller_prices'][i])}"
                 cb = f"BU_{str(settings['seller_days'][i])}-{str(settings['seller_traffic'][i])}#{str(settings['seller_connections'][i])}&{str(settings['seller_prices'][i])}"
                 keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         else:
@@ -6742,7 +6755,7 @@ def call_buy(bot, query):
                 else:
                     traffic = str(settings['traffic'][i]) + " گیگ"
                 #text += f"{str(i + 1)}. {traffic} - {str(settings['connections'][i])} کاربر - {str(settings['days'][i])} روزه - {str(settings['prices'][i])} تومن\n"
-                tcb = f"{get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i] - random_number)} تومن"
+                tcb = f"{get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {get_shortcut_of_price(settings['prices'][i] - random_number)}"
                 cb = f"BU_{str(settings['days'][i])}-{str(settings['traffic'][i])}#{str(settings['connections'][i])}&{str(settings['prices'][i] - random_number)}"
                 keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
@@ -7295,7 +7308,7 @@ def call_UPG(bot, query):
                             traffic = "نامحدود"
                         else:
                             traffic = str(settings['seller_traffic'][i]) + " گیگ"
-                        tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {str(settings['seller_prices'][i])} تومن"
+                        tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {get_shortcut_of_price(settings['seller_prices'][i])}"
                         cb = f"UPKIF_{str(settings['seller_days'][i])}-{str(settings['seller_traffic'][i])}#{str(settings['seller_connections'][i])}&{str(settings['seller_prices'][i])}:{user}@{host}"
                         keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
                 else:
@@ -7305,7 +7318,7 @@ def call_UPG(bot, query):
                             traffic = "نامحدود"
                         else:
                             traffic = str(settings['traffic'][i]) + " گیگ"
-                        tcb = f"{get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {str(settings['prices'][i] - random_number)} تومن"
+                        tcb = f"{get_info_of_expiry(settings['days'][i])} - {str(settings['connections'][i])} کاربر - {traffic} - {get_shortcut_of_price(settings['prices'][i] - random_number)}"
                         cb = f"UPB_{str(settings['days'][i])}-{str(settings['traffic'][i])}#{str(settings['connections'][i])}&{str(settings['prices'][i] - random_number)}:{user}@{host}"
                         keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         except:
@@ -9568,7 +9581,7 @@ def call_maximum(bot, query):
     ]
     settings = get_settings()
     text = '<b>Maximum Settings</b>\n\n' + "کاربرد این گزینه : وقتی شما مثلا عدد 50  کاربر تنظیم میکنین برای هر سرور... وقتی که فروش فعال باشه و کاربر اکانت بخره. سرور وقتی رسید به 50 تا کاربر دیگه اکانت نمیسازه و میره از سرور بعدی میسازه ولی وقتی که هیچ سرور دیگه ای نباشه یا همه سرورا رسیده باشن به 50 کاربر شما باید سرور جدید به ربات اضافه کنین یا مقدارو تغییر بدین هر موقع که خواستین و این هم برای گزینه برای دکمه ظرفیت سرور ها کاربرد داره و میگه که کدوم سرورا رسیدن به 50 تا اکانت. برای تغییر مقدار دکمه ادیت بزنین\n\nCurrent: " + str(settings['maximum']) + " Clients"
-    keyboard.append([InlineKeyboardButton("<<", callback_data='smt')])
+    keyboard.append([InlineKeyboardButton("<<", callback_data='SMT')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
@@ -10245,7 +10258,7 @@ def call_SNON(bot, query):
                                                                 if (traffics[i] == "نامحدود") and (usages[i] != "0.0"):
                                                                     otherN = ""
                                                                 else:
-                                                                    otherN = " و " + traffics[i]
+                                                                    otherN = "و " + str('{:.2f}'.format((float(traffics[i].split("گیگابایت")[0])) - float(usages[i]))) + " گیگ"
                                                                 NTX = f"⚠️اخطار\nاکانت:\n{usernames[i]}\n\n فقط {str(int(days_left[i]))} روز {otherN} مونده."
                                                                 bot.send_message(ID, NTX, reply_markup=Reply_markup)
                                                                 checked_users.append(usernames[i])
