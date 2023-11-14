@@ -3093,96 +3093,122 @@ def text_private(bot, message):
                 message.reply_text("فقط میتونی عدد بفرستی", reply_markup=reply_markup)
 
         elif "ETM" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['mac'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
                 message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
 
         elif "ETW" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['windows'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
                 message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
 
         elif "ETA" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['android'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
                 message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
 
         elif "ETI" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['ios'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
                 message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
 
         elif "EAID" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['support'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='SID')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
                 message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
 
+        elif "custom_tutorial_button" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            if len(link) <= 32:
+                settings = get_settings()
+                settings['custom_tutorial_only_button_name'] = fixed_link_json(link)
+                update_settings(settings)
+                message.reply_text("✔️ انجام شد\n\n حالا تکست یا ویدیو, عکس, فایل با کپشن بدون فوروارد بفرستین.", reply_markup=reply_markup)
+                delete_cache(chat_id)
+                add_cache(chat_id, "custom_tutorial_button_type")
+            else:
+                message.reply_text("تکست برای دکمه خیلی طولانیه لطفا کمتر (حداکثر 32 کاراکتر)", reply_markup=reply_markup)
+
+        elif "custom_tutorial_button_type" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            if len(link) <= 4000:
+                settings = get_settings()
+                settings['custom_tutorial_only_button_caption'] = fixed_link_json(link)
+                settings['custom_tutorial_only_button_type'] = "text"
+                update_settings(settings)
+                message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+                delete_cache(chat_id)
+            else:
+                message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین", reply_markup=reply_markup)
+
         elif "Start_message" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='WSMSG')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['start'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='WSMSG')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
                 message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
 
         elif "Price_message" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='WLMSG')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['list'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='WLMSG')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
                 message.reply_text("این پیام خیلی طولانیه! پیام دیگه ای رو بفرستین یا /cancel", reply_markup=reply_markup)
 
         elif "after_buy" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='PODSC')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if len(link) <= 3900:
                 settings = get_settings()
                 settings['after_buy'] = fixed_link_json(link)
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='PODSC')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
             else:
@@ -9244,10 +9270,24 @@ def call_test(bot, query):
 
 @app.on_callback_query(filters.regex('help'))
 def call_help(bot, query):
-    keyboard = [
-        [InlineKeyboardButton("IOS🍏", callback_data='IOS'), InlineKeyboardButton("Android🤖", callback_data='Android')],
-        [InlineKeyboardButton("Mac🍎", callback_data='Mac'), InlineKeyboardButton("Windows💻", callback_data='Windows')]
-    ]
+    settings = get_settings()
+    if settings['tutorial_windows'] == "on" and settings['tutorial_android'] == "on" and settings['tutorial_ios'] == "on" and settings['tutorial_mac'] == "on":
+        keyboard = [
+            [InlineKeyboardButton("IOS🍏", callback_data='IOS'), InlineKeyboardButton("Android🤖", callback_data='Android')],
+            [InlineKeyboardButton("Mac🍎", callback_data='Mac'), InlineKeyboardButton("Windows💻", callback_data='Windows')]
+        ]
+    else:
+        keyboard = []
+        if settings['tutorial_windows'] == "on":
+            keyboard.append([InlineKeyboardButton("Windows💻", callback_data='Windows')])
+        if settings['tutorial_android'] == "on":
+            keyboard.append([InlineKeyboardButton("Android🤖", callback_data='Android')])
+        if settings['tutorial_ios'] == "on":
+            keyboard.append([InlineKeyboardButton("IOS🍏", callback_data='IOS')])
+        if settings['tutorial_mac'] == "on":
+            keyboard.append([InlineKeyboardButton("Mac🍎", callback_data='Mac')])
+    if settings['custom_tutorial_only_button'] == "on":
+        keyboard.append([InlineKeyboardButton(settings['custom_tutorial_only_button_name'], callback_data='CtSAELF')])
     keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     text = "سیستم عامل مورد نظرتو انتخاب کن🫡"
@@ -9280,6 +9320,38 @@ def call_Windows(bot, query):
     keyboard = [[InlineKeyboardButton("<<", callback_data='help')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=get_settings()['windows'], reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('CtSAELF'))
+def call_CtSAELF(bot, query):
+    chat_id = query.message.chat.id
+    keyboard = [[InlineKeyboardButton("<<", callback_data='help')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    settings = get_settings()
+    if settings['custom_tutorial_only_button_type'] == 'text':
+        try:
+            query.edit_message_text(text=settings['custom_tutorial_only_button_caption'], reply_markup=reply_markup, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    elif settings['custom_tutorial_only_button_type'] == 'photo':
+        try:
+            bot.send_photo(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    elif settings['custom_tutorial_only_button_type'] == 'video':
+        try:
+            bot.send_video(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    elif settings['custom_tutorial_only_button_type'] == 'document':
+        try:
+            bot.send_document(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    if settings['custom_tutorial_only_button_type'] != 'text':
+        msg = query.message.id
+        bot.delete_messages(chat_id, msg)
+        bot.send_message(chat_id, "آموزش👆", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('referral'))
@@ -10685,10 +10757,78 @@ def call_Tutorials(bot, query):
         delete_cache(chat_id)
     keyboard = [
         [InlineKeyboardButton("IOS🍏", callback_data='CTI'), InlineKeyboardButton("Android🤖", callback_data='CTA')],
-        [InlineKeyboardButton("Mac🍎", callback_data='CTM'), InlineKeyboardButton("Windows💻", callback_data='CTW')]
+        [InlineKeyboardButton("Mac🍎", callback_data='CTM'), InlineKeyboardButton("Windows💻", callback_data='CTW')],
+        [InlineKeyboardButton("دکمه آموزش کاستوم", callback_data='CVM')]
     ]
     text = '<b>Tutorials Settings</b>\n\n' + "یکی از گزینه هارو انتخاب کنین"
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('CVM'))
+def call_CVM(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    data = query.data
+    settings = get_settings()
+    if "_" in data:
+        data = data.split("_")[1]
+        settings['custom_tutorial_only_button'] = data
+        update_settings(settings)
+    if settings['custom_tutorial_only_button'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+    else:
+        emoji = "🔴"
+        cb = 'on'
+    keyboard = [
+        [InlineKeyboardButton(f"Button: {settings['custom_tutorial_only_button']} {emoji}", callback_data=f'CVM_{cb}')],
+        [InlineKeyboardButton("Edit✏️", callback_data='EVM')]
+    ]
+    text = "<b>Custom</b>\n\nStatus: " + settings['custom_tutorial_only_button'] + " " + emoji + "\nButton name: " + settings['custom_tutorial_only_button_name']
+    keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
+    if "_" in data:
+        return
+    if settings['custom_tutorial_only_button_type'] == 'text':
+        try:
+            bot.send_message(chat_id, settings['custom_tutorial_only_button_caption'])
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    elif settings['custom_tutorial_only_button_type'] == 'photo':
+        try:
+            bot.send_photo(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    elif settings['custom_tutorial_only_button_type'] == 'video':
+        try:
+            bot.send_video(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    elif settings['custom_tutorial_only_button_type'] == 'document':
+        try:
+            bot.send_document(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+        except:
+            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('EVM'))
+def call_EVM(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "custom_tutorial_button")
+    text = "اسم دکمه ای که نمایش داده میشه رو بفرستین (لطفا حداکثر بین 8 تا 24 باشه برای نمایش بهتر)"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='CVM')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
@@ -10701,11 +10841,23 @@ def call_CTI(bot, query):
         return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
-    keyboard = [
-        [InlineKeyboardButton("Edit✏️", callback_data='ETI')],
-    ]
+    data = query.data
     settings = get_settings()
-    text = '<b>IOS🍏</b>\n\n' + "Current: \n\n" + str(settings['ios'])
+    if "_" in data:
+        data = data.split("_")[1]
+        settings['tutorial_ios'] = data
+        update_settings(settings)
+    if settings['tutorial_ios'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+    else:
+        emoji = "🔴"
+        cb = 'on'
+    keyboard = [
+        [InlineKeyboardButton(f"Button: {settings['tutorial_ios']} {emoji}", callback_data=f'CTI_{cb}')],
+        [InlineKeyboardButton("Edit✏️", callback_data='ETI')]
+    ]
+    text = '<b>IOS🍏</b>\n\n' + "Current: \n\n" + str(settings['ios']) + "\n\nStatus: " + settings['tutorial_ios'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
@@ -10734,11 +10886,23 @@ def call_CTA(bot, query):
         return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
-    keyboard = [
-        [InlineKeyboardButton("Edit✏️", callback_data='ETA')],
-    ]
+    data = query.data
     settings = get_settings()
-    text = '<b>Android🤖</b>\n\n' + "Current: \n\n" + str(settings['android'])
+    if "_" in data:
+        data = data.split("_")[1]
+        settings['tutorial_android'] = data
+        update_settings(settings)
+    if settings['tutorial_android'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+    else:
+        emoji = "🔴"
+        cb = 'on'
+    keyboard = [
+        [InlineKeyboardButton(f"Button: {settings['tutorial_android']} {emoji}", callback_data=f'CTA_{cb}')],
+        [InlineKeyboardButton("Edit✏️", callback_data='ETA')]
+    ]
+    text = '<b>Android🤖</b>\n\n' + "Current: \n\n" + str(settings['android']) + "\n\nStatus: " + settings['tutorial_android'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
@@ -10767,11 +10931,23 @@ def call_CTM(bot, query):
         return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
-    keyboard = [
-        [InlineKeyboardButton("Edit✏️", callback_data='ETM')],
-    ]
+    data = query.data
     settings = get_settings()
-    text = '<b>Mac🍎</b>\n\n' + "Current: \n\n" + str(settings['mac'])
+    if "_" in data:
+        data = data.split("_")[1]
+        settings['tutorial_mac'] = data
+        update_settings(settings)
+    if settings['tutorial_mac'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+    else:
+        emoji = "🔴"
+        cb = 'on'
+    keyboard = [
+        [InlineKeyboardButton(f"Button: {settings['tutorial_mac']} {emoji}", callback_data=f'CTM_{cb}')],
+        [InlineKeyboardButton("Edit✏️", callback_data='ETA')]
+    ]
+    text = '<b>Mac🍎</b>\n\n' + "Current: \n\n" + str(settings['mac']) + "\n\nStatus: " + settings['tutorial_mac'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
@@ -10800,11 +10976,23 @@ def call_CTW(bot, query):
         return
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
-    keyboard = [
-        [InlineKeyboardButton("Edit✏️", callback_data='ETW')],
-    ]
+    data = query.data
     settings = get_settings()
-    text = '<b>Windows💻</b>\n\n' + "Current: \n\n" + str(settings['windows'])
+    if "_" in data:
+        data = data.split("_")[1]
+        settings['tutorial_windows'] = data
+        update_settings(settings)
+    if settings['tutorial_windows'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+    else:
+        emoji = "🔴"
+        cb = 'on'
+    keyboard = [
+        [InlineKeyboardButton(f"Button: {settings['tutorial_windows']} {emoji}", callback_data=f'CTW_{cb}')],
+        [InlineKeyboardButton("Edit✏️", callback_data='ETA')]
+    ]
+    text = '<b>Windows💻</b>\n\n' + "Current: \n\n" + str(settings['windows']) + "\n\nStatus: " + settings['tutorial_windows'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
@@ -11789,6 +11977,19 @@ def admin_video(bot, message):
             bot.send_message(chat_id, f"sent to {str(sent)} users")
             bot.delete_messages(chat_id, msg)
 
+        elif "custom_tutorial_button_type" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            settings = get_settings()
+            if caption is None:
+                caption = "-"
+            settings['custom_tutorial_only_button_caption'] = fixed_link_json(caption)
+            settings['custom_tutorial_only_button_type'] = "video"
+            settings['custom_tutorial_only_button_file_id'] = file_id
+            update_settings(settings)
+            message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+            delete_cache(chat_id)
+
 
 @app.on_message(filters.chat(admin_id) & filters.document)
 def admin_document(bot, message):
@@ -11817,6 +12018,19 @@ def admin_document(bot, message):
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
             bot.delete_messages(chat_id, msg)
+
+        elif "custom_tutorial_button_type" == status:
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            settings = get_settings()
+            if caption is None:
+                caption = "-"
+            settings['custom_tutorial_only_button_caption'] = fixed_link_json(caption)
+            settings['custom_tutorial_only_button_type'] = "document"
+            settings['custom_tutorial_only_button_file_id'] = file_id
+            update_settings(settings)
+            message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+            delete_cache(chat_id)
 
         elif status == "upload_panels":
             if message.document.file_name == "Pannels.txt":
@@ -11899,6 +12113,24 @@ def image_users(bot, message):
                         continue
             bot.send_message(chat_id, f"sent to {str(sent)} users")
             bot.delete_messages(chat_id, msg)
+
+        elif "custom_tutorial_button_type" == status:
+            file_id = message.photo.file_id
+            try:
+                caption = message.caption
+            except:
+                caption = None
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Tutorials')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            settings = get_settings()
+            if caption is None:
+                caption = "-"
+            settings['custom_tutorial_only_button_caption'] = fixed_link_json(caption)
+            settings['custom_tutorial_only_button_type'] = "photo"
+            settings['custom_tutorial_only_button_file_id'] = file_id
+            update_settings(settings)
+            message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+            delete_cache(chat_id)
 
         elif "support" in status:
             n = int(status.split("support ")[1])
