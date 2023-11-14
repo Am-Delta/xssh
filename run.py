@@ -179,6 +179,18 @@ def db_update():
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
 
+    if settings.get("custom_tutorial_only_button", None) is None:
+        add_dict = {
+            "custom_tutorial_only_button": "off",
+            "custom_tutorial_only_button_name": "آموزش خرید",
+            "custom_tutorial_only_button_type": "text",
+            "custom_tutorial_only_button_file_id": 0,
+            "custom_tutorial_only_button_caption": "text"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
