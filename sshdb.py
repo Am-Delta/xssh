@@ -217,7 +217,12 @@ settings = {
     "tutorial_custom_button_data": [],
     "perfect_money": "off",
     "perfect_money_account_id": "None",
-    "perfect_money_account_password": "None"
+    "perfect_money_account_password": "None",
+    "custom_tutorial_only_button": "off",
+    "custom_tutorial_only_button_name": "آموزش خرید",
+    "custom_tutorial_only_button_type": "text",
+    "custom_tutorial_only_button_file_id": 0,
+    "custom_tutorial_only_button_caption": "text"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
