@@ -214,7 +214,10 @@ settings = {
     "tutorial_mac": "on",
     "tutorial_custom": "off",
     "tutorial_custom_button_name": [],
-    "tutorial_custom_button_data": []
+    "tutorial_custom_button_data": [],
+    "perfect_money": "off",
+    "perfect_money_account_id": "None",
+    "perfect_money_account_password": "None"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
