@@ -2618,6 +2618,7 @@ def text_private(bot, message):
                     try:
                         Session = sshx.PANNEL(host, username, password, port, panel, 'User', cache_list[1])
                         text = Session.Update(int(cache_list[2]), days, int(cache_list[-1]))
+                        text += "\n" + Session.Reset_traffic()
                         try:
                             if cache_list[1] in checked_users:
                                 checked_users.remove(cache_list[1])
@@ -7616,6 +7617,7 @@ def call_UPKIF(bot, query):
                 except:
                     pass
             server_msg = Session.Update(GB, days, connection_limit)
+            Session.Reset_traffic()
             if "Error" not in server_msg:
                 value = old_value - price
                 update_user_wallet(chat_id, value)
@@ -7831,6 +7833,7 @@ def call_Confirmed_UPGRADE(bot, query):
                 except:
                     pass
             server_msg = Session.Update(GB, days, connection_limit)
+            Session.Reset_traffic()
             text += server_msg
             if "Error" not in server_msg:
                 add_check_admin(query.message.chat.id, query.message.chat.first_name, username_admin, code, "Yes", int(time()))
@@ -10794,28 +10797,27 @@ def call_CVM(bot, query):
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
-    if "_" in data:
-        return
-    if settings['custom_tutorial_only_button_type'] == 'text':
-        try:
-            bot.send_message(chat_id, settings['custom_tutorial_only_button_caption'])
-        except:
-            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
-    elif settings['custom_tutorial_only_button_type'] == 'photo':
-        try:
-            bot.send_photo(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
-        except:
-            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
-    elif settings['custom_tutorial_only_button_type'] == 'video':
-        try:
-            bot.send_video(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
-        except:
-            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
-    elif settings['custom_tutorial_only_button_type'] == 'document':
-        try:
-            bot.send_document(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
-        except:
-            query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+    if "_" not in query.data:
+        if settings['custom_tutorial_only_button_type'] == 'text':
+            try:
+                bot.send_message(chat_id, settings['custom_tutorial_only_button_caption'])
+            except:
+                query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+        elif settings['custom_tutorial_only_button_type'] == 'photo':
+            try:
+                bot.send_photo(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+            except:
+                query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+        elif settings['custom_tutorial_only_button_type'] == 'video':
+            try:
+                bot.send_video(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+            except:
+                query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
+        elif settings['custom_tutorial_only_button_type'] == 'document':
+            try:
+                bot.send_document(chat_id, settings['custom_tutorial_only_button_file_id'], caption=settings['custom_tutorial_only_button_caption'])
+            except:
+                query.answer("⚠️خطا لطفا بررسی کنین یا دوباره مدیا رو بفرستین", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('EVM'))
