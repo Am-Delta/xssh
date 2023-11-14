@@ -2,6 +2,7 @@ import json
 import requests
 from random import randint
 from unidecode import unidecode
+from selectolax.parser import HTMLParser
 
 API_main_address = "http://hd.ladokpro.pw:5000/usd"
 
@@ -66,6 +67,78 @@ def check_status_invoice_plisio(API, txn_id):
             return "Error: " + data['status'], "", False
     else:
         return "Error: " + str(r.status_code), "", False
+
+
+def check_valid_perfect_money(account_id, passphrase):
+    URL = f'https://perfectmoney.com/acct/balance.asp?AccountID={account_id}&PassPhrase={passphrase}&'
+    try:
+        text = ""
+        r = requests.get(URL)
+        if r.status_code == 200:
+            html = HTMLParser(r.text)
+            for data in html.css('input'):
+                if data.attributes.get("name", None) is not None:
+                    if "ERROR" == data.attributes['name']:
+                        return False, "Error: " + data.attributes['value']
+                    else:
+                        text += f"{data.attributes['name']} | {data.attributes['value']}\n"
+            return True, text
+        else:
+            return False, "Error: HTTP " + str(r.status_code)
+    except Exception as e:
+        return False, "Error: " + str(e)
+
+
+def get_U_perfect_money(account_id, passphrase):
+    URL = f'https://perfectmoney.com/acct/balance.asp?AccountID={account_id}&PassPhrase={passphrase}&'
+    try:
+        r = requests.get(URL)
+        if r.status_code == 200:
+            html = HTMLParser(r.text)
+            for data in html.css('input'):
+                if data.attributes.get("name", None) is not None:
+                    if "ERROR" == data.attributes['name']:
+                        return False, "Error: " + data.attributes['value']
+                    elif "U" == data.attributes['name'][0]:
+                        return True, data.attributes['name']
+            return False, "Error: not found API error"
+        else:
+            return False, "Error: HTTP " + str(r.status_code)
+    except Exception as e:
+        return False, "Error: " + str(e)
+
+
+def validate_perfect_money_voucher(account_id, passphrase, ev_number, ev_code):
+    url = "https://perfectmoney.com/acct/ev_activate.asp"
+    try:
+        status, Payee_Account = get_U_perfect_money(account_id, passphrase)
+        if status is True:
+            data = {
+                "AccountID": account_id,
+                "PassPhrase": passphrase,
+                "ev_number": ev_number,
+                "ev_code": ev_code,
+                "Payee_Account": Payee_Account
+            }
+            r = requests.post(url, data=data)
+            html = HTMLParser(r.text)
+            VOUCHER_NUM = None
+            for data in html.css('input'):
+                if data.attributes.get("name", None) is not None:
+                    if "ERROR" == data.attributes['name']:
+                        return False, "Error: " + data.attributes['value'], 0.0
+                    elif "VOUCHER_NUM" == data.attributes['name']:
+                        VOUCHER_NUM = data.attributes['value']
+                    elif "VOUCHER_AMOUNT" == data.attributes['name']:
+                        VOUCHER_AMOUNT = float(data.attributes['value'])
+            if VOUCHER_NUM is not None:
+                return True, VOUCHER_NUM, VOUCHER_AMOUNT
+            else:
+                return False, "Error: not found", 0.0
+        else:
+            return False, Payee_Account, 0.0
+    except Exception as e:
+        return False, "Error: " + str(e), 0.0
 
 
 def check_valid_zarinpal(name):
