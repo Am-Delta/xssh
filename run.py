@@ -168,6 +168,17 @@ def db_update():
         settings.update(add_dict)
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
+
+    if settings.get("perfect_money", None) is None:
+        add_dict = {
+            "perfect_money": "off",
+            "perfect_money_account_id": "None",
+            "perfect_money_account_password": "None"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
