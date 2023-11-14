@@ -18,7 +18,7 @@ from unidecode import unidecode
 from random import randint, choice
 from pyrogram import Client, filters, enums
 from pyrogram.errors import NotAcceptable, BadRequest, FloodWait
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InputMediaPhoto, InputMediaVideo
 
 
 session = "run"
@@ -1735,7 +1735,7 @@ def text_private(bot, message):
     else:
         status = get_cache_status(chat_id)
 
-        if (chat_id not in (admin_id)) and ((status == "config") or ("host_" in status) or ("support" in status) or ("USP_" in status) or ("USU_" in status) or ("userwpm" == status) or ("usergift" == status) or ("Uname_" in status) or ("Auth_" in status)):
+        if (chat_id not in (admin_id)) and ((status == "config") or ("host_" in status) or ("support" in status) or ("USP_" in status) or ("USU_" in status) or ("userwpm" == status) or ("usergift" == status) or ("Uname_" in status) or ("Auth_" in status) or ("voucher" == status) or ("e-voucher_" in status)):
             if (status == "config"):
                 try:
                     host, user = get_host_username(link)
@@ -2059,8 +2059,67 @@ def text_private(bot, message):
                 else:
                     message.reply_text("مبلغی که فرستادی خیلی کمه")
 
+            elif ("voucher" == status):
+                keyboard = [[InlineKeyboardButton("<<", callback_data='UWM')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                try:
+                    int(link)
+                    delete_cache(chat_id)
+                    add_cache(chat_id, "e-voucher_" + link)
+                    message.reply_text("حالا کد Activation code رو بصورت عدد بفرستین:", reply_markup=reply_markup)
+                except:
+                    message.reply_text("❌ کد ووچر اشتباست لطفا بصورت عدد بفرستین:", reply_markup=reply_markup)
+
+            elif ("e-voucher_" in status):
+                keyboard = [[InlineKeyboardButton("<<", callback_data='UWM')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                try:
+                    int(link)
+                    settings = get_settings()
+                    stus, value = payment.GET_USD()
+                    if stus is False:
+                        value = settings['usd']
+                    ev_number = status.split("e-voucher_")[1]
+                    ev_code = link
+                    account_id = settings['perfect_money_account_id']
+                    passphrase = settings['perfect_money_account_password']
+                    st, VOUCHER_NUM, VOUCHER_AMOUNT = payment.validate_perfect_money_voucher(account_id, passphrase, ev_number, ev_code)
+                    if st is True:
+                        keyboard = [
+                            [InlineKeyboardButton("🛒 خرید", callback_data='buy')],
+                            [InlineKeyboardButton("⤴️ منو ", callback_data='back')]
+                        ]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        Value = int(value * VOUCHER_AMOUNT)
+                        message.reply_text(f"✅ کیف پول شما با موفقیت شارژ شد.\n\nمبلغ: \n{str(Value)} تومن\n\n{str(VOUCHER_AMOUNT)}$", reply_markup=reply_markup)
+                        name, u, phone, old_value = get_full_user_data_id(chat_id)
+                        add_payment(chat_id, name, u, "perfectmoney", Value, ev_number, "completed")
+                        new_value = Value + old_value
+                        update_user_wallet(chat_id, new_value)
+                        text = f"🟢 اطلاعات پرداخت ووچر پرفکت مانی :\nName: {name}\nID: {str(chat_id)}\nUsername: {u}\nPhone: {phone}\n\ne-voucher: {ev_number}\nActivation code: {ev_code}\nAmount: {str(VOUCHER_AMOUNT)}$\nToman: {str(Value)}"
+                        keyboard = [[InlineKeyboardButton("💰 Balance", callback_data='perfectmoney')]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        for admin in admin_id:
+                            try:
+                                bot.send_message(admin, text, reply_markup=reply_markup)
+                            except:
+                                pass
+                    else:
+                        message.reply_text(f"⛔️ خطا لطفا اطلاعات بررسی کنین اگه مشکل از ما بود پیام بدید\n\n{VOUCHER_NUM}", reply_markup=reply_markup)
+                        if "Can not login with passed AccountID and PassPhrase or API is disabled on this account/IP" in VOUCHER_NUM:
+                            keyboard = [[InlineKeyboardButton("<<", callback_data='perfectmoney')]]
+                            reply_markup = InlineKeyboardMarkup(keyboard)
+                            for admin in admin_id:
+                                try:
+                                    bot.send_message(admin, "⛔️ خطای اکانت پرفکت مانی برای خرید کاربر.پn\nلطفا اطلاعات لاگین و آیپی آدرس مسک داخل API وبسایت پرفکت مانی رو بررسی کنین!", reply_markup=reply_markup)
+                                except:
+                                    pass
+                    delete_cache(chat_id)
+                except:
+                    message.reply_text("❌ کد Activation code اشتباست لطفا بصورت عدد بفرستین:", reply_markup=reply_markup)
+
             elif ("usergift" == status):
-                keyboard = [[InlineKeyboardButton("<< back", callback_data='UWM')]]
+                keyboard = [[InlineKeyboardButton("<<", callback_data='UWM')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 if check_gift_code_exist(link) is True:
                     value, kind, count, users_id, timer_expiry = get_gift_code_full(link)
@@ -2859,6 +2918,35 @@ def text_private(bot, message):
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
             else:
                 message.reply_text(server_msg, reply_markup=reply_markup)
+            delete_cache(chat_id)
+
+        elif status == "change_perfectmoney":
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='perfectmoney')]])
+            try:
+                int(link)
+                delete_cache(chat_id)
+                add_cache(chat_id, "perfectmoneyid_" + link)
+                message.reply_text("پسورد اکانتتون بفرستین:", reply_markup=reply_markup)
+            except:
+                message.reply_text("ممبر آیدی اشتباست فقط میتونی بصورت عدد بفرستی:", reply_markup=reply_markup)
+
+        elif "perfectmoneyid_" in status:
+            account_id = status.split("perfectmoneyid_")[1]
+            link = fixed_link_json(link)
+            password = link
+            status, text = payment.check_valid_perfect_money(account_id, password)
+            if status is True:
+                settings = get_settings()
+                settings['perfect_money_account_id'] = account_id
+                settings['perfect_money_account_password'] = password
+                update_settings(settings)
+                keyboard = [[InlineKeyboardButton("<<", callback_data='perfectmoney')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text(f"✔️ انجام شد\n\n{text}", reply_markup=reply_markup)
+            else:
+                keyboard.insert(0, [InlineKeyboardButton("🔄 امتحان مجدد", callback_data='ChPFM')])
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text(f"اطلاعات اکانت وارد شده اشتباست!\n\n{text}", reply_markup=reply_markup)
             delete_cache(chat_id)
 
         elif ("disable_" in status) or ("enable_" in status):
@@ -5180,29 +5268,24 @@ def call_TrfPlus(bot, query):
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("CTRPLUS_"))
         else:
-            settings = get_settings()
-            if settings['seller_custom'] == "off":
-                accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
-                keyboard = []
-                if status is False:
-                    query.answer("سرویسی پیدا نشد!", show_alert=True)
-                else:
-                    if len(accounts) >= 2:
-                        if len(accounts) % 2 == 0:
-                            for i in range(0, len(accounts) - 1, 2):
-                                keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UTGB_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UTGB_" + hosts[i + 1] + "$" + accounts[i + 1]))])
-                        else:
-                            for i in range(0, len(accounts) - 1, 2):
-                                keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UTGB_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UTGB_" + hosts[i + 1] + "$" + accounts[i + 1]))])
-                            keyboard.append([InlineKeyboardButton(accounts[-1], callback_data=("UTGB_" + hosts[-1] + "$" + accounts[-1]))])
-                    else:
-                        keyboard.append([InlineKeyboardButton(accounts[0], callback_data=("UTGB_" + hosts[0] + "$" + accounts[0]))])
-                    keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
-                    reply_markup = InlineKeyboardMarkup(keyboard)
-                    query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
+            accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
+            keyboard = []
+            if status is False:
+                query.answer("سرویسی پیدا نشد!", show_alert=True)
             else:
-                add_cache(query.message.chat.id, "updatetraffic")
-                query.edit_message_text(text="آدرس سرور بفرستین")
+                if len(accounts) >= 2:
+                    if len(accounts) % 2 == 0:
+                        for i in range(0, len(accounts) - 1, 2):
+                            keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UTGB_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UTGB_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                    else:
+                        for i in range(0, len(accounts) - 1, 2):
+                            keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UTGB_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UTGB_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                        keyboard.append([InlineKeyboardButton(accounts[-1], callback_data=("UTGB_" + hosts[-1] + "$" + accounts[-1]))])
+                else:
+                    keyboard.append([InlineKeyboardButton(accounts[0], callback_data=("UTGB_" + hosts[0] + "$" + accounts[0]))])
+                keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -5346,29 +5429,24 @@ def call_update(bot, query):
         if check_seller_exist(query.message.chat.id) is False:
             query.edit_message_text(text="سرور مورد نظر انتخاب کنین:", reply_markup=server_cb_creator("UP_"))
         else:
-            settings = get_settings()
-            if settings['seller_custom'] == "off":
-                accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
-                keyboard = []
-                if status is False:
-                    query.answer("سرویسی پیدا نشد!", show_alert=True)
-                else:
-                    if len(accounts) >= 2:
-                        if len(accounts) % 2 == 0:
-                            for i in range(0, len(accounts) - 1, 2):
-                                keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
-                        else:
-                            for i in range(0, len(accounts) - 1, 2):
-                                keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
-                            keyboard.append([InlineKeyboardButton(accounts[-1], callback_data=("UPG_" + hosts[-1] + "$" + accounts[-1]))])
-                    else:
-                        keyboard.append([InlineKeyboardButton(accounts[0], callback_data=("UPG_" + hosts[0] + "$" + accounts[0]))])
-                    keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
-                    reply_markup = InlineKeyboardMarkup(keyboard)
-                    query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
+            accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
+            keyboard = []
+            if status is False:
+                query.answer("سرویسی پیدا نشد!", show_alert=True)
             else:
-                add_cache(query.message.chat.id, "updatehost")
-                query.edit_message_text(text="آدرس سرور بفرستین")
+                if len(accounts) >= 2:
+                    if len(accounts) % 2 == 0:
+                        for i in range(0, len(accounts) - 1, 2):
+                            keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                    else:
+                        for i in range(0, len(accounts) - 1, 2):
+                            keyboard.append([InlineKeyboardButton(accounts[i], callback_data=("UPG_" + hosts[i] + "$" + accounts[i])), InlineKeyboardButton(accounts[i + 1], callback_data=("UPG_" + hosts[i + 1] + "$" + accounts[i + 1]))])
+                        keyboard.append([InlineKeyboardButton(accounts[-1], callback_data=("UPG_" + hosts[-1] + "$" + accounts[-1]))])
+                else:
+                    keyboard.append([InlineKeyboardButton(accounts[0], callback_data=("UPG_" + hosts[0] + "$" + accounts[0]))])
+                keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
     else:
         query.edit_message_text(text="Please /cancel it first")
 
@@ -5658,6 +5736,103 @@ def call_nextpay(bot, query):
     query.answer("بزودی...", show_alert=True)
 
 
+@app.on_callback_query(filters.regex('perfectmoney'))
+def call_perfectmoney(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    keyboard = [
+        [InlineKeyboardButton("🔧Change", callback_data='ChPFM')],
+        [InlineKeyboardButton("🔴 Off", callback_data='OFM'), InlineKeyboardButton("🟢 On", callback_data='ONM')],
+        [InlineKeyboardButton("آموزش فعال سازی API", callback_data='PCNSLM')],
+        [InlineKeyboardButton("<<", callback_data='ZBSHP')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    settings = get_settings()
+    if settings['perfect_money'] == "off":
+        status = "🔴 OFF"
+    else:
+        status = "🟢 ON"
+    if settings['perfect_money_account_id'] != "None":
+        st, text = payment.check_valid_perfect_money(settings['perfect_money_account_id'], settings['perfect_money_account_password'])
+        balance = "\n\n" + text
+    else:
+        balance = ""
+    text = f"💳Perfect Money\n\nAccount ID: <code>{settings['perfect_money_account_id']}</code>\nPassword: {settings['perfect_money_account_password']}\n\nStatus: {status}\n\nخرید اتوماتیک با پرفکت مانی. حتما طبق دکمه آموزش پیش برید. (فقط توی کیف پول کاربر فعال میشه)\n\n{balance}"
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
+
+
+@app.on_callback_query(filters.regex('ChPFM'))
+def call_ChIPay(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "change_perfectmoney")
+    keyboard = [[InlineKeyboardButton("<<", callback_data='perfectmoney')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="(Member ID) آیدی اکانتو بصورت عددی بفرستین همون اطلاعات لاگین :", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('PCNSLM'))
+def call_PCNSLM(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    media = [
+        InputMediaPhoto("https://i.ibb.co/5MQZyGS/1.png", caption="وارد سایت perfectmoney.com بشین و اکانت بسازین یا اگه دارین لاگین کنین"),
+        InputMediaPhoto("https://i.ibb.co/55tnr8Y/2.png"),
+        InputMediaPhoto("https://i.ibb.co/bgYt2st/3.png"),
+        InputMediaPhoto("https://i.ibb.co/Fzy1MFw/4.png")
+    ]
+    bot.send_media_group(chat_id, media)
+    keyboard = [[InlineKeyboardButton("🔧Change", callback_data='ChPFM')], [InlineKeyboardButton("<<", callback_data='perfectmoney')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    bot.send_message(chat_id, "برای تغییر دکمه پایینو کلیک کنین:", reply_markup=reply_markup)
+    msg = query.message.id
+    bot.delete_messages(chat_id, msg)
+
+
+@app.on_callback_query(filters.regex('OFM'))
+def call_OFM(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    if settings['perfect_money'] == 'on':
+        settings['perfect_money'] = 'off'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='perfectmoney')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
+    else:
+        query.answer("Already OFF", show_alert=True)
+
+
+@app.on_callback_query(filters.regex('ONM'))
+def call_ONM(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    if settings['perfect_money'] == 'off':
+        settings['perfect_money'] = 'on'
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='perfectmoney')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
+    else:
+        query.answer("Already ON", show_alert=True)
+
+
 @app.on_callback_query(filters.regex('idpay'))
 def call_idpay(bot, query):
     chat_id = query.message.chat.id
@@ -5669,7 +5844,7 @@ def call_idpay(bot, query):
     keyboard = [
         [InlineKeyboardButton("🔧Change", callback_data='ChIPay')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFI'), InlineKeyboardButton("🟢 On", callback_data='ONI')],
-        [InlineKeyboardButton("<< Back", callback_data='ZBSHP')]
+        [InlineKeyboardButton("<<", callback_data='ZBSHP')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     settings = get_settings()
@@ -5740,7 +5915,7 @@ def call_zarinpal(bot, query):
     keyboard = [
         [InlineKeyboardButton("🔧Change", callback_data='ChZarin')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFZ'), InlineKeyboardButton("🟢 On", callback_data='ONZ')],
-        [InlineKeyboardButton("<< Back", callback_data='ZBSHP')]
+        [InlineKeyboardButton("<<", callback_data='ZBSHP')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     settings = get_settings()
@@ -6424,7 +6599,10 @@ def call_Ptxnid(bot, query):
                 query.edit_message_text(text=text, reply_markup=reply_markup)
                 text = f"اطلاعات پرداخت کریپتو :\nنام: {name}\nآیدی عددی: {str(chat_id)}\nیوزرنیم: {u}\nتلفن: {phone}\nلینک تراکنش: {tx_url}\nآیدی تراکنش: {txn_id}"
                 for admin in admin_id:
-                    bot.send_message(admin, text, disable_web_page_preview=True)
+                    try:
+                        bot.send_message(admin, text, disable_web_page_preview=True)
+                    except:
+                        pass
                 plisio_retry_time.remove(plisio_retry_time[plisio_retry.index(txn_id)])
                 plisio_retry.remove(txn_id)
                 plisio_attemp_del(chat_id)
@@ -6487,10 +6665,17 @@ def call_UTGB(bot, query):
             else:
                 text += "\n\nبرای افزایش ترافیک یکی از گزینه هارو انتخاب کنین🙂"
                 if chat_id in seller_id:
-                    for i in range(len(settings['seller_plus_traffic'])):
-                        tcb = f"{str(settings['seller_plus_traffic'][i])} گیگابایت - {get_shortcut_of_price(settings['seller_plus_prices'][i])}"
-                        cb = f"LTPB_{str(settings['seller_plus_traffic'][i])}-{str(settings['seller_plus_prices'][i])}:{user}@{host}"
-                        keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
+                    if settings['seller_custom'] == "on":
+                        cache_list = [host, user]
+                        add_collector(chat_id, "plus", cache_list, [])
+                        delete_cache(chat_id)
+                        add_cache(chat_id, "plus-Traffic")
+                        text = "حجمو به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)"
+                    else:
+                        for i in range(len(settings['seller_plus_traffic'])):
+                            tcb = f"{str(settings['seller_plus_traffic'][i])} گیگابایت - {get_shortcut_of_price(settings['seller_plus_prices'][i])}"
+                            cb = f"LTPB_{str(settings['seller_plus_traffic'][i])}-{str(settings['seller_plus_prices'][i])}:{user}@{host}"
+                            keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
                 else:
                     for i in range(len(settings['plus-traffic'])):
                         tcb = f"{str(settings['plus-traffic'][i])} گیگابایت - {get_shortcut_of_price(settings['plus-prices'][i])}"
@@ -7303,14 +7488,21 @@ def call_UPG(bot, query):
                 text += "\n\nبرای تمدید یکی از گزینه هارو انتخاب کنین🙂"
                 keyboard = []
                 if chat_id in seller_id:
-                    for i in range(len(settings['seller_prices'])):
-                        if settings['seller_traffic'][i] == 0:
-                            traffic = "نامحدود"
-                        else:
-                            traffic = str(settings['seller_traffic'][i]) + " گیگ"
-                        tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {get_shortcut_of_price(settings['seller_prices'][i])}"
-                        cb = f"UPKIF_{str(settings['seller_days'][i])}-{str(settings['seller_traffic'][i])}#{str(settings['seller_connections'][i])}&{str(settings['seller_prices'][i])}:{user}@{host}"
-                        keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
+                    if settings['seller_custom'] == "on":
+                        cache_list = [host, user]
+                        delete_cache(chat_id)
+                        add_collector(chat_id, "update", cache_list, [])
+                        add_cache(chat_id, "GB-update")
+                        text = "\n\n\n<b>حجمو به عدد بفرستین مثلا 10 گیگ (0 = نامحدود)</b>"
+                    else:
+                        for i in range(len(settings['seller_prices'])):
+                            if settings['seller_traffic'][i] == 0:
+                                traffic = "نامحدود"
+                            else:
+                                traffic = str(settings['seller_traffic'][i]) + " گیگ"
+                            tcb = f"{get_info_of_expiry(settings['seller_days'][i])} - {str(settings['seller_connections'][i])} کاربر - {traffic} - {get_shortcut_of_price(settings['seller_prices'][i])}"
+                            cb = f"UPKIF_{str(settings['seller_days'][i])}-{str(settings['seller_traffic'][i])}#{str(settings['seller_connections'][i])}&{str(settings['seller_prices'][i])}:{user}@{host}"
+                            keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
                 else:
                     random_number = get_random_number_if_on()
                     for i in range(len(settings['prices'])):
@@ -7323,7 +7515,7 @@ def call_UPG(bot, query):
                         keyboard.append([InlineKeyboardButton(tcb, callback_data=cb)])
         except:
             text = "⚠️خطا"
-        keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
+        keyboard.append([InlineKeyboardButton("<<", callback_data='back')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -8455,7 +8647,7 @@ def call_ipv6(bot, query):
     plus_host = ""
     for host in hosts:
         if settings['addresses'].get(host, None) is not None:
-            plus_host += f"{host} {settings['addresses'][host]}"
+            plus_host += f"{host} {settings['addresses'][host]}\n"
     query.edit_message_text(text=f"این گزینه برای اینه که ipv6 یا هر آدرس و دامینی که میخواین اد کنین که بجای ادرس اصلی سرور به کاربر داده بشه ( دقت کنین که هرچیزی که اینجا اد کنین به کاربر فرستاده میشه هیچ تستی انجام نمیشه کاملا باید درست وارد کنین. فرقی نداره ipv6 یا دامین یا دامینی که برای تانل باشه یا حتی تکست ساده و به عهده خودتونه درست یا غلط بودنش)\n\n{plus_host}", reply_markup=reply_markup)
 
 
@@ -8536,7 +8728,7 @@ def call_JUQSTC(bot, query):
     plus_host = ""
     for host in hosts:
         if settings['SSH_custom'].get(host, None) is not None:
-            plus_host += f"{host} {settings['SSH_custom'][host]}"
+            plus_host += f"{host} {settings['SSH_custom'][host]}\n"
     query.edit_message_text(text=f"این گزینه برای اینه که برای مثلا یه سرور بجای اینکه ssh پورت اصلیو بفرسته پورتی که شما تعیین میکنین رو میده.\n\n{plus_host}", reply_markup=reply_markup)
 
 
@@ -9163,15 +9355,43 @@ def call_PAUB(bot, query):
     query.edit_message_text(text=text)
 
 
+@app.on_callback_query(filters.regex('voucher'))
+def call_voucher(bot, query):
+    settings = get_settings()
+    if settings['buy'] == 'on':
+        chat_id = query.message.chat.id
+        if check_cache(chat_id) is True:
+            delete_cache(chat_id)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='UWM')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        if (settings['perfect_money'] == "on") and (settings['perfect_money_account_id'] != "None"):
+            add_cache(chat_id, "voucher")
+            query.edit_message_text(text="کد e-Voucher بصورت عدد بفرستین:", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+        else:
+            query.edit_message_text(text="افزایش موجودی و خرید غیرفعاله !", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+    else:
+        query.answer("افزایش موجودی و خرید غیرفعاله", show_alert=True)
+
+
 @app.on_callback_query(filters.regex('UWPM'))
 def call_UWPM(bot, query):
     settings = get_settings()
     if settings['buy'] == 'on':
         chat_id = query.message.chat.id
-        delete_cache(chat_id)
-        text = "مبلغ مورد نظرتون به تومن بفرستین (حداقل 1000):"
-        add_cache(chat_id, "userwpm")
-        keyboard = [[InlineKeyboardButton("<< back", callback_data='UWM')]]
+        if check_cache(chat_id) is True:
+            delete_cache(chat_id)
+        data = query.data
+        if (settings['perfect_money'] == "on") and (settings['perfect_money_account_id'] != "None") and ("!" not in data):
+            keyboard = [
+                [InlineKeyboardButton("🔴 پرفکت مانی", callback_data='voucher')],
+                [InlineKeyboardButton("دیگر روش های پرداخت ", callback_data='UWPM!')],
+                [InlineKeyboardButton("<<", callback_data='UWM')]
+            ]
+            text = "⚪️ یکی از گزینه هارو انتخاب کنین:"
+        else:
+            text = "مبلغ مورد نظرتون به تومن بفرستین (حداقل 1000):"
+            add_cache(chat_id, "userwpm")
+            keyboard = [[InlineKeyboardButton("<<", callback_data='UWM')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -9688,6 +9908,7 @@ def call_ZBSHP(bot, query):
         [InlineKeyboardButton("💵 ولت ترون", callback_data='wallet'), InlineKeyboardButton("💳 کارت", callback_data='Card')],
         [InlineKeyboardButton("📲 درگاه Plisio", callback_data='plisio'), InlineKeyboardButton("🟡 درگاه زرین پال", callback_data='zarinpal')],
         [InlineKeyboardButton("🔵 درگاه آیدی پی", callback_data='idpay'), InlineKeyboardButton("⚪️ درگاه نکست پی", callback_data='nextpay')],
+        [InlineKeyboardButton("🔴 پرفکت مانی", callback_data='perfectmoney')],
         [InlineKeyboardButton("🛒قیمت ترافیک", callback_data='ADTPR'), InlineKeyboardButton("🛒قیمت ها", callback_data='ADMINPRICES')],
         [InlineKeyboardButton("🌀تنظیم قیمت رندوم ", callback_data='CSNDF')],
         [InlineKeyboardButton("🚦 وضعیت خرید ترافیک", callback_data='BTOPtion'), InlineKeyboardButton("🔐وضعیت خرید اکانت", callback_data='BSOPtion')],
