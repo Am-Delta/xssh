@@ -953,6 +953,15 @@ def check_premium_spliter(html):
             return True, "YES"
 
 
+def request_more(r, url):
+    s = ""   
+    for i in range(3):
+        s = r.get(url).text
+        if s != "":
+            return s
+    return s
+
+
 class PANNEL:
     def __init__(self, host, username, password, port, panel, job, uname):
         self.host = host
@@ -1038,26 +1047,29 @@ class PANNEL:
     def Backup_content(self):
         if self.panel == "shahan":
             try:
-                s = self.r.get(self.url + "/p/setting.php").text
+                s = request_more(self.r, self.url + "/p/setting.php")
                 html = BeautifulSoup(s, 'html.parser')
                 urls = []
                 for a in html.find_all('a', href=True):
-                    if ("/p/backup/" in a['href']) and ("20" in a['href']):
+                    if ("/p/backup/" in a['href']) and ("sql" in a['href']):
                         urls.append(a['href'])
                 for delete in urls:
                     file = delete.split('/p/backup/')[1]
                     payload = {"delete": file}
                     self.r.get(self.url + "/p/setting.php?delete=" + file, data=payload)
-                dt = (str(datetime.fromtimestamp(time()))).split(' ')[0]
-                date = dt + "-554"
-                payload = {"backupfull": date}
-                self.r.get(self.url + "/p/setting.php?backupfull=" + date, data=payload).text
-                s = self.r.get(self.url + "/p/setting.php").text
-                html = BeautifulSoup(s, 'html.parser')
-                urls = []
-                for a in html.find_all('a', href=True):
-                    if ("/p/backup/" in a['href']) and ("20" in a['href']) and ("sql" in a['href']):
-                        urls.append(a['href'])
+                for i in range(5):
+                    dt = (str(datetime.fromtimestamp(time()))).split(' ')[0]
+                    date = dt + "-554"
+                    payload = {"backupfull": date}
+                    self.r.get(self.url + "/p/setting.php?backupfull=" + date, data=payload).text
+                    s = request_more(self.r, self.url + "/p/setting.php")
+                    html = BeautifulSoup(s, 'html.parser')
+                    urls = []
+                    for a in html.find_all('a', href=True):
+                        if ("/p/backup/" in a['href']) and ("sql" in a['href']):
+                            urls.append(a['href'])
+                    if len(urls) >= 1:
+                        break
                 rec = self.r.get(self.url + urls[0]).content
                 return True, rec
             except Exception as e:
@@ -1152,7 +1164,7 @@ class PANNEL:
         storage = "?"
         if self.panel == "shahan":
             try:
-                s = self.r.get(self.url + "/p/index.php").text
+                s = request_more(self.r, self.url + "/p/index.php")
                 html = HTMLParser(s)
                 for setr in html.css('small.pull-left'):
                     if counter == 1:
@@ -1247,7 +1259,7 @@ class PANNEL:
         storage = "?"
         if self.panel == "shahan":
             try:
-                s = self.r.get(self.url + "/p/index.php").text
+                s = request_more(self.r, self.url + "/p/index.php")
                 html = HTMLParser(s)
                 for setr in html.css('small.pull-left'):
                     if counter == 1:
@@ -1348,7 +1360,7 @@ class PANNEL:
     def Count_Clients(self):
         if self.panel == "shahan":
             try:
-                s = self.r.get(self.url + "/p/index.php").text
+                s = request_more(self.r, self.url + "/p/index.php")
                 html = HTMLParser(s)
                 info = []
                 for data in html.css('span.info-box-number'):
@@ -1382,7 +1394,7 @@ class PANNEL:
     def info(self):
         if self.panel == "shahan":
             try:
-                s = self.r.get(self.url + "/p/index.php").text
+                s = request_more(self.r, self.url + "/p/index.php")
                 html = HTMLParser(s)
                 return Get_list_shahan(html)
             except Exception as e:
@@ -1426,7 +1438,7 @@ class PANNEL:
         data = []
         if self.panel == "shahan":
             try:
-                s = self.r.get(self.url + "/p/online.php").text
+                s = request_more(self.r, self.url + "/p/online.php")
                 html = HTMLParser(s)
                 for span in html.css('span.font-medium'):
                     data.append(span.text())
@@ -1585,7 +1597,7 @@ class PANNEL:
     def Exist(self, user):
         if self.panel == "shahan":
             try:
-                s = self.r.get(self.url + "/p/index.php").text
+                s = request_more(self.r, self.url + "/p/index.php")
                 html = HTMLParser(s)
                 usernames = Get_list_users_only_shahan(html)
                 if user in usernames:
