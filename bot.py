@@ -9236,7 +9236,11 @@ def call_test(bot, query):
                 t0 = "اکانت تست شما ❤️\n\n"
                 GB = float(str("{:.2f}".format(float((settings['test-traffic'] / 1024)))))
                 description = f"[ BOT - TEST ] Date: ( {str(jdatetime.datetime.now()).split('.')[0]} ), userID: {str(chat_id)}, Username: {USERNAME}"
-                text = t0 + change_infos_user_info(Session.Create(user, passw, 1, 1, GB, description, False, settings['dropbear']))
+                if panel == "xpanel":
+                    days = 2
+                else:
+                    days = 1
+                text = t0 + change_infos_user_info(Session.Create(user, passw, 1, days, GB, description, False, settings['dropbear']))
                 if "Error" not in text:
                     add_test_user(chat_id, user)
                     port, udgpw, dropbear = Session.Ports()
