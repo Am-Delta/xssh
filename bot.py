@@ -1617,6 +1617,7 @@ def start_user(bot, message):
         text = '🔻<b>Tools</b>'
         message.reply_text(text, reply_markup=Seller_Tools_keys(), parse_mode=enums.ParseMode.HTML)
     else:
+        settings = get_settings()
         link = message.text
         name = message.from_user.first_name
         try:
@@ -1626,23 +1627,24 @@ def start_user(bot, message):
         if len(link) >= 7:
             try:
                 ref_chat_id = int(link.split('/start ')[1])
-                if ((check_referral_exists(ref_chat_id) is True) and (chat_id != ref_chat_id)) and (get_settings()['invite'] == "on"):
+                if ((check_referral_exists(ref_chat_id) is True) and (chat_id != ref_chat_id)) and (settings['invite'] == "on"):
                     name, referrals = get_referral_info(ref_chat_id)
                     if (chat_id not in referrals):
-                        ref_value = get_settings()['referral']
-                        bot.send_message(ref_chat_id, f"کاربر {name} با لینکت وارد ربات شد.\nمبلغ {str(ref_value)} به موجودی کیف پولت اضافه شد 💝")
-                        referrals.append(chat_id)
-                        update_referall(ref_chat_id, referrals)
-                        name, u, phone, old_value = get_full_user_data_id(ref_chat_id)
-                        value = ref_value + old_value
-                        update_user_wallet(ref_chat_id, value)
+                        if len(referrals) < settings['invitation_limit']:
+                            ref_value = settings['referral']
+                            bot.send_message(ref_chat_id, f"کاربر {name} با لینکت وارد ربات شد.\nمبلغ {str(ref_value)} به موجودی کیف پولت اضافه شد 💝")
+                            referrals.append(chat_id)
+                            update_referall(ref_chat_id, referrals)
+                            name, u, phone, old_value = get_full_user_data_id(ref_chat_id)
+                            value = ref_value + old_value
+                            update_user_wallet(ref_chat_id, value)
             except:
                 pass
         if check_referral_exists(chat_id) is False:
             add_referral(chat_id, name, username, [])
         if check_user_exists_in_clients_table(chat_id) is False:
             add_client_db(chat_id, name, username, 'None', 0)
-            if get_settings()['notification'] == "on":
+            if settings['notification'] == "on":
                 for admin in admin_id:
                     try:
                         mention = "<a href='tg://user?id=" + str(chat_id) + "'>" + name + "</a>"
@@ -1650,43 +1652,43 @@ def start_user(bot, message):
                         bot.send_message(admin, text, parse_mode=enums.ParseMode.HTML)
                     except:
                         pass
-            if get_settings()['before_start_msg'] != "None":
-                message.reply_text(get_settings()['before_start_msg'])
+            if settings['before_start_msg'] != "None":
+                message.reply_text(settings['before_start_msg'])
         else:
             update_name_and_username(chat_id, name, username)
         Buttons = [[KeyboardButton("ارسال شماره تلفن 📞", request_contact=True)]]
         reply_markup = ReplyKeyboardMarkup(Buttons, resize_keyboard=True)
         text = "لطفا برای استفاده از ربات دکمه پایین کلیک کنین و شمارتون بفرستین👇"
-        if (get_settings())['sponser'] == "None":
-            if ((get_settings())['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
+        if settings['sponser'] == "None":
+            if (settings['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
                 message.reply_text(text, reply_markup=reply_markup)
             else:
-                message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+                message.reply_text(settings['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
         else:
             try:
-                chat_member = bot.get_chat_member((get_settings())['sponser'], chat_id)
-                if ((get_settings())['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
+                chat_member = bot.get_chat_member(settings['sponser'], chat_id)
+                if (settings['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
                     message.reply_text(text, reply_markup=reply_markup)
                 else:
-                    message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+                    message.reply_text(settings['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
             except NotAcceptable:
-                if ((get_settings())['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
+                if (settings['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
                     message.reply_text(text, reply_markup=reply_markup)
                 else:
-                    message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+                    message.reply_text(settings['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
             except BadRequest as e:
                 if "USER_NOT_PARTICIPANT" in str(e):
-                    text = "برای استفاده از ربات اینجا باید جوین بشین:" + "\n\n" + (get_settings())['sponser']
+                    text = "برای استفاده از ربات اینجا باید جوین بشین:" + "\n\n" + settings['sponser']
                     keyboard = [[InlineKeyboardButton("جوین شدم✅", callback_data="JOIN")]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     message.reply_text(text, reply_markup=reply_markup)
                 else:
-                    if ((get_settings())['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
+                    if (settings['phone'] == "on") and (check_user_phone_exist(chat_id) is False):
                         message.reply_text(text, reply_markup=reply_markup)
                     else:
-                        message.reply_text((get_settings())['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
+                        message.reply_text(settings['start'], reply_markup=User_Tools_keys(), parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_message(filters.private & filters.text)
@@ -3287,6 +3289,19 @@ def text_private(bot, message):
                 settings['maximum'] = maximum
                 update_settings(settings)
                 keyboard = [[InlineKeyboardButton("<<", callback_data='maximum')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+                delete_cache(chat_id)
+            except:
+                message.reply_text("فقط میتونی عدد بفرستی")
+
+        elif "invite_limit" == status:
+            try:
+                invitation_limit = int(link)
+                settings = get_settings()
+                settings['invitation_limit'] = invitation_limit
+                update_settings(settings)
+                keyboard = [[InlineKeyboardButton("<<", callback_data='INVS')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
                 delete_cache(chat_id)
@@ -6651,7 +6666,7 @@ def call_traffic(bot, query):
     if status is False:
         query.answer("سرویسی پیدا نشد. اگه سرویسی دارین دکمه اطلاعات سرویس بزنین و بفرستین 🙂", show_alert=True)
     else:
-        if settings['buy-traffic'] == 'on':
+        if ((settings['buy-traffic'] == 'on') and (settings['buy_only_customers'] == 'off')) or ((settings['buy_only_customers'] == 'on') and (len(accounts) >= 1)):
             if len(accounts) >= 2:
                 if len(accounts) % 2 == 0:
                     for i in range(0, len(accounts) - 1, 2):
@@ -6666,9 +6681,7 @@ def call_traffic(bot, query):
             reply_markup = InlineKeyboardMarkup(keyboard)
             query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
         else:
-            keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            query.edit_message_text(text="فروش ترافیک غیرفعاله", reply_markup=reply_markup)
+            query.answer("فروش ترافیک غیرفعاله", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('UTGB_'))
@@ -6947,7 +6960,8 @@ def call_buy(bot, query):
         delete_code_buy(code)
     keyboard = []
     settings = get_settings()
-    if (settings['buy'] == 'on'):
+    accounts, hosts, status = get_all_accounts_by_chat_id(chat_id)
+    if ((settings['buy'] == 'on') and (settings['buy_only_customers'] == 'off')) or ((settings['buy_only_customers'] == 'on') and (len(accounts) >= 1)):
         text = "یکی از گزینه هارو انتخاب کنین:\n\n"
         if chat_id in seller_id:
             for i in range(len(settings['seller_prices'])):
@@ -6974,9 +6988,7 @@ def call_buy(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(text=text, reply_markup=reply_markup)
     else:
-        keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        query.edit_message_text(text="فروش غیرفعاله", reply_markup=reply_markup)
+        query.answer("فروش غیرفعاله", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('CC_'))
@@ -7475,7 +7487,7 @@ def call_upgrade(bot, query):
     if status is False:
         query.answer("سرویسی پیدا نشد. اگه سرویسی دارین دکمه اطلاعات سرویس بزنین و بفرستین 🙂", show_alert=True)
     else:
-        if settings['buy'] == 'on':
+        if ((settings['buy'] == 'on') and (settings['buy_only_customers'] == 'off')) or ((settings['buy_only_customers'] == 'on') and (len(accounts) >= 1)):
             if len(accounts) >= 2:
                 if len(accounts) % 2 == 0:
                     for i in range(0, len(accounts) - 1, 2):
@@ -7490,9 +7502,7 @@ def call_upgrade(bot, query):
             reply_markup = InlineKeyboardMarkup(keyboard)
             query.edit_message_text(text="یکی برای تمدید انتخاب کن", reply_markup=reply_markup)
         else:
-            keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            query.edit_message_text(text="فروش غیرفعاله", reply_markup=reply_markup)
+            query.answer("فروش غیرفعاله", show_alert=True)
 
 
 @app.on_callback_query(filters.regex('UPG_'))
@@ -7637,7 +7647,7 @@ def call_UPKIF(bot, query):
                     for admin in admin_id:
                         try:
                             mention = f"<a href='tg://user?id={str(chat_id)}'>{name}</a>"
-                            bot.send_message(admin, f"↕️ اطلاعات ترافیک اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                            bot.send_message(admin, f"🔄 اطلاعات تمدید اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                         except:
                             pass
             else:
@@ -9377,7 +9387,8 @@ def call_referral(bot, query):
             username = "Null"
         add_referral(chat_id, query.message.chat.first_name, username, [])
     name, referrals = get_referral_info(chat_id)
-    text = f"با دعوت هر یه نفر به ربات {str(get_settings()['referral'])} تومن هدیه بگیرین 🫡🎁\n\nتعداد دعوت های شما: {str(len(referrals))}\n\nلینک دعوت : \n{link}"
+    settings = get_settings()
+    text = f"با دعوت هر یه نفر به ربات {str(settings['referral'])} تومن هدیه بگیرین 🫡🎁\n\nتعداد دعوت های شما: {str(len(referrals))}/{str(settings['invitation_limit'])}\n\nلینک دعوت : \n{link}"
     keyboard = []
     keyboard.append([InlineKeyboardButton("<< Back", callback_data='back')])
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -10156,13 +10167,38 @@ def call_BSOPtion(bot, query):
         emoji = "🔴"
         cb = 'on'
         emoji_cb = "🟢"
+    if settings['buy_only_customers'] == "on":
+        emoji_2 = "🟢"
+        cb_2 = 'off'
+        emoji_cb_2 = "🔴"
+    else:
+        emoji_2 = "🔴"
+        cb_2 = 'on'
+        emoji_cb_2 = "🟢"
     keyboard = [
-        [InlineKeyboardButton(f"وضعیت خرید {cb} {emoji_cb}", callback_data=f'EBS_{cb}')]
+        [InlineKeyboardButton(f"وضعیت خرید {cb} {emoji_cb}", callback_data=f'EBS_{cb}')],
+        [InlineKeyboardButton(f"فقط مشتری {cb_2} {emoji_cb_2}", callback_data=f'EKJV_{cb_2}')]
     ]
-    text = '<b>Shop Status Settings</b>\n\n' + "میتونین با خاموش و روشن کردن این گزینه خرید یا تمدید غیرفعال یا فعال کنین" + "\n\nCurrent: " + settings['buy'] + " " + emoji
+    text = '<b>Shop Status Settings</b>\n\n' + "میتونین با خاموش و روشن کردن این گزینه خرید یا تمدید غیرفعال یا فعال کنین (برای همه)\n\nیا اینکه این گزینه فقط برای مشتری ها روشن باشه " + "\n\nCurrent: " + settings['buy'] + " " + emoji + "\nCustomers only: " + settings['buy_only_customers'] + " " + emoji_2
     keyboard.append([InlineKeyboardButton("<<", callback_data='ZBSHP')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('EKJV_'))
+def call_EKJV(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    buy = data.split("EKJV_")[1]
+    settings = get_settings()
+    settings['buy_only_customers'] = buy
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='BSOPtion')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('EBS_'))
@@ -10618,9 +10654,10 @@ def call_INVS(bot, query):
         emoji_cb = "🟢"
     keyboard = [
         [InlineKeyboardButton("Edit✏️", callback_data='ENVS')],
-        [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'XNVS_{cb}')]
+        [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'XNVS_{cb}')],
+        [InlineKeyboardButton("تغییر محدودیت دعوت", callback_data='QNVS')]
     ]
-    text = '<b>Referrals Settings</b>\n\n' + "با دعوت هر یه نفر به ربات با لینک توسط یه کاربر یه مبلغی به کیف پولش اضافه میشه . دکمه ادیت بزنین و مبلغ مورد نظرتون به تومن بفرستین\n\nمیتونید این قابلیت برای کاربرا خاموش کنین\n\nCurrent: " + str(settings['referral']) + " تومن\n" + settings['invite'] + " " + emoji
+    text = '<b>Referrals Settings</b>\n\n' + "با دعوت هر یه نفر به ربات با لینک توسط یه کاربر یه مبلغی به کیف پولش اضافه میشه . دکمه ادیت بزنین و مبلغ مورد نظرتون به تومن بفرستین\n\nمیتونید این قابلیت برای کاربرا خاموش کنین\n\nگزینه سوم تغییر محدودیت کاربر هست مثلا فقط بتونه ده نفر دعوت کنه\n\nCurrent: " + str(settings['referral']) + " تومن\n" + settings['invite'] + " " + emoji + "\nLimit: " + str(settings['invitation_limit']) 
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -10642,6 +10679,21 @@ def call_XNVS(bot, query):
     query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('QNVS'))
+def call_QNVS(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "invite_limit")
+    text = "عدد مورد نظرتو بفرست:"
+    keyboard = [[InlineKeyboardButton("<<", callback_data='INVS')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
 @app.on_callback_query(filters.regex('ENVS'))
 def call_ENVS(bot, query):
     chat_id = query.message.chat.id
@@ -10651,7 +10703,7 @@ def call_ENVS(bot, query):
     if check_cache(chat_id) is True:
         delete_cache(chat_id)
     add_cache(chat_id, "invite")
-    text = "عدد مورد نظرتو بفرست:r"
+    text = "عدد مورد نظرتو بفرست:"
     keyboard = [[InlineKeyboardButton("<<", callback_data='INVS')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
