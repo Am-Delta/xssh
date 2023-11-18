@@ -191,6 +191,15 @@ def db_update():
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
 
+    if settings.get("invitation_limit", None) is None:
+        add_dict = {
+            "invitation_limit": 10,
+            "buy_only_customers": "off"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
