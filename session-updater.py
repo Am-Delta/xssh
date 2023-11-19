@@ -13,10 +13,13 @@ if Path('logs.txt').is_file() is True:
 
 def bot_checker():
     for pid in psutil.pids():
-        p = psutil.Process(pid)
-        if "python" in p.name():
-            if "bot.py" in p.cmdline():
-                return
+        try:
+            p = psutil.Process(pid)
+            if "python" in p.name():
+                if "bot.py" in p.cmdline():
+                    return
+        except:
+            pass
     os.system("nohup python3 -u bot.py &")
 
 
