@@ -1,15 +1,27 @@
 import os
 import sshx
+import psutil
 from pathlib import Path
 from time import sleep
 from datetime import datetime
 from random import randint
 
+
 if Path('logs.txt').is_file() is True:
     os.remove('logs.txt')
 
 
+def bot_checker():
+    for pid in psutil.pids():
+        p = psutil.Process(pid)
+        if "python" in p.name():
+            if "bot.py" in p.cmdline():
+                return
+    os.system("nohup python3 -u bot.py &")
+
+
 def main():
+    bot_checker()
     with open('logs.txt', 'a+') as logs:
         hosts, remarks = sshx.HOSTS()
         for host in hosts:
