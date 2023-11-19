@@ -190,6 +190,12 @@ def get_ips_of_users_dragon(ssh, usernames):
                 if cache[0] not in gotted:
                     pids.append(cache[1])
                     gotted.append(cache[0])
+            elif cache[0][-1] == "+":
+                if len(cache) == 9:
+                    if cache[8] in usernames:
+                        if cache[8] not in gotted:
+                            pids.append(cache[1])
+                            gotted.append(cache[0])
     ips = []
     users = []
 
@@ -200,8 +206,11 @@ def get_ips_of_users_dragon(ssh, usernames):
         ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', datas)
         if ip == []:
             break
-        else:
+        elif len(ip) == 1:
             ips.append(ip[0])
+            users.append(gotted[pids.index(pid)])
+        else:
+            ips.append(ip[1])
             users.append(gotted[pids.index(pid)])
 
     return ips, users
@@ -1318,7 +1327,7 @@ class PANNEL:
             ssh_stdin.write('1\n')
             ssh_stdin.flush()
             ssh_stdin.write('s\n')
-            sleep(10)
+            sleep(50)
             ssh_stdin.flush()
             dirty = Force_string(ssh_stdout).read().decode()
             cleaned = Clean_string(dirty)
