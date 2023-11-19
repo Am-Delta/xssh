@@ -18,7 +18,10 @@ def main():
             Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
             status, content = Session.Backup_content()
             if status is True:
-                f = folder + "/" + host + ".sql"
+                if panel in ['dragon']:
+                    f = folder + "/" + host + ".vps"
+                else:
+                    f = folder + "/" + host + ".sql"
                 if Path(f).is_file() is True:
                     os.remove(f)
                 with open(f, 'wb') as file:
