@@ -17,6 +17,7 @@ pip install termcolor
 pip install Unidecode
 pip install jdatetime
 pip install ipaddress
+pip install paramiko
 
 mkdir /root/botCh
 
