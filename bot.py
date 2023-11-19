@@ -1,5 +1,6 @@
 import os
 import re
+import gc
 import ast
 import sshx
 import json
@@ -1644,6 +1645,7 @@ def start_user(bot, message):
 
 @app.on_message(filters.private & filters.text)
 def text_private(bot, message):
+    gc.collect()
     chat_id = message.chat.id
     link = message.text
     if 'http://' in link:
