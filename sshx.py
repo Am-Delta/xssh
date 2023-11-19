@@ -17,7 +17,7 @@ from uuid import uuid4
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 node1 = "ir1.node.check-host.net"
 node2 = "ir3.node.check-host.net"
-node3 = "ir4.node.check-host.net"
+node3 = "ir5.node.check-host.net"
 node4 = "de1.node.check-host.net"
 node5 = "fr2.node.check-host.net"
 node6 = "us1.node.check-host.net"
@@ -91,9 +91,12 @@ def check_host_json_results(results):
     for result in results[node2][0]:
         if result[0] == "OK":
             return False
-    for result in results[node3][0]:
-        if result[0] == "OK":
-            return False
+    try:
+        for result in results[node3][0]:
+            if result[0] == "OK":
+                return False
+    except:
+        pass
     for result in results[node4][0]:
         if result[0] == "OK":
             return True
