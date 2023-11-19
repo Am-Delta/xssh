@@ -4867,6 +4867,8 @@ def call_filtering(bot, query):
                 if sshx.check_host_api(host) is True:
                     blocked_servers += 1
                     FS += (f"🔴Offline: {host}\n")
+                else:
+                    online_servers += 1
             else:
                 if "Error" in server_msg:
                     checked_servers -= 1
