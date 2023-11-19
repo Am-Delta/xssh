@@ -3,14 +3,31 @@ import json
 import os
 import re
 import ast
+import paramiko
 import ipaddress
 import jdatetime
 from pathlib import Path
 from bs4 import BeautifulSoup
 from selectolax.parser import HTMLParser
 from datetime import datetime
-from time import time
+from time import time, sleep
 from uuid import uuid4
+
+
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+node1 = "ir1.node.check-host.net"
+node2 = "ir3.node.check-host.net"
+node3 = "ir4.node.check-host.net"
+node4 = "de1.node.check-host.net"
+node5 = "fr2.node.check-host.net"
+node6 = "us1.node.check-host.net"
+headers = {
+    'accept': 'application/json',
+    'user-agent': user_agent
+}
+
+http_panels = ['shahan', 'xpanel', 'rocket']
+ssh_panels = ['dragon']
 
 
 shortcut_isp_json = {
@@ -67,6 +84,46 @@ def ISP(target):
     return ""
 
 
+def check_host_json_results(results):
+    for result in results[node1][0]:
+        if result[0] == "OK":
+            return False
+    for result in results[node2][0]:
+        if result[0] == "OK":
+            return False
+    for result in results[node3][0]:
+        if result[0] == "OK":
+            return False
+    for result in results[node4][0]:
+        if result[0] == "OK":
+            return True
+    for result in results[node5][0]:
+        if result[0] == "OK":
+            return True
+    for result in results[node6][0]:
+        if result[0] == "OK":
+            return True
+
+
+def check_host_api(host):
+    try:
+        url = f"https://check-host.net/check-ping?host={host}&node={node1}&node={node2}&node={node3}&node={node4}&node={node5}&node={node6}"
+        r = requests.get(url, headers=headers)
+        if r.status_code == 200:
+            request_id = json.loads(r.text)['request_id']
+            sleep(7)
+            data = requests.get("https://check-host.net/check-result/" + request_id, headers=headers)
+            if data.status_code == 200:
+                results = json.loads(data.text)
+                return check_host_json_results(results)
+            else:
+                return False
+        else:
+            return False
+    except:
+        return False
+
+
 def open_session(host, port):
     r = requests.session()
     session = "ssh/" + host + ".session"
@@ -86,6 +143,63 @@ def get_token(req):
         if data.attributes.get("name", None) is not None:
             if data.attributes['name'] == "csrf-token":
                 return data.attributes['content']
+
+
+def ssh_status(host, port, username, password):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        ssh.connect(host, int(port), username, password)
+        return "🟢 Online"
+    except Exception as e:
+        return "🔴 Offline: Please check the username or password or port"
+
+
+def Force_string(stdout):
+    timeout = 1.5
+    endtime = time() + timeout
+    while not stdout.channel.eof_received:
+        sleep(0.2)
+        if time() > endtime:
+            stdout.channel.close()
+            break
+    return stdout
+
+
+def Clean_string(dirty):
+    cleaned = re.sub('\[[0-9;]+[a-zA-Z]',' ', dirty)
+    cleaned = cleaned.replace('\x1b', "")
+    return cleaned
+
+
+def get_ips_of_users_dragon(ssh, usernames):
+    cmd = "ps -ef | grep ssh"
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
+    datas = ssh_stdout.read().decode()
+    datas = datas.split("\n")
+    pids = []
+    gotted = []
+    for data in datas:
+        cache = data.split(" ")
+        cache = list(filter(None, cache))
+        if cache != []:
+            if cache[0] in usernames:
+                if cache[0] not in gotted:
+                    pids.append(cache[1])
+                    gotted.append(cache[0])
+    ips = []
+
+    for pid in pids:
+        cmd = "lsof -p " + pid
+        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
+        datas = ssh_stdout.read().decode()
+        ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', datas)
+        if ip == []:
+            break
+        else:
+            ips.append(ip[0])
+
+    return ips
 
 
 def check_lang_details(html):
@@ -193,47 +307,67 @@ def Test(r, host, port, panel, status):
 
 
 def Login(username, password, host, port, panel):
-    r = requests.session()
-    if panel == "shahan":
-        protocol = check_panel_protocol(host)
-        login_path = f"{protocol}://{host}/p/login.php"
-        data = {'username': username, 'password': password, "loginsubmit": ""}
+    if panel in http_panels:
+        r = requests.session()
+        if panel == "shahan":
+            protocol = check_panel_protocol(host)
+            login_path = f"{protocol}://{host}/p/login.php"
+            data = {'username': username, 'password': password, "loginsubmit": ""}
 
-    elif panel == "xpanel":
-        protocol = check_panel_protocol(host + ':' + port)
-        login_path = f"{protocol}://{host}:{port}/login"
-        data = {'_token': get_token(r.get(login_path).text), 'username': username, 'password': password}
+        elif panel == "xpanel":
+            protocol = check_panel_protocol(host + ':' + port)
+            login_path = f"{protocol}://{host}:{port}/login"
+            data = {'_token': get_token(r.get(login_path).text), 'username': username, 'password': password}
 
-    elif panel == "rocket":
-        protocol = check_panel_protocol(host + ':' + port)
-        login_path = f"{protocol}://{host}:{port}/ajax/login"
-        data = {'username': username, 'password': password, "remember": ""}
+        elif panel == "rocket":
+            protocol = check_panel_protocol(host + ':' + port)
+            login_path = f"{protocol}://{host}:{port}/ajax/login"
+            data = {'username': username, 'password': password, "remember": ""}
 
-    session = "ssh/" + host + ".session"
-    try:
-        with open(session, 'wb') as f:
-            responde = r.post(login_path, data=data)
-            pickle.dump(r.cookies, f)
-            if responde.status_code <= 302:
-                if Test(r, host, port, panel, 'login') is True:
-                    print(f"Login and saved session at {host} | Code: ", responde.status_code)
-                    if Path("protocol-cache.txt").is_file() is False:
-                        add_protocol_cache(host, protocol)
+        session = "ssh/" + host + ".session"
+        try:
+            with open(session, 'wb') as f:
+                responde = r.post(login_path, data=data)
+                pickle.dump(r.cookies, f)
+                if responde.status_code <= 302:
+                    if Test(r, host, port, panel, 'login') is True:
+                        print(f"Login and saved session at {host} | Code: ", responde.status_code)
+                        if Path("protocol-cache.txt").is_file() is False:
+                            add_protocol_cache(host, protocol)
+                        else:
+                            if get_protocol_cache(host) is not None:
+                                remove_protocol_cache(host)
+                            add_protocol_cache(host, protocol)
+                        return True
                     else:
-                        if get_protocol_cache(host) is not None:
-                            remove_protocol_cache(host)
-                        add_protocol_cache(host, protocol)
+                        print("Error : Test")
+                        return False
+                else:
+                    print("Error : ", responde.status_code)
+                    return False
+        except Exception as e:
+            print("Login Error: ", e)
+            return False
+        r.close()
+
+    elif panel in ssh_panels:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            if panel == "dragon":
+                ssh.connect(host, port, username, password)
+                ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("menu")
+                ssh_stdin.flush()
+                dirty = Force_string(ssh_stdout).read().decode()
+                cleaned = Clean_string(dirty)
+                if "DRAGON VPS MANAGER" in cleaned:
                     return True
                 else:
-                    print("Error : Test")
                     return False
-            else:
-                print("Error : ", responde.status_code)
-                return False
-    except Exception as e:
-        print("Login Error: ", e)
-        return False
-    r.close()
+        except Exception as e:
+            print("Login Error: ", e)
+            return False
+        ssh.close()
 
 
 #>>     Domain:Panelport @ User:Password ? Panel:path & sshport:udgpw & remark
@@ -268,6 +402,11 @@ def HOST_INFO(target):
 
 
 def get_port_xpanel(host):
+    port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(host)
+    return sshport, udgpw
+
+
+def get_port_dragon(host):
     port, username, password, panel, route_path, sshport, udgpw, remark = HOST_INFO(host)
     return sshport, udgpw
 
@@ -347,24 +486,22 @@ def Update_Host_All_info(old_host, host, port, username, password, panel, route_
         return "Error"
 
 
-def Change_udp_port(panel, host, udgpw):
+def Change_udp_port(host, udgpw):
     port, username, password, panel, route_path, sshport, old_udgpw, remark = HOST_INFO(host)
-    if panel == "xpanel":
-        if "host has been removed from the list" in Remove_Host(host, False):
-            Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
-            return "Done✔️"
-        else:
-            return "Error"
+    if "host has been removed from the list" in Remove_Host(host, False):
+        Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
+        return "Done✔️"
+    else:
+        return "Error"
 
 
-def Change_ssh_port(panel, host, sshport):
+def Change_ssh_port(host, sshport):
     port, username, password, panel, route_path, old_sshport, udgpw, remark = HOST_INFO(host)
-    if panel == "xpanel":
-        if "host has been removed from the list" in Remove_Host(host, False):
-            Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
-            return "Done✔️"
-        else:
-            return "Error"
+    if "host has been removed from the list" in Remove_Host(host, False):
+        Add_Host(host, port, username, password, panel, route_path, sshport, udgpw, remark)
+        return "Done✔️"
+    else:
+        return "Error"
 
 
 def Change_remark(host, remark):
@@ -460,6 +597,33 @@ def get_cache_xpanel(html):
             if (ASCII_Check(tdx) is True) and (Contains(tdx) is True):
                 cache.append(tdx)
     return cache
+
+
+def get_users_data_dragon(ssh):
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("menu")
+    ssh_stdin.write('9\n')
+    ssh_stdin.flush()
+    dirty = Force_string(ssh_stdout).read().decode()
+    cleaned = Clean_string(dirty)
+    cleaned = cleaned.split('◇User        ◇Password      ◇limit     ◇validity')[1].split('◇ TOTAL USERS')[0]
+
+    usernames, passwords, connection_limits, days, status = ([] for i in range(5))
+    datas = cleaned.split("\n")
+    for data in datas:
+        cache = data.split(" ")
+        cache = list(filter(None, cache))
+        if 4 <= len(cache) <= 5:
+            if (cache[1] != "Null"):
+                usernames.append(cache[0])
+                passwords.append(cache[1])
+                connection_limits.append(cache[2])
+                if cache[3] in ["Nunca", "Venceu"]:
+                    status.append('غیرفعال')
+                    days.append("0")
+                else:
+                    status.append('فعال')
+                    days.append(cache[3])
+    return usernames, passwords, connection_limits, days, status
 
 
 def Get_user_info_shahan(html, uname):
@@ -665,6 +829,13 @@ def Get_user_info_xpanel(html, uname):
             else:
                 kind = "expiry"
             return passwords[i], traffics[i], int(connection_limits[i]), int(days_left[i]), status[i], usages[i], kind, expires[i], descriptions[i], dropbear
+
+
+def Get_user_info_dragon(ssh, uname):
+    usernames, passwords, connection_limits, days, status = get_users_data_dragon(ssh)
+    for i in range(len(usernames)):
+        if uname == usernames[i]:
+            return passwords[i], connection_limits[i], days[i], status[i]
 
 
 def Get_list_users_only_shahan(html):
@@ -954,7 +1125,7 @@ def check_premium_spliter(html):
 
 
 def request_more(r, url):
-    s = ""   
+    s = ""
     for i in range(3):
         s = r.get(url).text
         if s != "":
@@ -969,20 +1140,25 @@ class PANNEL:
         self.password = password
         self.port = port
         self.panel = panel
-        self.url, self.r = open_session(host, port)
         #self.route_path = "cp"
+        if panel in http_panels:
+            self.url, self.r = open_session(host, port)
+        elif panel in ssh_panels:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(host, int(port), username, password)
+            self.ssh = ssh
 
         if job == 'User':
             self.dropbear = ""
+            self.uname = uname
             if panel == "shahan":
-                self.uname = uname
                 s = self.r.get(self.url + "/p/index.php").text
                 html = HTMLParser(s)
                 self.req = self.url + "/p/newuser.php"
                 self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description, self.SPort, self.Sudgpw, self.dropbear, self.tuic = Get_user_info_shahan(html, uname)
 
             elif panel == "rocket":
-                self.uname = uname
                 s = self.r.post(self.url + "/ajax/users/list").text
                 if "<br" in s:
                     s = s.split("<br")[0]
@@ -992,13 +1168,16 @@ class PANNEL:
                 self.ip = host
 
             elif self.panel == "xpanel":
-                self.uname = uname
                 s = self.r.get(self.url + "/cp/users").text
                 html = HTMLParser(s)
                 self.req = self.url + "/cp/user/edit"
                 self.token = get_token(s)
                 self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.kind, self.Date, self.description, self.dropbear = Get_user_info_xpanel(html, uname)
                 self.ip = host
+
+            elif self.panel == "dragon":
+                self.ip = host
+                self.passwd, self.connection_limit, self.days, self.status = Get_user_info_dragon(ssh, uname)
 
     def Ports(self):
         if self.panel == "shahan":
@@ -1042,6 +1221,10 @@ class PANNEL:
 
         elif self.panel == "xpanel":
             port, udgpw = get_port_xpanel(self.host)
+            return port, udgpw, ""
+
+        elif self.panel == "dragon":
+            port, udgpw = get_port_dragon(self.host)
             return port, udgpw, ""
 
     def Backup_content(self):
@@ -1122,6 +1305,25 @@ class PANNEL:
             except Exception as e:
                 return False, str(e)
 
+        elif self.panel == "dragon":
+            ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+            ssh_stdin.write('15\n')
+            ssh_stdin.flush()
+            sleep(0.05)
+            ssh_stdin.write('1\n')
+            ssh_stdin.flush()
+            ssh_stdin.write('s\n')
+            sleep(10)
+            ssh_stdin.flush()
+            dirty = Force_string(ssh_stdout).read().decode()
+            cleaned = Clean_string(dirty)
+            try:
+                link = cleaned.split("LINK :")[1].split("\n")[0].replace(" ", "")
+                rec = requests.get(link).content
+                return True, rec
+            except Exception as e:
+                return False, str(e)
+
     def Check(self):
         if self.panel == "shahan":
             s = self.r.get(self.url + "/p/index.php").text
@@ -1146,7 +1348,10 @@ class PANNEL:
             return check_lang_details(html)
 
     def Backup(self):
-        f = uuid4().hex[0:8] + ".sql"
+        if self.panel in ssh_panels:
+            f = uuid4().hex[0:8] + ".vps"
+        else:
+            f = uuid4().hex[0:8] + ".sql"
         try:
             with open(f, 'wb') as file:
                 status, rec = self.Backup_content()
@@ -1249,6 +1454,23 @@ class PANNEL:
                 return text
             except Exception as e:
                 return "Error: " + str(e)
+
+        elif self.panel == "dragon":
+            ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+            ssh_stdin.flush()
+            dirty = Force_string(ssh_stdout).read().decode()
+            cleaned = Clean_string(dirty)
+            system_info = cleaned.split("Up Time:")[1].split("\n")[0]
+            cpu = system_info.split("In use:")[2].replace(" ", "")
+            ram = system_info.split("In use:")[1].replace(" ", "")
+            uptime = system_info.split("In use:")[0].replace(" ", "")
+            clients_info = cleaned.split("Online:")[1].split("\n")[0]
+            clients = clients_info.split("Total:")[1].replace(" ", "")
+            onlines = clients_info.split("◇ㅤexpired:")[0].replace(" ", "")
+            disabled = clients_info.split("◇ㅤexpired:")[1].split("◇ㅤTotal:")[0].replace(" ", "")
+            active = int(clients) - int(disabled)
+            text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
+            return text
 
     def Panel_Short_info(self):
         server_traffic = 0
@@ -1357,6 +1579,23 @@ class PANNEL:
             except Exception as e:
                 return "Error: " + str(e)
 
+        elif self.panel == "dragon":
+            ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+            ssh_stdin.flush()
+            dirty = Force_string(ssh_stdout).read().decode()
+            cleaned = Clean_string(dirty)
+            system_info = cleaned.split("Up Time:")[1].split("\n")[0]
+            cpu = system_info.split("In use:")[2].replace(" ", "")
+            ram = system_info.split("In use:")[1].replace(" ", "")
+            uptime = system_info.split("In use:")[0].replace(" ", "")
+            clients_info = cleaned.split("Online:")[1].split("\n")[0]
+            clients = clients_info.split("Total:")[1].replace(" ", "")
+            onlines = clients_info.split("◇ㅤexpired:")[0].replace(" ", "")
+            disabled = clients_info.split("◇ㅤexpired:")[1].split("◇ㅤTotal:")[0].replace(" ", "")
+            active = int(clients) - int(disabled)
+            text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
+            return text
+
     def Count_Clients(self):
         if self.panel == "shahan":
             try:
@@ -1391,6 +1630,10 @@ class PANNEL:
             except Exception as e:
                 return "Error: " + str(e)
 
+        elif self.panel == "dragon":
+            usernames, passwords, connection_limits, days, status = get_users_data_dragon(self.ssh)
+            return str(len(usernames))
+
     def info(self):
         if self.panel == "shahan":
             try:
@@ -1419,6 +1662,25 @@ class PANNEL:
                 html = HTMLParser(s)
                 text = self.Short_info()
                 return Get_list_xpanel(html, self.host, text, self.r, self.url)
+            except Exception as e:
+                print("Error: " + str(e))
+                return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
+
+        elif self.panel == "dragon":
+            try:
+                usernames, passwords, connection_limits, days_left, status = get_users_data_dragon(self.ssh)
+                ips, usages, expires, ports, descriptions, traffics = ([] for i in range(6))
+                for i in range(len(usernames)):
+                    usages.append("0.0")
+                    traffics.append("نامحدود")
+                    ips.append(self.host)
+                    if days_left[i] == "0":
+                        expire = "منقضی شده"
+                    else:
+                        expire = (str(jdatetime.datetime.fromtimestamp(time() + (int(days_left[i]) * 86400))).split(" ")[0]).replace("-", "/")
+                    expires.append(expire)
+
+                return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions, 0, 0, True
             except Exception as e:
                 print("Error: " + str(e))
                 return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
@@ -1485,6 +1747,32 @@ class PANNEL:
                     if a.attributes.get("href", None) is not None:
                         if "/online/user/" in a.attributes['href']:
                             users.append((a.attributes['href']).split("/online/user/")[1])
+                return "Good", users, ips
+            except Exception as e:
+                return "Error: " + str(e), [], []
+
+        elif self.panel == "dragon":
+            try:
+                usernames, passwords, connection_limits, days, status = get_users_data_dragon(self.ssh)
+                ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                ssh_stdin.write('4\n')
+                sleep(1)
+                ssh_stdin.flush()
+                dirty = Force_string(ssh_stdout).read().decode()
+                cleaned = Clean_string(dirty)
+                cleaned = cleaned.split('◇ㅤUser       ◇ㅤStatus     ◇ㅤConnection   ◇ㅤTime')[1].split('◇ ENTER  to return to  MENU!')[0]
+                datas = cleaned.split("\n")
+                for data in datas:
+                    cache = data.split(" ")
+                    cache = list(filter(None, cache))
+                    if 4 == len(cache):
+                        if cache[0] in usernames:
+                            if cache[1] == "Online":
+                                users.append(cache[0])
+                                ips.append("127.0.0.1")
+                ips_catched = get_ips_of_users_dragon(self.ssh, users)
+                if len(ips_catched) == len(users):
+                    ips = ips_catched
                 return "Good", users, ips
             except Exception as e:
                 return "Error: " + str(e), [], []
@@ -1558,6 +1846,30 @@ class PANNEL:
                     if i == 1:
                         return False, "Error: " + str(e)
 
+        elif self.panel == "dragon":
+            try:
+                url = f"https://check-host.net/check-ping?host={self.host}&node={node1}&node={node2}&node={node3}&node={node4}&node={node5}&node={node6}"
+                cmd = f"""curl -H 'Accept: application/json' \
+                     '{url}'"""
+                ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command(cmd)
+                out = ssh_stdout.read().decode()
+                data = json.loads(out)
+                sleep(4)
+                request_id = data['request_id']
+                user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+                headers = {'accept': 'application/json', 'user-agent': user_agent}
+                data = requests.get("https://check-host.net/check-result/" + request_id, headers=headers)
+                if data.status_code == 200:
+                    results = json.loads(data.text)
+                    if check_host_json_results(results) is True:
+                        return True, "Offline ❌"
+                    else:
+                        return False, "Online ✅"
+                else:
+                    return False, f"Error: {str(data.status_code)}"
+            except Exception as e:
+                return False, "Error: " + str(e)
+
     def Stats(self):
         if self.panel == "shahan":
             try:
@@ -1594,6 +1906,9 @@ class PANNEL:
         elif self.panel == "xpanel":
             return None
 
+        elif self.panel == "dragon":
+            return None
+
     def Exist(self, user):
         if self.panel == "shahan":
             try:
@@ -1628,6 +1943,17 @@ class PANNEL:
                 s = self.r.get(self.url + "/cp/users").text
                 html = HTMLParser(s)
                 usernames = Get_list_users_only_xpanel(html)
+                if user in usernames:
+                    return "Good", True
+                else:
+                    return "Good", False
+            except Exception as e:
+                print("Error: " + str(e))
+                return "Error: " + str(e), False
+
+        elif self.panel == "dragon":
+            try:
+                usernames, passwords, connection_limits, days, status = get_users_data_dragon(self.ssh)
                 if user in usernames:
                     return "Good", True
                 else:
@@ -1704,6 +2030,24 @@ class PANNEL:
                 else:
                     return "The user is not Online", users
                 return "Good", users
+            except Exception as e:
+                return "Error: " + str(e), []
+
+        elif self.panel == "dragon":
+            try:
+                status, users, ips = self.Online_clients()
+                if user in users:
+                    cmd = f"ps -e -o user,pid | grep '^{user} ' | awk" + " '{ print $2 }' | xargs"
+                    ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command(cmd)
+                    out = ssh_stdout.read().decode()
+                    if out not in ['\n', '']:
+                        ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command(f"pkill -u {user}\n")
+                        users.remove(user)
+                        return "Killed✅", users 
+                    else:
+                        return "The user is not Online", users
+                else:
+                    return "The user is not Online", users
             except Exception as e:
                 return "Error: " + str(e), []
 
@@ -1856,6 +2200,51 @@ class PANNEL:
                         return "Error: 403 HTTP the user not found"
                 else:
                     return server_msg
+            except Exception as e:
+                return "Error: " + str(e)
+
+        elif self.panel == "dragon":
+            try:
+                ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                ssh_stdin.write('3\n')
+                ssh_stdin.flush()
+                sleep(0.05)
+                ssh_stdin.write('1\n')
+                ssh_stdin.flush()
+                dirty = Force_string(ssh_stdout).read().decode()
+                cleaned = Clean_string(dirty)
+                cleaned = cleaned.split('LIST OF USERS:')[1].split('Enter or select a user')[0]
+                usernames, numbers = ([] for i in range(2))
+                datas = cleaned.split("\n")
+                for data in datas:
+                    cache = data.split(" ")
+                    cache = list(filter(None, cache))
+                    if len(cache) == 5:
+                        usernames.append(cache[4])
+                        if cache[1][0] == "0":
+                            numbers.append(cache[1].replace("0", ""))
+                        else:
+                            numbers.append(cache[1])
+                if uname in usernames:
+                    ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                    ssh_stdin.write('3\n')
+                    ssh_stdin.flush()
+                    sleep(0.05)
+                    ssh_stdin.write('1\n')
+                    ssh_stdin.flush()
+                    ssh_stdin.write(f'{numbers[usernames.index(uname)]}\n')
+                    sleep(0.3)
+                    ssh_stdin.flush()
+                    dirty = Force_string(ssh_stdout).read().decode()
+                    cleaned = Clean_string(dirty)
+                    if f"User {uname} successfully removed!" in cleaned:
+                        return "❌Deleted"
+                    elif "User is empty or invalid!" in cleaned:
+                        return "Error: User is empty or invalid!"
+                    else:
+                        return "Error: unknown"
+                else:
+                    return f"Error: The user {uname} does not exist"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2020,6 +2409,39 @@ class PANNEL:
             except Exception as e:
                 return "Error: " + str(e)
 
+        elif self.panel == "dragon":
+            try:
+                #if "BOT - TEST" in description:
+                    #write 2 the test minutes
+                ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                ssh_stdin.write('1\n')
+                ssh_stdin.flush()
+                ssh_stdin.write(f'{uname}\n')
+                ssh_stdin.flush()
+                ssh_stdin.write(f'{passw}\n')
+                ssh_stdin.flush()
+                ssh_stdin.write(f'{str(days)}\n')
+                ssh_stdin.flush()
+                ssh_stdin.write(f'{str(connection_limit)}\n')
+                sleep(0.05)
+                ssh_stdin.flush()
+                dirty = Force_string(ssh_stdout).read().decode()
+                cleaned = Clean_string(dirty)
+                if "◈─────⪧ SSH ACCOUNT ⪦─────◈" in cleaned:
+                    if ("DropBear ⌁" in cleaned) and (drop is True):
+                        DROP = cleaned.split("DropBear ⌁")[1].split("\n")[0].replace(" ", "")
+                        dropbear = f"\nDropbear Port: <code>{DROP}</code>"
+                    else:
+                        dropbear = ""
+                    port, udgpw, DROP = self.Ports()
+                    traffic = "نامحدود"
+                    Date = (str(jdatetime.datetime.fromtimestamp(time() + (int(days) * 86400))).split(" ")[0]).replace("-", "/")
+                    return f"SSH Host : <code>{self.host}</code>\nPort : <code>{port}</code>{dropbear}\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
+                else:
+                    return "Error: cannot create the user try another username"
+            except Exception as e:
+                return "Error: " + str(e)
+
     def Password(self, password):
         if self.panel == "shahan":
             if "گیگابایت" in self.traffic:
@@ -2132,6 +2554,51 @@ class PANNEL:
                     return f"🟢 Successfully changed to {password}"
                 else:
                     return "Error: 404"
+            except Exception as e:
+                return "Error: " + str(e)
+
+        elif self.panel == "dragon":
+            try:
+                ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                ssh_stdin.write('7\n')
+                sleep(0.05)
+                ssh_stdin.flush()
+                dirty = Force_string(ssh_stdout).read().decode()
+                cleaned = Clean_string(dirty)
+                cleaned = cleaned.split('LIST OF USERS AND THEIR PASSWORDS:')[1].split('Enter or select a user')[0]
+                usernames, numbers = ([] for i in range(2))
+                datas = cleaned.split("\n")
+                for data in datas:
+                    cache = data.split(" ")
+                    cache = list(filter(None, cache))
+                    if len(cache) == 8:
+                        usernames.append(cache[4])
+                        if cache[1][0] == "0":
+                            numbers.append(cache[1].replace("0", ""))
+                        else:
+                            numbers.append(cache[1])
+                if self.uname in usernames:
+                    ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                    ssh_stdin.write('7\n')
+                    ssh_stdin.flush()
+                    sleep(0.05)
+                    ssh_stdin.write(f'{numbers[usernames.index(self.uname)]}\n')
+                    ssh_stdin.flush()
+                    sleep(0.01)
+                    ssh_stdin.write(f'{password}\n')
+                    ssh_stdin.flush()
+                    sleep(0.1)
+                    dirty = Force_string(ssh_stdout).read().decode()
+                    cleaned = Clean_string(dirty)
+
+                    if f"User password {self.uname} has been changed to: {password}" in cleaned:
+                        return f"User password {self.uname} has been changed to: {password}"
+                    elif "User is empty or invalid!" in cleaned:
+                        return "Error: User is empty or invalid!"
+                    else:
+                        return "Error: unknown error"
+                else:
+                    return f"Error: The user {self.uname} does not exist"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2256,6 +2723,62 @@ class PANNEL:
             except Exception as e:
                 return "Error: " + str(e)
 
+        elif self.panel == "dragon":
+            try:
+                ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                ssh_stdin.write('5\n')
+                ssh_stdin.flush()
+                sleep(0.1)
+                dirty = Force_string(ssh_stdout).read().decode()
+                cleaned = Clean_string(dirty)
+                cleaned = cleaned.split('LIST OF USERS AND EXPIRY DATE:')[1].split('Enter or select a user')[0]
+                usernames, numbers = ([] for i in range(2))
+                datas = cleaned.split("\n")
+                for data in datas:
+                    cache = data.split(" ")
+                    cache = list(filter(None, cache))
+                    if len(cache) == 7:
+                        usernames.append(cache[4])
+                        if cache[1][0] == "0":
+                            numbers.append(cache[1].replace("0", ""))
+                        else:
+                            numbers.append(cache[1])
+                if self.uname in usernames:
+                    ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                    ssh_stdin.write('5\n')
+                    ssh_stdin.flush()
+                    sleep(0.1)
+                    ssh_stdin.write(f'{numbers[usernames.index(self.uname)]}\n')
+                    ssh_stdin.flush()
+                    sleep(0.2)
+                    date = str(datetime.fromtimestamp(time() + (int(days) * 86400))).split(" ")[0].split("-")
+                    fixed_date = f"{date[2]}/{date[1]}/{date[0]}"
+                    ssh_stdin.write(f'{fixed_date}\n')
+                    ssh_stdin.flush()
+                    sleep(0.2)
+                    ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                    ssh_stdin.write('6\n')
+                    ssh_stdin.flush()
+                    sleep(0.1)
+                    ssh_stdin.write(f'{numbers[usernames.index(self.uname)]}\n')
+                    ssh_stdin.flush()
+                    sleep(0.1)
+                    ssh_stdin.write(f'{str(connection_limit)}\n')
+                    ssh_stdin.flush()
+                    sleep(0.1)
+                    dirty = Force_string(ssh_stdout).read().decode()
+                    cleaned = Clean_string(dirty)
+                    if f"Limit applied to the user {self.uname} foi {str(connection_limit)}" in cleaned:
+                        return "🟢Updated successfully"
+                    elif "User is empty or invalid!" in cleaned:
+                        return "Error: User is empty or invalid!"
+                    else:
+                        return "Error: unknown error"
+                else:
+                    return f"Error: The user {self.uname} does not exist"
+            except Exception as e:
+                return "Error: " + str(e)
+
     def Reset_traffic(self):
         if self.panel == "shahan":
             payload = {'edituserusername': self.uname, 'resettrafficsubmit': 'submitted H a m e d A p'}
@@ -2284,6 +2807,9 @@ class PANNEL:
                     return "Error: 404 HTTP"
             except Exception as e:
                 return "Error: " + str(e)
+
+        elif self.panel == "dragon":
+            return "Error: not supported"
 
     def Enable(self):
         if self.panel == "shahan":
@@ -2323,6 +2849,9 @@ class PANNEL:
                 except Exception as e:
                     return "Error: " + str(e)
 
+        elif self.panel == "dragon":
+            return "Error: not supported"
+
     def Disable(self):
         if self.panel == "shahan":
             if "فعال" == self.status:
@@ -2360,6 +2889,9 @@ class PANNEL:
                     return "Error: " + str(e)
             else:
                 return "🔴 Already Disabled"
+
+        elif self.panel == "dragon":
+            return "Error: not supported"
 
     def User_info(self, DROP, TUIC):
         if (DROP == "on") and (self.dropbear != ""):
@@ -2431,6 +2963,15 @@ class PANNEL:
                 except:
                     date = self.Date
                 return f"SSH Host : <code>{self.ip}</code>\nPort : <code>{port}</code>{drop}\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{self.uname}</code>\nPassword : <code>{self.passwd}</code>\n\nConnection limit: {str(self.connection_limit)}\nDays : {days}\nExpiry : {date}\nTraffic: {str(self.traffic)}\nUsage: {str(usage)}\nStatus: {status}"
+            except Exception as e:
+                return "Error: " + str(e)
+
+        elif self.panel == "dragon":
+            try:
+                port, udgpw, dropbear = self.Ports()
+                date = (str(jdatetime.datetime.fromtimestamp(time() + (int(self.days) * 86400))).split(" ")[0]).replace("-", "/")
+                traffic = "نامحدود"
+                return f"SSH Host : <code>{self.ip}</code>\nPort : <code>{port}</code>{drop}\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{self.uname}</code>\nPassword : <code>{self.passwd}</code>\n\nConnection limit: {str(self.connection_limit)}\nDays : {self.days}\nExpiry : {date}\nTraffic: {traffic}\nStatus: {self.status}"
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2552,3 +3093,6 @@ class PANNEL:
                     return "Error: 404"
             except Exception as e:
                 return "Error: " + str(e)
+        
+        elif self.panel == "dragon":
+            return "Error: not supported"
