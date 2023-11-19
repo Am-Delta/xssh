@@ -28,8 +28,11 @@ https://my.telegram.org/auth
 
 اگه ربات استارت نشد یا میخواین تغییرات اعمال کنین دوباره کامند اجرا کنین
 
+حداقل رم برای این ربات 100MB حتما دقت کنین ( برای خرید سرور 1 دلاری مخصوص ربات ب این سایت مراجعه کنین serverum.com سرور روسی )
+
 
 Channel: https://t.me/delta_bcc
+
 Group: https://t.me/deltacommentsgp
 
 
