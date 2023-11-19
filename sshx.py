@@ -191,6 +191,7 @@ def get_ips_of_users_dragon(ssh, usernames):
                     pids.append(cache[1])
                     gotted.append(cache[0])
     ips = []
+    users = []
 
     for pid in pids:
         cmd = "lsof -p " + pid
@@ -201,8 +202,9 @@ def get_ips_of_users_dragon(ssh, usernames):
             break
         else:
             ips.append(ip[0])
+            users.append(gotted[pids.index(pid)])
 
-    return ips
+    return ips, users
 
 
 def check_lang_details(html):
@@ -1773,9 +1775,10 @@ class PANNEL:
                             if cache[1] == "Online":
                                 users.append(cache[0])
                                 ips.append("127.0.0.1")
-                ips_catched = get_ips_of_users_dragon(self.ssh, users)
+                ips_catched, users_catched = get_ips_of_users_dragon(self.ssh, users)
                 if len(ips_catched) == len(users):
                     ips = ips_catched
+                    users = users_catched
                 return "Good", users, ips
             except Exception as e:
                 return "Error: " + str(e), [], []
