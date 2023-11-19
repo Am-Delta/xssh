@@ -49,9 +49,6 @@ checked_filtering, checked_connections, checked_users, checked_id, cache_list, s
 cache, backup, run_backup, Filtering_system, run_filtering, notify_system, run_notify, backup_command, search_spam = ([False] for i in range(9))
 filter_name = ['root', 'Root', 'ROOT', 'ubuntu', 'Ubuntu', 'UBUNTU', 'centos', 'Centos', 'CentOS', 'user', 'User', 'Username', 'username']
 
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-headers = {"user-agent": user_agent}
-
 
 def sellers_id_add_list():
     seller_id.clear()
@@ -412,52 +409,6 @@ def plisio_attemp_del(chat_id):
     indexes = list(reversed(indexes))
     for i in indexes:
         del plisio_attemp[i]
-
-
-def check_host_api(host):
-    try:
-        node1 = "ir1.node.check-host.net"
-        node2 = "ir3.node.check-host.net"
-        node3 = "ir4.node.check-host.net"
-        node4 = "de1.node.check-host.net"
-        node5 = "fr2.node.check-host.net"
-        node6 = "us1.node.check-host.net"
-        url = f"https://check-host.net/check-ping?host={host}&node={node1}&node={node2}&node={node3}&node={node4}&node={node5}&node={node6}"
-        headers = {
-            'accept': 'application/json',
-            'user-agent': user_agent
-        }
-        r = requests.get(url, headers=headers)
-        if r.status_code == 200:
-            request_id = json.loads(r.text)['request_id']
-            sleep(20)
-            data = requests.get("https://check-host.net/check-result/" + request_id, headers=headers)
-            if data.status_code == 200:
-                results = json.loads(data.text)
-                for result in results[node1][0]:
-                    if result[0] == "OK":
-                        return False
-                for result in results[node2][0]:
-                    if result[0] == "OK":
-                        return False
-                for result in results[node3][0]:
-                    if result[0] == "OK":
-                        return False
-                for result in results[node4][0]:
-                    if result[0] == "OK":
-                        return True
-                for result in results[node5][0]:
-                    if result[0] == "OK":
-                        return True
-                for result in results[node6][0]:
-                    if result[0] == "OK":
-                        return True
-            else:
-                return False
-        else:
-            return False
-    except:
-        return False
 
 
 def Toman_USD():
@@ -4034,6 +3985,10 @@ def text_private(bot, message):
                     cache_list.append("sshport")
                     cache_list.append("udgpw")
                     add_cache(chat_id, "AllEditremark")
+                elif cache_list[1] == "dragon":
+                    message.reply_text("پورت udgpw رو بفرستین (اصولا 7300 یا 7301 بصورت پیش فرض هر سرور حتما فعال کنین)")
+                    cache_list.append(link)
+                    add_cache(chat_id, "AllEditudgpw")
                 elif cache_list[1] == "xpanel":
                     message.reply_text("پورت ssh سرور رو بفرستین (فقط برای فرستادن اطلاعات اکانت به کاربر استفاده میشه)")
                     add_cache(chat_id, "AllEditsshport")
@@ -4131,7 +4086,7 @@ def text_private(bot, message):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 hosts, remarks = sshx.HOSTS()
                 if host in hosts:
-                    sm = sshx.Change_udp_port('xpanel', host, link)
+                    sm = sshx.Change_udp_port(host, link)
                     message.reply_text(sm, reply_markup=reply_markup)
                 else:
                     message.reply_text(f"سروری با این آدرس وجود نداره:\n\n{host}", reply_markup=reply_markup)
@@ -4146,7 +4101,7 @@ def text_private(bot, message):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 hosts, remarks = sshx.HOSTS()
                 if host in hosts:
-                    sm = sshx.Change_ssh_port('xpanel', host, link)
+                    sm = sshx.Change_ssh_port(host, link)
                     message.reply_text(sm, reply_markup=reply_markup)
                 else:
                     message.reply_text(f"سروری با این آدرس وجود نداره:\n\n{host}", reply_markup=reply_markup)
@@ -4206,6 +4161,10 @@ def text_private(bot, message):
                     cache_list.append("sshport")
                     cache_list.append("udgpw")
                     add_cache(chat_id, "serverremark")
+                elif cache_list[0] == "dragon":
+                    message.reply_text("پورت udgpw رو بفرستین (اصولا 7300 یا 7301 بصورت پیش فرض هر سرور حتما فعال کنین)")
+                    cache_list.append(link)
+                    add_cache(chat_id, "serverudgpw")
                 elif cache_list[0] == "xpanel":
                     message.reply_text("پورت ssh سرور رو بفرستین (فقط برای فرستادن اطلاعات اکانت به کاربر استفاده میشه)")
                     add_cache(chat_id, "serversshport")
@@ -4905,7 +4864,7 @@ def call_filtering(bot, query):
             Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
             status, server_msg = Session.IP_Check()
             if status is True:
-                if check_host_api(host) is True:
+                if sshx.check_host_api(host) is True:
                     blocked_servers += 1
                     FS += (f"🔴Offline: {host}\n")
             else:
@@ -8273,11 +8232,14 @@ def call_TTRS(bot, query):
         try:
             query.edit_message_text(text='Login test Wait...')
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-            url, r = sshx.open_session(host, port)
-            if sshx.Test(r, host, port, panel, 'updater') is True:
-                status = "🟢 Online"
+            if panel in ['dragon']:
+                status = sshx.ssh_status(host, port, username, password)
             else:
-                status = "🔴 Offline: Please check the username or password or port"
+                url, r = sshx.open_session(host, port)
+                if sshx.Test(r, host, port, panel, 'updater') is True:
+                    status = "🟢 Online"
+                else:
+                    status = "🔴 Offline: Please check the username or password or port"
             chat_id = query.message.chat.id
             keyboard = [
                 [InlineKeyboardButton("🌐 Edit Domain", callback_data=f"EDD_{host}")],
@@ -8306,11 +8268,11 @@ def call_EAl(bot, query):
     if host in hosts:
         keyboard = [
             [InlineKeyboardButton("Shahan", callback_data=f'ELIP_shahan:{host}'), InlineKeyboardButton("XPanel", callback_data=f'ELIP_xpanel:{host}')],
-            [InlineKeyboardButton("Rocket", callback_data=f'ELIP_rocket:{host}')],
+            [InlineKeyboardButton("Rocket", callback_data=f'ELIP_rocket:{host}'), InlineKeyboardButton("Dragon", callback_data=f'ELIP_dragon:{host}')],
             [InlineKeyboardButton("<<", callback_data=f'TTRS_{host}')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        text = "یکی از پنل های زیر انتخاب کنین :\n"
+        text = "یکی از پنل های زیر انتخاب کنین :\n\n"
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="SMT")]]))
@@ -8387,12 +8349,12 @@ def call_AST(bot, query):
         return
     keyboard = [
         [InlineKeyboardButton("Shahan", callback_data='CHSA_shahan'), InlineKeyboardButton("XPanel", callback_data='CHSA_xpanel')],
-        [InlineKeyboardButton("Rocket", callback_data='CHSA_rocket')],
+        [InlineKeyboardButton("Rocket", callback_data='CHSA_rocket'), InlineKeyboardButton("Dragon", callback_data='CHSA_dragon')],
         [InlineKeyboardButton("<<", callback_data='SMT')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    t_persian = "یکی از پنل های زیر انتخاب کنین :\n"
-    t_english = '<a href="https://github.com/HamedAp/Ssh-User-management">Shahan</a>\n<a href="https://github.com/xpanel-cp/XPanel-SSH-User-Management">XPanel</a>\n<a href="https://github.com/mahmoud-ap/rocket-ssh">Rocket</a>'
+    t_persian = "یکی از پنل های زیر انتخاب کنین :\n\n"
+    t_english = '<a href="https://github.com/HamedAp/Ssh-User-management">Shahan</a>\n<a href="https://github.com/xpanel-cp/XPanel-SSH-User-Management">XPanel</a>\n<a href="https://github.com/mahmoud-ap/rocket-ssh">Rocket</a>\n<a href="https://github.com/januda-ui/DRAGON-VPS-MANAGER">Dragon</a>'
     query.edit_message_text(text=(t_persian + t_english), reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
 
 
@@ -8469,11 +8431,11 @@ def call_UEPOT(bot, query):
     hosts, remarks = sshx.HOSTS()
     if host in hosts:
         port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-        if panel == 'xpanel':
+        if panel in ['xpanel', 'dragon']:
             add_cache(chat_id, "EUDPport_" + host)
             query.edit_message_text(text='پورت udp بفرستین:', reply_markup=reply_markup)
         else:
-            query.answer("این گزینه فقط برای ایکس پنل هست", show_alert=True)
+            query.answer("این گزینه فقط برای ایکس پنل و دراگون هست", show_alert=True)
     else:
         query.edit_message_text(text="این سرور وجود نداره! احتمالا قبلا از لیست حذف کردین", reply_markup=reply_markup)
 
@@ -8634,35 +8596,36 @@ def call_VDNKHF(bot, query):
         hosts, remarks = sshx.HOSTS()
         for host in hosts:
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-            do = True
-            session = 'ssh/' + host + ".session"
-            if Path(session).is_file() is False:
-                if sshx.Login(username, password, host, port, panel) is False:
-                    do = False
-            elif os.stat(session).st_size == 0:
-                os.remove(session)
-                if sshx.Login(username, password, host, port, panel) is False:
-                    do = False
-            if (Path("protocol-cache.txt").is_file() is False) or (sshx.get_protocol_cache(host) is None):
-                protocol = sshx.check_panel_protocol(host)
-                sshx.add_protocol_cache(host, protocol)
-            if do is True:
-                try:
-                    protocol_cache = sshx.get_protocol_cache(host)
-                    protocol_check = sshx.check_panel_protocol(host)
-                    if protocol_check != protocol_cache:
-                        sshx.remove_protocol_cache(host)
-                        sshx.add_protocol_cache(host, protocol_check)
-                    url, r = sshx.open_session(host, port)
-                    if sshx.Test(r, host, port, panel, 'updater') is False:
-                        sshx.Login(username, password, host, port, panel)
-                        logs += f"🟢Login: {host} {panel}\n"
-                    else:
-                        logs += f"⚪️Good: {host} {panel}\n"
-                except Exception as e:
-                    logs += f"🔴Session Error: {host} {panel}\n"
-            else:
-                logs += f"🔴Login Error: {host} {panel}\n"
+            if panel not in ['dragon']:
+                do = True
+                session = 'ssh/' + host + ".session"
+                if Path(session).is_file() is False:
+                    if sshx.Login(username, password, host, port, panel) is False:
+                        do = False
+                elif os.stat(session).st_size == 0:
+                    os.remove(session)
+                    if sshx.Login(username, password, host, port, panel) is False:
+                        do = False
+                if (Path("protocol-cache.txt").is_file() is False) or (sshx.get_protocol_cache(host) is None):
+                    protocol = sshx.check_panel_protocol(host)
+                    sshx.add_protocol_cache(host, protocol)
+                if do is True:
+                    try:
+                        protocol_cache = sshx.get_protocol_cache(host)
+                        protocol_check = sshx.check_panel_protocol(host)
+                        if protocol_check != protocol_cache:
+                            sshx.remove_protocol_cache(host)
+                            sshx.add_protocol_cache(host, protocol_check)
+                        url, r = sshx.open_session(host, port)
+                        if sshx.Test(r, host, port, panel, 'updater') is False:
+                            sshx.Login(username, password, host, port, panel)
+                            logs += f"🟢Login: {host} {panel}\n"
+                        else:
+                            logs += f"⚪️Good: {host} {panel}\n"
+                    except Exception as e:
+                        logs += f"🔴Session Error: {host} {panel}\n"
+                else:
+                    logs += f"🔴Login Error: {host} {panel}\n"
         keyboard = [[InlineKeyboardButton("<<", callback_data='SMT')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot.send_message(chat_id, logs, reply_markup=reply_markup)
@@ -10349,7 +10312,7 @@ def call_FLCHON(bot, query):
                                             for i in range(2):
                                                 status, content = Session.IP_Check()
                                                 if (status is True) and (i == 1):
-                                                    if check_host_api(host) is True:
+                                                    if sshx.check_host_api(host) is True:
                                                         text = "🔴Blocked in IRAN: " + host
                                                         checked_filtering.append(host)
                                                         for admin in admin_id:
