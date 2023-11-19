@@ -1,7 +1,7 @@
 [![Telegram Group](https://raw.githubusercontent.com/gauravghongde/social-icons/9d939e1c5b7ea4a24ac39c3e4631970c0aa1b920/SVG/Color/Telegram.svg)](https://t.me/deltacommentsgp)
 # SSH Panel Telegram bot
 
-ربات تلگرام فروش و منیجر پنل اس اس اچ برای پنل های شاهان و ایکس پنل و راکت (پایین تر ورژن های ساپورت نوشته شده)
+ربات تلگرام فروش و منیجر پنل اس اس اچ برای پنل های شاهان و ایکس پنل و راکت و دراگون (پایین تر ورژن های ساپورت نوشته شده)
 ## 🔗 نصب و آپدیت
 
 کامند پایین کپی و داخل سرور اجرا کنین (میتونین تو سروری که هر پنلی یا رباتی روشه نصب کنین) 
@@ -37,6 +37,7 @@ Group: https://t.me/deltacommentsgp
 - Shahan v6.9
 - XPanel v3.8.5
 - Rocket v1.2.0
+- Dragon Lastest
  
 
 ## 🖥 Suggestion System
@@ -66,3 +67,5 @@ TRX: TAuhCY9PbmKw7gKgjKqkqQHmazNKUXHR26
 [XPanel](https://github.com/xpanel-cp/XPanel-SSH-User-Management)
 
 [mahmoud-ap](https://github.com/mahmoud-ap/rocket-ssh)
+
+[januda-ui](https://github.com/januda-ui/DRAGON-VPS-MANAGER)
