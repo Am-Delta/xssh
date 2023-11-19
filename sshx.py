@@ -152,7 +152,7 @@ def ssh_status(host, port, username, password):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        ssh.connect(host, int(port), username, password)
+        ssh.connect(host, int(port), username, password, banner_timeout=200)
         return "🟢 Online"
     except Exception as e:
         return "🔴 Offline: Please check the username or password or port"
@@ -360,7 +360,7 @@ def Login(username, password, host, port, panel):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             if panel == "dragon":
-                ssh.connect(host, port, username, password)
+                ssh.connect(host, port, username, password, banner_timeout=200)
                 ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("menu")
                 ssh_stdin.flush()
                 dirty = Force_string(ssh_stdout).read().decode()
@@ -1151,7 +1151,7 @@ class PANNEL:
         elif panel in ssh_panels:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(host, int(port), username, password)
+            ssh.connect(host, int(port), username, password, banner_timeout=200)
             self.ssh = ssh
 
         if job == 'User':
@@ -1324,8 +1324,13 @@ class PANNEL:
             cleaned = Clean_string(dirty)
             try:
                 link = cleaned.split("LINK :")[1].split("\n")[0].replace(" ", "")
-                rec = requests.get(link).content
-                return True, rec
+                try:
+                    rec = requests.get(link).content
+                    return True, rec
+                except:
+                    link = f"http://{self.host}:8888/backup/backup.vps"
+                    rec = requests.get(link).content
+                    return True, rec
             except Exception as e:
                 return False, str(e)
 
@@ -3099,6 +3104,6 @@ class PANNEL:
                     return "Error: 404"
             except Exception as e:
                 return "Error: " + str(e)
-        
+
         elif self.panel == "dragon":
             return "Error: not supported"
