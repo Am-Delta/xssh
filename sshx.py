@@ -2776,12 +2776,12 @@ class PANNEL:
                     sleep(0.1)
                     ssh_stdin.write(f'{numbers[usernames.index(self.uname)]}\n')
                     ssh_stdin.flush()
-                    sleep(0.2)
+                    sleep(1)
                     date = str(datetime.fromtimestamp(time() + (int(days) * 86400))).split(" ")[0].split("-")
                     fixed_date = f"{date[2]}/{date[1]}/{date[0]}"
                     ssh_stdin.write(f'{fixed_date}\n')
                     ssh_stdin.flush()
-                    sleep(0.2)
+                    sleep(0.5)
                     ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
                     ssh_stdin.write('6\n')
                     ssh_stdin.flush()
@@ -2835,7 +2835,7 @@ class PANNEL:
                 return "Error: " + str(e)
 
         elif self.panel == "dragon":
-            return "Error: not supported"
+            return "Error: traffic reset not supported"
 
     def Enable(self):
         if self.panel == "shahan":
