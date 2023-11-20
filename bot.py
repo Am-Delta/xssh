@@ -18,7 +18,7 @@ from unidecode import unidecode
 from random import randint, choice
 from pyrogram import Client, filters, enums
 from pyrogram.errors import NotAcceptable, BadRequest, FloodWait
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InputMediaPhoto, InputMediaVideo
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InputMediaPhoto, InputMediaVideo, InputMediaDocument
 
 
 session = "run"
@@ -1388,14 +1388,22 @@ def backup_cmd(bot, message):
         chat_id = message.chat.id
         msg = message.reply_text("Wait...").id
         files = ["All.txt", "ssh.db", "data.json", "Pannels.txt", "logs.txt", "nohup.out"]
-        logs = "✔️ انجام شد\n\nLogs:\n\n"
+        media = []
         for file in files:
-            try:
-                bot.send_document(chat_id, document=open(file, 'rb'), file_name=file)
-            except Exception as e:
-                logs += ("File: " + file + " " + str(e) + "\n")
-            sleep(0.2)
-        bot.send_message(chat_id, logs)
+            if Path(file).is_file() is True:
+                if os.stat(file).st_size != 0:
+                    media.append(InputMediaDocument(file))
+        try:
+            bot.send_media_group(chat_id, media)
+        except:
+            logs = "✔️ انجام شد\n\nLogs:\n\n"
+            for file in files:
+                try:
+                    bot.send_document(chat_id, document=open(file, 'rb'), file_name=file)
+                except Exception as e:
+                    logs += ("File: " + file + " " + str(e) + "\n")
+                sleep(0.2)
+            bot.send_message(chat_id, logs)
         bot.delete_messages(chat_id, msg)
         backup_command[0] = False
     else:
@@ -9531,6 +9539,16 @@ def call_bkon(bot, query):
                         if ((int(time()) - start_time) < ((get_settings()['backup'] * 60) * 60)) and (first is False):
                             sleep(3)
                         else:
+                            files = ["All.txt", "ssh.db", "data.json", "Pannels.txt", "logs.txt", "nohup.out"]
+                            media = []
+                            for file in files:
+                                if Path(file).is_file() is True:
+                                    if os.stat(file).st_size != 0:
+                                        media.append(InputMediaDocument(file))
+                            try:
+                                bot.send_media_group(chat_id, media)
+                            except:
+                                pass
                             count_all, count_errors, count_goods = (0,)*3
                             hosts, remarks = sshx.HOSTS()
                             for host in hosts:
