@@ -10989,7 +10989,7 @@ def call_CTM(bot, query):
         cb = 'on'
     keyboard = [
         [InlineKeyboardButton(f"Button: {settings['tutorial_mac']} {emoji}", callback_data=f'CTM_{cb}')],
-        [InlineKeyboardButton("Edit✏️", callback_data='ETA')]
+        [InlineKeyboardButton("Edit✏️", callback_data='ETM')]
     ]
     text = '<b>Mac🍎</b>\n\n' + "Current: \n\n" + str(settings['mac']) + "\n\nStatus: " + settings['tutorial_mac'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
@@ -11034,7 +11034,7 @@ def call_CTW(bot, query):
         cb = 'on'
     keyboard = [
         [InlineKeyboardButton(f"Button: {settings['tutorial_windows']} {emoji}", callback_data=f'CTW_{cb}')],
-        [InlineKeyboardButton("Edit✏️", callback_data='ETA')]
+        [InlineKeyboardButton("Edit✏️", callback_data='ETW')]
     ]
     text = '<b>Windows💻</b>\n\n' + "Current: \n\n" + str(settings['windows']) + "\n\nStatus: " + settings['tutorial_windows'] + " " + emoji
     keyboard.append([InlineKeyboardButton("<<", callback_data='Tutorials')])
