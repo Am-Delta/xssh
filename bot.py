@@ -2897,12 +2897,12 @@ def text_private(bot, message):
             link = fixed_link_json(link)
             password = link
             status, text = payment.check_valid_perfect_money(account_id, password)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='perfectmoney')]]
             if status is True:
                 settings = get_settings()
                 settings['perfect_money_account_id'] = account_id
                 settings['perfect_money_account_password'] = password
                 update_settings(settings)
-                keyboard = [[InlineKeyboardButton("<<", callback_data='perfectmoney')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 message.reply_text(f"✔️ انجام شد\n\n{text}", reply_markup=reply_markup)
             else:
@@ -4829,8 +4829,8 @@ def call_stats(bot, query):
             except Exception as e:
                 offline_servers += 1
                 logs += f"⭕️ Connection Error: {host} | {str(e)}"
-            if (checked_servers % 5 == 0):
-                query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
+            #if (checked_servers % 5 == 0):
+                #query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
         if len(str(int(servers_traffic))) >= 3:
             total_usage_vps = f"{str('{:.2f}'.format(float(servers_traffic) / 1024))} TB"
         else:
@@ -4887,8 +4887,8 @@ def call_filtering(bot, query):
             checked_servers += 1
         except Exception as e:
             logs += f"⭕️ Connection Error: {host}"
-        if (checked_servers % 5 == 0):
-            query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
+        #if (checked_servers % 5 == 0):
+            #query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
     text = f"{FS}\n🖥 Servers: {str(count_servers)}\n☑️Check servers: {str(checked_servers)}\n⚠️Blocked servers: {str(blocked_servers)}\n🟢Online servers: {online_servers}\n{logs}\n⏳Time: {str(int(time() - start))}s"
     query.edit_message_text(text=text, reply_markup=reply_markup)
 
@@ -4925,8 +4925,8 @@ def call_full(bot, query):
             checked_servers += 1
         except Exception as e:
             logs += f"⭕️ Connection Error: {host}"
-        if (checked_servers % 5 == 0):
-            query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
+        #if (checked_servers % 5 == 0):
+            #query.edit_message_text(text=f"Collected data from {str(checked_servers)} servers...")
     text = f"{FS}\n🖥 Servers: {str(count_servers)}\n☑️Check servers: {str(checked_servers)}\n⚠️Full servers: {str(full_servers)}\n👤Clients: {count_clients}\n⚪️Remain Clients: {str(remain_clients)}\n{logs}\n⏳Time: {str(int(time() - start))}s"
     query.edit_message_text(text=text, reply_markup=reply_markup)
 
