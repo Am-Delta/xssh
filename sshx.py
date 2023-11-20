@@ -195,7 +195,7 @@ def get_ips_of_users_dragon(ssh, usernames):
                     if cache[8] in usernames:
                         if cache[8] not in gotted:
                             pids.append(cache[1])
-                            gotted.append(cache[0])
+                            gotted.append(cache[8])
     ips = []
     users = []
 
@@ -1414,8 +1414,11 @@ class PANNEL:
                     info.append(data.text())
                 onlines = info[1]
                 if "کاربر" in onlines:
-                    onlines = onlines.replace("کاربر", "")
-                text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(info[0])}\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(onlines)}"
+                    onlines = onlines.replace("کاربر", "").replace("\n", "").replace(" ", "")
+                Clients = str(info[0]).replace('\n', '').replace(' ', '')
+                Active = str(info[2]).replace('\n', '').replace(' ', '')
+                Disabled = str(info[3]).replace('\n', '').replace(' ', '')
+                text = f'🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {Clients}\n✔️Active: {Active}\n🔴Disabled: {Disabled}\n🟢Online: {str(onlines)}'
                 return text
             except Exception as e:
                 return "Error: " + str(e)
@@ -1526,14 +1529,17 @@ class PANNEL:
                     info.append(data.text())
                 onlines = info[1]
                 if "کاربر" in onlines:
-                    onlines = onlines.replace("کاربر", "")
+                    onlines = onlines.replace("کاربر", "").replace("\n", "").replace(" ", "")
                 #Bool, status = self.IP_Check()
                 stats = self.Stats()
                 if "Error" in stats:
                     stats = "Update your Panel to get the stats"
                 #t0 = f"\n\nIP Check: {status}\n{stats}"
                 t0 = "\n\n" + stats
-                text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(info[0])}\n✔️Active: {str(info[2])}\n🔴Disabled: {str(info[3])}\n🟢Online: {str(onlines)}"
+                Clients = str(info[0]).replace('\n', '').replace(' ', '')
+                Active = str(info[2]).replace('\n', '').replace(' ', '')
+                Disabled = str(info[3]).replace('\n', '').replace(' ', '')
+                text = f'🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {Clients}\n✔️Active: {Active}\n🔴Disabled: {Disabled}\n🟢Online: {str(onlines)}'
                 return text + t0
             except Exception as e:
                 return "Error: " + str(e)
@@ -1623,7 +1629,7 @@ class PANNEL:
                 info = []
                 for data in html.css('span.info-box-number'):
                     info.append(data.text())
-                return str(info[0])
+                return str(info[0]).replace("\n", "").replace(" ", "")
             except Exception as e:
                 return "Error: " + str(e)
 
