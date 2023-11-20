@@ -200,7 +200,7 @@ def get_ips_of_users_dragon(ssh, usernames):
     users = []
 
     for pid in pids:
-        cmd = "lsof -p " + pid
+        cmd = f"lsof -p {pid} | grep TCP"
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
         datas = ssh_stdout.read().decode()
         ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', datas)
