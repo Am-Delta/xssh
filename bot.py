@@ -1707,13 +1707,15 @@ def text_private(bot, message):
                 rm = True
                 if host is not None:
                     if (password_retry.count(chat_id) == 5):
-                        timer = int(time()) - password_retry_time[password_retry.index(user)]
+                        timer = int(time()) - password_retry_time[password_retry.index(chat_id)]
                         if (timer <= 1800):
                             keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                             reply_markup = InlineKeyboardMarkup(keyboard)
-                            text = f"شما بدلیل اسپم تا  {str((1800 + password_retry_time[password_retry.index(user)]) - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
+                            text = f"شما بدلیل اسپم تا  {str((1800 + password_retry_time[password_retry.index(chat_id)]) - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
                             message.reply_text(text, reply_markup=reply_markup)
                             return
+                        else:
+                            password_retry_del(chat_id)
                     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                     settings = get_settings()
                     if check_exist_user(host, user) is False:
@@ -1815,13 +1817,15 @@ def text_private(bot, message):
                 keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 if (password_retry.count(chat_id) == 5):
-                    timer = int(time()) - password_retry_time[password_retry.index(user)]
+                    timer = int(time()) - password_retry_time[password_retry.index(chat_id)]
                     if (timer <= 1801):
                         keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                         reply_markup = InlineKeyboardMarkup(keyboard)
-                        text = f"شما بدلیل اسپم تا  {str((1800 + password_retry_time[password_retry.index(user)]) - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
+                        text = f"شما بدلیل اسپم تا  {str((1800 + password_retry_time[password_retry.index(chat_id)]) - int(time()))} ثانیه نمیتونین اطلاعات اکانتی رو ببینین"
                         message.reply_text(text, reply_markup=reply_markup)
                         return
+                    else:
+                        password_retry_del(chat_id)
                 if st is True:
                     port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                     settings = get_settings()
