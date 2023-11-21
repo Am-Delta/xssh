@@ -1878,6 +1878,7 @@ class PANNEL:
                 cmd = f"""curl -H 'Accept: application/json' \
                      '{url}'"""
                 ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command(cmd)
+                sleep(0.2)
                 out = ssh_stdout.read().decode()
                 data = json.loads(out)
                 sleep(4)
@@ -1887,10 +1888,13 @@ class PANNEL:
                 data = requests.get("https://check-host.net/check-result/" + request_id, headers=headers)
                 if data.status_code == 200:
                     results = json.loads(data.text)
-                    if check_host_json_results(results) is True:
-                        return True, "Offline ❌"
-                    else:
-                        return False, "Online ✅"
+                    try:
+                        if check_host_json_results(results) is True:
+                            return True, "Offline ❌"
+                        else:
+                            return False, "Online ✅"
+                    except:
+                        return False, "Error: Panel is okay but check host not available for now"
                 else:
                     return False, f"Error: {str(data.status_code)}"
             except Exception as e:
@@ -2332,6 +2336,8 @@ class PANNEL:
                             PORT, UDGPW, DROP = self.Ports()
                         dropbear = f"\nDropbear Port: <code>{DROP}</code>"
                     return f"SSH Host : <code>{IP}</code>\nPort : <code>{PORT}</code>{dropbear}\nUdgpw : <code>{UDGPW}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nTraffic: {str(traffic)}"
+                else:
+                    return "Error: Code " + str(s.status_code)
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2384,6 +2390,8 @@ class PANNEL:
                             s = s.split("<br")[0]
                         PASS, TRAFFIC, CONNECTION_LIMIT, DAYS, STATUS, USAGE, UID, KIND, DATE, DESCRIPTION, PUBLIC_LINK, port, udgpw = Get_user_info_rocket(json.loads(s), uname, self.r, self.url)
                     return f"SSH Host : <code>{self.host}</code>\nPort : <code>{port}</code>\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
+                else:
+                    return "Error: Code " + str(s.status_code)
             except Exception as e:
                 return "Error: " + str(e)
 
@@ -2432,6 +2440,8 @@ class PANNEL:
                     except:
                         pass
                     return f"SSH Host : <code>{self.host}</code>\nPort : <code>{port}</code>\nUdgpw : <code>{udgpw}</code>\nUsername : <code>{uname}</code>\nPassword : <code>{passw}</code>\n\nConnection limit: {str(connection_limit)}\nDays : {str(days)}\nExpiry : {Date}\nTraffic: {str(traffic)}"
+                else:
+                    return "Error: Code " + str(s.status_code)
             except Exception as e:
                 return "Error: " + str(e)
 
