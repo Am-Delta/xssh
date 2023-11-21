@@ -9254,6 +9254,7 @@ def call_test(bot, query):
                 else:
                     bot.send_message(chat_id, f"Error: {text}")
             except Exception as e:
+                print(e)
                 keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 bot.send_message(chat_id, "خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
