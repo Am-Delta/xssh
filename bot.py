@@ -3000,7 +3000,7 @@ def text_private(bot, message):
                 message.reply_text("فقط میتونی عدد بفرستی")
 
         elif "Kill_" in status:
-            msg = message.reply_text("Wait...", reply_markup=reply_markup).id
+            msg = message.reply_text("Wait...").id
             keyboard = [[InlineKeyboardButton("<<", callback_data='Manager')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             try:
