@@ -2485,7 +2485,11 @@ class PANNEL:
     def Password(self, password):
         if self.panel == "shahan":
             if "گیگابایت" in self.traffic:
-                Traffic = int((self.traffic).replace("گیگابایت", ""))
+                Traffic = (self.traffic).replace("گیگابایت", "")
+                try:
+                    Traffic = int(Traffic)
+                except:
+                    Traffic = float(Traffic)
             elif "نامحدود" in self.traffic:
                 Traffic = ""
             if self.Date == "فعال نشده":
@@ -2514,7 +2518,11 @@ class PANNEL:
 
         elif self.panel == "rocket":
             if "گیگابایت" in self.traffic:
-                Traffic = int((self.traffic).replace("گیگابایت", ""))
+                Traffic = (self.traffic).replace("گیگابایت", "")
+                try:
+                    Traffic = int(Traffic)
+                except:
+                    Traffic = float(Traffic)
             elif "نامحدود" in self.traffic:
                 Traffic = 0
             if self.kind == "days":
@@ -2551,7 +2559,11 @@ class PANNEL:
 
         elif self.panel == "xpanel":
             if "گیگابایت" in self.traffic:
-                Traffic = int((self.traffic).replace("گیگابایت", ""))
+                Traffic = (self.traffic).replace("گیگابایت", "")
+                try:
+                    Traffic = int(Traffic)
+                except:
+                    Traffic = float(Traffic)
             elif "نامحدود" in self.traffic:
                 Traffic = 0
             if 'فعال' in self.status:
@@ -3023,7 +3035,11 @@ class PANNEL:
                 traffic = -traffic
             else:
                 if "گیگابایت" in self.traffic:
-                    traffic = int((self.traffic).replace("گیگابایت", "")) + traffic
+                    Traffic = (self.traffic).replace("گیگابایت", "")
+                    try:
+                        traffic = int(Traffic) + traffic
+                    except:
+                        traffic = float(Traffic) + traffic
             if self.Date == "فعال نشده":
                 stat, file = self.Backup()
                 self.days = get_real_days_shahan(stat, file, self.days, self.uname)
@@ -3051,7 +3067,11 @@ class PANNEL:
             if traffic <= -1:
                 traffic = -traffic
             if "گیگابایت" in self.traffic:
-                traffic = int((self.traffic).replace("گیگابایت", "")) + traffic
+                Traffic = (self.traffic).replace("گیگابایت", "")
+                try:
+                    traffic = int(Traffic) + traffic
+                except:
+                    traffic = float(Traffic) + traffic
             Traffic = int(traffic)
             if self.kind == "days":
                 payload = {
@@ -3089,7 +3109,11 @@ class PANNEL:
             if traffic <= -1:
                 traffic = -traffic
             if "گیگابایت" in self.traffic:
-                traffic = int((self.traffic).replace("گیگابایت", "")) + traffic
+                Traffic = (self.traffic).replace("گیگابایت", "")
+                try:
+                    traffic = int(Traffic) + traffic
+                except:
+                    traffic = float(Traffic) + traffic
             Traffic = int(traffic)
             if 'فعال' in self.status:
                 status = "active"
