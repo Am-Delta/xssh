@@ -2380,10 +2380,13 @@ class PANNEL:
                 }
             try:
                 s = self.r.post(self.url + "/ajax/users", data=payload)
-                if "تاریخ پایان نمی تواند کوچکتر از تاریخ فعلی باشد" in str(json.loads(s.text)):
-                    Date = (str(jdatetime.datetime.fromtimestamp(time() + ((days + 1) * 86400))).split(" ")[0]).replace("-", "/")
-                    payload = {'username': uname, 'password': passw, 'email': "", 'mobile': "", 'limit_users': connection_limit, 'traffic': traffic, 'expiry_type': 'date', 'exp_days': "", 'exp_date': Date, 'desc': description}
-                    s = self.r.post(self.url + "/ajax/users", data=payload)
+                try:
+                    if "تاریخ پایان نمی تواند کوچکتر از تاریخ فعلی باشد" in str(json.loads(s.text)):
+                        Date = (str(jdatetime.datetime.fromtimestamp(time() + ((days + 1) * 86400))).split(" ")[0]).replace("-", "/")
+                        payload = {'username': uname, 'password': passw, 'email': "", 'mobile': "", 'limit_users': connection_limit, 'traffic': traffic, 'expiry_type': 'date', 'exp_days': "", 'exp_date': Date, 'desc': description}
+                        s = self.r.post(self.url + "/ajax/users", data=payload)
+                except:
+                    pass
                 if s.status_code == 200:
                     if traffic == 0:
                         traffic = "نامحدود"
