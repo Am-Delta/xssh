@@ -3662,6 +3662,13 @@ def text_private(bot, message):
             message.reply_text(text, reply_markup=reply_markup)
             delete_cache(chat_id)
 
+        elif status == "IPINFO":
+            text = sshx.IP_INFO(link)
+            keyboard = [[InlineKeyboardButton("<<", callback_data='Manager')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message.reply_text(text, reply_markup=reply_markup)
+            delete_cache(chat_id)
+
         elif status == "SQerch":
             if len(link) < 2:
                 message.reply_text("send more than one character or /cancel")
@@ -8138,6 +8145,20 @@ def call_SABU(bot, query):
     bot.send_message(chat_id, "✔️ انجام شد", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('IPINFO'))
+def call_IPINFO(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "IPINFO")
+    keyboard = [[InlineKeyboardButton("<<", callback_data='back')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text='آیپی یا آدرس دامین تارگت بفرستین:', reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('Manager'))
 def call_Manager(bot, query):
     chat_id = query.message.chat.id
@@ -8153,9 +8174,9 @@ def call_Manager(bot, query):
         [InlineKeyboardButton("🚻ریست ترافیک", callback_data='TrfRes'), InlineKeyboardButton("➕افزایش ترافیک", callback_data='TrfPlus')],
         [InlineKeyboardButton("🔑تغییر پسورد اکانت", callback_data='ADPASS'), InlineKeyboardButton("👝موجودی کاربر", callback_data='ADUB')],
         [InlineKeyboardButton("🛠ساخت اکانت یوزر تلگرام", callback_data='create'), InlineKeyboardButton("🛠ساخت اکانت", callback_data='Create_none')],
-        [InlineKeyboardButton("💀Kill User", callback_data='AKill'), InlineKeyboardButton("🔎 جستجو کاربر ", callback_data='search')],
+        [InlineKeyboardButton("⚠️کاربران نزدیک اتمام", callback_data="CQLOSE"), InlineKeyboardButton("🔎 جستجو کاربر ", callback_data='search')],
         [InlineKeyboardButton("🔴کاربران غیرفعال", callback_data="IQNAC"), InlineKeyboardButton("🟢کاربران آنلاین", callback_data="OQNLI")],
-        [InlineKeyboardButton("⚠️کاربران نزدیک اتمام", callback_data="CQLOSE")],
+        [InlineKeyboardButton("🌐 IP info", callback_data='IPINFO'), InlineKeyboardButton("💀Kill User", callback_data='AKill')]
     ]
     keyboard.append([InlineKeyboardButton("<<", callback_data='back_admin')])
     reply_markup = InlineKeyboardMarkup(keyboard)
