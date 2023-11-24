@@ -515,7 +515,7 @@ def get_password_by_settings():
             for x in range(1, password_length + 1): L += "9"
             password = str(randint(int(F), int(L)))
         elif settings['password_method'] == "letters":
-            chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+            chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
             for x in range(password_length): F += choice(chars)
             password = F
         elif settings['password_method'] == "number&letters":
@@ -6122,14 +6122,27 @@ def call_wallet(bot, query):
     if chat_id not in admin_id:
         query.answer("Access denied", show_alert=True)
         return
+    data = query.data
+    settings = get_settings()
+    if "_" in data:
+        data = data.split("_")[1]
+        settings['currency_usdt'] = data
+        update_settings(settings)
+    settings = get_settings()
+    if settings['currency_usdt'] == "on":
+        emoji = "🟢"
+        cb = 'off'
+    else:
+        emoji = "🔴"
+        cb = 'on'
     keyboard = [
         [InlineKeyboardButton("🔧تغییر", callback_data='ChangeWallet')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFT'), InlineKeyboardButton("🟢 On", callback_data='ONT')],
-        [InlineKeyboardButton("<< Back", callback_data='ZBSHP')]
+        [InlineKeyboardButton(f"نشان دادن قیمت تتر: {emoji}", callback_data=f'wallet_{cb}')],
+        [InlineKeyboardButton("<<", callback_data='ZBSHP')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     name, username, wallet, crypto = get_wallet_info()
-    settings = get_settings()
     if settings['trx_buy'] == "off":
         status = "🔴 OFF"
     else:
@@ -6454,7 +6467,10 @@ def call_TUWPD(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [price, "💲ترون"]
         add_code_buy(chat_id, Code, "userdeposit", cache_list)
-        price = trx_price(price)
+        if get_settings()['currency_usdt'] == "on":
+            price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
+        else:
+            price = trx_price(price)
         text = f"""
 مبلغ:
 {price}
@@ -6850,7 +6866,10 @@ def call_TTPB(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [GB, price, user, host, "💲ترون"]
         add_code_buy(chat_id, Code, "traffic", cache_list)
-        price = trx_price(price)
+        if get_settings()['currency_usdt'] == "on":
+            price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
+        else:
+            price = trx_price(price)
         text = f"""
 مبلغ:
 {price}
@@ -7036,7 +7055,10 @@ def call_TR(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [days, GB, client, price, query.message.chat.first_name, UNAME, Selected_host, "💲 ترون"]
         add_code_buy(chat_id, Code, "add", cache_list)
-        price = trx_price(price)
+        if get_settings()['currency_usdt'] == "on":
+            price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
+        else:
+            price = trx_price(price)
         text = f"""
 مبلغ:
 {price}
@@ -7663,7 +7685,10 @@ def call_UPTXR(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [days, GB, connection_limit, price, user, host, "💲ترون"]
         add_code_buy(chat_id, Code, "upgrade", cache_list)
-        price = trx_price(price)
+        if get_settings()['currency_usdt'] == "on":
+            price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
+        else:
+            price = trx_price(price)
         text = f"""
 مبلغ:
 {price}
@@ -9143,7 +9168,7 @@ def call_ID(bot, query):
     cb = host + "$" + user
     if check_exist_user(host, user) is True:
         query.edit_message_text(text="wait...")
-        try:
+        if True:
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
             Session = sshx.PANNEL(host, username, password, port, panel, 'User', user)
             settings = get_settings()
@@ -9163,7 +9188,7 @@ def call_ID(bot, query):
             keyboard.append([InlineKeyboardButton("<<", callback_data='service')])
             reply_markup = InlineKeyboardMarkup(keyboard)
             query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
-        except:
+        else:
             query.answer("⚠️خطا لطفا بعدا تلاش کنین", show_alert=True)
     else:
         keyboard = [[InlineKeyboardButton("<< Back", callback_data='back')]]
