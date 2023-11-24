@@ -200,6 +200,16 @@ def db_update():
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
 
+    if settings.get("invitation_type", None) is None:
+        add_dict = {
+            "invitation_type": "money",
+            "invitation_percentage": 10,
+            "currency_usdt": "off"
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
@@ -295,6 +305,7 @@ def run():
     db_update()
     print(colored("\nRunning the bot... if you see any issues run the command again.\n\nif you wanna stop the bot use this command:\n\npkill -9 python3 or pkill -9 python\n\nYou can now close the window.", 'white'))
     os.system('nohup python3 -u session-updater.py &')
+    #os.system('nohup python3 -u backup-ssh.py &')
     os.system('nohup python3 -u bot.py &')
     if Path("sshdb.py").is_file() is True:
         os.remove('sshdb.py')
