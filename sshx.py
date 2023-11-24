@@ -169,7 +169,7 @@ def ssh_status(host, port, username, password):
         ssh.connect(host, int(port), username, password, banner_timeout=200)
         return "🟢 Online"
     except Exception as e:
-        return "🔴 Offline: Please check the username or password or port"
+        return "🔴 Offline: Please check the username or password or port : " + str(e)
 
 
 def Force_string(stdout):
@@ -623,7 +623,8 @@ def get_cache_xpanel(html):
         elif "\n" in td.text():
             tdx = td.text().replace(" ", "").replace("\n", "")
             if (ASCII_Check(tdx) is True) and (Contains(tdx) is True):
-                cache.append(tdx)
+                if (len(tdx) <= 5) and (tdx != ""):
+                    cache.append(tdx)
     return cache
 
 
@@ -834,11 +835,27 @@ def Get_user_info_xpanel(html, uname):
         connection_limits.append(cache[i + 6])
         days = cache[i + 7]
         if days == 'Unlimit':
-            days = "9999"
+            days_left.append("9999")
             expires.append("?")
-        else:
+        elif days.isdigit() is True:
             expires.append(str(datetime.fromtimestamp(time() + (int(days) * 86400))).split(" ")[0])
-        days_left.append(days)
+            days_left.append(days)
+        elif "ExpiredDate:" in days:
+            end = days.split("ExpiredDate:")[-1]
+            if end.count("-") == 2:
+                start = str(datetime.now()).split(" ")[0]
+                expires.append(end)
+                date_format = "%Y-%m-%d"
+                a = datetime.strptime(start, date_format)
+                b = datetime.strptime(end, date_format)
+                delta = b - a
+                days_left.append(str(delta.days))
+            else:
+                expires.append("?")
+                days_left.append("0")
+        else:
+            expires.append("?")
+            days_left.append("0")
         if cache[i + 8] == "Active":
             status.append('فعال')
         else:
@@ -1055,23 +1072,41 @@ def Get_list_xpanel(html, ip, info, r, url):
         connection_limits.append(connection_limit)
         days = cache[i + 7]
         if days == 'Unlimit':
-            days = "9999"
+            days_left.append("9999")
             expires.append("?")
-        else:
+        elif days.isdigit() is True:
             expires.append(str(datetime.fromtimestamp(time() + (int(days) * 86400))).split(" ")[0])
-        days_left.append(days)
+            days_left.append(days)
+        elif "ExpiredDate:" in days:
+            end = days.split("ExpiredDate:")[-1]
+            if (end.count("-") == 2):
+                start = str(datetime.now()).split(" ")[0]
+                expires.append(end)
+                date_format = "%Y-%m-%d"
+                a = datetime.strptime(start, date_format)
+                b = datetime.strptime(end, date_format)
+                delta = b - a
+                days_left.append(str(delta.days))
+            else:
+                expires.append("?")
+                days_left.append("0")
+        else:
+            expires.append("?")
+            days_left.append("0")
         if cache[i + 8] == "Active":
             status.append('فعال')
         else:
             status.append('غیرفعال')
         ips.append(ip)
         descriptions.append(cache[i + 9])
-    traffic_data = info.split("Storage: ")[1].split('👤Clients')[0]
+    '''traffic_data = info.split("Storage: ")[1].split('👤Clients')[0]
     if "GB" in traffic_data.split('Clients Traffic')[0]:
         server_traffic = float(traffic_data.split("Server Traffic: ")[1].split(" GB")[0])
     else:
         server_traffic = float(traffic_data.split("Traffic: ")[1].split(" TB")[0]) * 1024
-    online_clients = int(info.split("Online: ")[1])
+    online_clients = int(info.split("Online: ")[1])'''
+    server_traffic = 0
+    Online_clients = 0
     return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions, server_traffic, online_clients, True
 
 
