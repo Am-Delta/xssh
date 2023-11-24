@@ -48,6 +48,7 @@ folder = 'backup'
 checked_filtering, checked_connections, checked_users, checked_id, cache_list, seller_id, botusername, process_codes, online_check_spam, spam_session, password_retry, password_retry_time, plisio_retry, plisio_retry_time, plisio_attemp = ([] for i in range(15))
 cache, backup, run_backup, Filtering_system, run_filtering, notify_system, run_notify, backup_command, search_spam = ([False] for i in range(9))
 filter_name = ['root', 'Root', 'ROOT', 'ubuntu', 'Ubuntu', 'UBUNTU', 'centos', 'Centos', 'CentOS', 'user', 'User', 'Username', 'username']
+ssh_panels = ['dragon']
 
 
 def sellers_id_add_list():
@@ -2723,6 +2724,7 @@ def text_private(bot, message):
                     message.reply_text("پیدا نشد❌", reply_markup=reply_markup)
                 delete_cache(chat_id)
             except:
+                reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='back')]])
                 message.reply_text("send only user ID or forward a message not username or anything else", reply_markup=reply_markup)
 
         elif status == "message":
@@ -7210,8 +7212,10 @@ def call_BL(bot, query):
                                 pass
                 else:
                     query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
-            except:
+                    print(text)
+            except Exception as e:
                 query.edit_message_text(text="خطایی پیش اومد بعدا امتحان کنین😑", reply_markup=reply_markup)
+                print(e)
         else:
             query.edit_message_text(text="ظرفیت پر شده بعدا امتحان کنین😑", reply_markup=reply_markup)
             for admin in admin_id:
@@ -8267,7 +8271,7 @@ def call_TTRS(bot, query):
         try:
             query.edit_message_text(text='Login test Wait...')
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-            if panel in ['dragon']:
+            if panel in ssh_panels:
                 status = sshx.ssh_status(host, port, username, password)
             else:
                 url, r = sshx.open_session(host, port)
@@ -8631,7 +8635,13 @@ def call_VDNKHF(bot, query):
         hosts, remarks = sshx.HOSTS()
         for host in hosts:
             port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
-            if panel not in ['dragon']:
+            if panel in ssh_panels:
+                message = sshx.ssh_status(host, port, username, password)
+                if "🟢 Online" in message:
+                    logs += f"⚪️Good: {host} {panel}\n"
+                else:
+                    logs += f"🔴Connection Error: {host} {panel}\n{message}\n"
+            else:
                 do = True
                 session = 'ssh/' + host + ".session"
                 if Path(session).is_file() is False:
@@ -9581,10 +9591,11 @@ def call_bkon(bot, query):
                                 port, username, password, panel, route_path, sshport, udgpw, remark = sshx.HOST_INFO(host)
                                 do = True
                                 count_all += 1
-                                session = 'ssh/' + host + ".session"
-                                if Path(session).is_file() is False:
-                                    if sshx.Login(username, password, host, port, panel) is False:
-                                        do = False
+                                if panel not in ssh_panels:
+                                    session = 'ssh/' + host + ".session"
+                                    if Path(session).is_file() is False:
+                                        if sshx.Login(username, password, host, port, panel) is False:
+                                            do = False
                                 if do is True:
                                     try:
                                         Session = sshx.PANNEL(host, username, password, port, panel, 'Other', 'uname')
@@ -10665,7 +10676,7 @@ def call_INVS(bot, query):
         cb = 'on'
         emoji_cb = "🟢"
     keyboard = [
-        [InlineKeyboardButton("Edit✏️", callback_data='ENVS')],
+        [InlineKeyboardButton("✏️تغییر مبلغ دعوت", callback_data='ENVS')],
         [InlineKeyboardButton(f"{cb} {emoji_cb}", callback_data=f'XNVS_{cb}')],
         [InlineKeyboardButton("تغییر محدودیت دعوت", callback_data='QNVS')]
     ]
