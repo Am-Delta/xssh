@@ -1369,28 +1369,33 @@ class PANNEL:
                 return False, str(e)
 
         elif self.panel == "dragon":
-            ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
-            ssh_stdin.write('15\n')
-            ssh_stdin.flush()
-            sleep(0.05)
-            ssh_stdin.write('1\n')
-            ssh_stdin.flush()
-            ssh_stdin.write('s\n')
-            sleep(50)
-            ssh_stdin.flush()
-            dirty = Force_string(ssh_stdout).read().decode()
-            cleaned = Clean_string(dirty)
-            try:
-                link = cleaned.split("LINK :")[1].split("\n")[0].replace(" ", "")
+            for i in range(2):
+                ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
+                ssh_stdin.write('15\n')
+                ssh_stdin.flush()
+                sleep(0.05)
+                ssh_stdin.write('1\n')
+                ssh_stdin.flush()
+                ssh_stdin.write('s\n')
+                if i == 0:
+                    sleep(15)
+                else:
+                    sleep(50)
+                ssh_stdin.flush()
+                dirty = Force_string(ssh_stdout).read().decode()
+                cleaned = Clean_string(dirty)
                 try:
-                    rec = requests.get(link).content
-                    return True, rec
-                except:
-                    link = f"http://{self.host}:8888/backup/backup.vps"
-                    rec = requests.get(link).content
-                    return True, rec
-            except Exception as e:
-                return False, str(e)
+                    link = cleaned.split("LINK :")[1].split("\n")[0].replace(" ", "")
+                    try:
+                        rec = requests.get(link, timeout=15).content
+                        return True, rec
+                    except:
+                        link = f"http://{self.host}:8888/backup/backup.vps"
+                        rec = requests.get(link, timeout=30).content
+                        return True, rec
+                except Exception as e:
+                    if i == 1:
+                        return False, str(e)
 
     def Check(self):
         if self.panel == "shahan":
