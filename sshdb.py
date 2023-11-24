@@ -224,7 +224,10 @@ settings = {
     "custom_tutorial_only_button_file_id": 0,
     "custom_tutorial_only_button_caption": "text",
     "invitation_limit": 10,
-    "buy_only_customers": "off"
+    "buy_only_customers": "off",
+    "invitation_type": "money",
+    "invitation_percentage": 10,
+    "currency_usdt": "off"
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
