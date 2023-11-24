@@ -84,6 +84,20 @@ def ISP(target):
     return ""
 
 
+def IP_INFO(query):
+    url = f"http://ip-api.com/json/{query}?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,timezone,isp,org,as"
+    try:
+        r = requests.get(url, headers=headers)
+        data = json.loads(r.text)
+        if data['status'] == "success":
+            text = f"🌎Continent: {data['continent']} ({data['continentCode']})\n🏳️Country: {data['country']} ({data['countryCode']})\n📍Region: {data['region']} ({data['regionName']})\n🗺City: {data['city']}\n⌚️Time zone: {data['timezone']}\n🌐ISP: {data['isp']}\n🏢Organization: {data['org']}\n🛜AS: {data['as']}"
+            return text
+        else:
+            return data['message']
+    except Exception as e:
+        return "Error: " + str(e)
+
+
 def check_host_json_results(results):
     for result in results[node1][0]:
         if result[0] == "OK":
@@ -2805,12 +2819,12 @@ class PANNEL:
                     sleep(0.1)
                     ssh_stdin.write(f'{numbers[usernames.index(self.uname)]}\n')
                     ssh_stdin.flush()
-                    sleep(1)
+                    sleep(2)
                     date = str(datetime.fromtimestamp(time() + (int(days) * 86400))).split(" ")[0].split("-")
                     fixed_date = f"{date[2]}/{date[1]}/{date[0]}"
                     ssh_stdin.write(f'{fixed_date}\n')
                     ssh_stdin.flush()
-                    sleep(0.5)
+                    sleep(1)
                     ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
                     ssh_stdin.write('6\n')
                     ssh_stdin.flush()
