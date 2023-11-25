@@ -1950,7 +1950,7 @@ class PANNEL:
                     except:
                         return False, "Error: Panel is okay but check host not available for now"
                 else:
-                    return False, f"Error: {str(data.status_code)}"
+                    return False, f"Error: Check Host HTTP {str(data.status_code)}"
             except Exception as e:
                 return False, "Error: " + str(e)
 
@@ -2871,10 +2871,10 @@ class PANNEL:
                     sleep(0.1)
                     ssh_stdin.write(f'{numbers[usernames.index(self.uname)]}\n')
                     ssh_stdin.flush()
-                    sleep(0.1)
+                    sleep(0.5)
                     ssh_stdin.write(f'{str(connection_limit)}\n')
                     ssh_stdin.flush()
-                    sleep(0.1)
+                    sleep(0.5)
                     dirty = Force_string(ssh_stdout).read().decode()
                     cleaned = Clean_string(dirty)
                     if f"Limit applied to the user {self.uname} foi {str(connection_limit)}" in cleaned:
