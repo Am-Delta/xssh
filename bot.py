@@ -917,6 +917,16 @@ def get_all_gift_codes():
             pass
 
 
+def get_all_accounts_bot():
+    for i in range(5):
+        try:
+            cur.execute("SELECT * FROM Users")
+            records = cur.fetchall()
+            return records
+        except:
+            pass
+
+
 def get_all_clients_bot():
     for i in range(5):
         try:
@@ -2407,7 +2417,7 @@ def text_private(bot, message):
             try:
                 int(link)
                 cache_list, host_cahce = get_collector_cache(chat_id)
-                message.reply_text("خب یه پیام از کاربر فوروارد کنین")
+                message.reply_text("خب یه پیام از کاربر فوروارد کنین یا آیدی عددیشو بفرستین کاملا دقت کنین که هر آیدی عددی فرستادین همون ثبت میشه. و بدلیل اینکه اسم شخص تشخیص داده نمیشه با آیدی عددی ربات بصورت دیفالت userid میزاره اسمشو و بهتره که از فوروارد استفاده کنین اگه هیدن نباشه")
                 cache_list.append(link)
                 delete_cache(chat_id)
                 add_cache(chat_id, "forward")
@@ -2415,8 +2425,23 @@ def text_private(bot, message):
             except:
                 message.reply_text("فقط میتونی عدد بفرستی")
 
-        elif status == 'forward':
-            message.reply_text("یه پیام از کاربر مورد نظر فوروارد کن یا /cancel")
+        elif status == "forward":
+            try:
+                user_id = int(link)
+                cache_list, host_cahce = get_collector_cache(chat_id)
+                cache_list.append(user_id)
+                name = "userid"
+                u = "None"
+                if check_user_exists_in_clients_table(user_id) is True:
+                    name, u, phone, value = get_full_user_data_id(user_id)
+                cache_list.append(name)
+                cache_list.append(u)
+                delete_cache(chat_id)
+                add_cache(chat_id, "connection")
+                update_collector(chat_id, cache_list, host_cahce)
+                message.reply_text("تعداد محدودیت کانکشن بفرستین یا /cancel")
+            except:
+                message.reply_text("فقط میتونی عدد بفرستی یا ی پیام ازش فوروارد کن")
 
         elif status == "connection":
             try:
@@ -2831,6 +2856,47 @@ def text_private(bot, message):
                 delete_cache(chat_id)
             except:
                 message.reply_text("فقط عدد میتونی بفرستی:", reply_markup=reply_markup)
+
+        elif "CaptionServer_" in status:
+            if len(link) >= 3900:
+                message.reply_text("این کپشن خیلی طولانیه لطفا کمتر باشه")
+                return
+            host = status.split("_")[1]
+            keyboard = [[InlineKeyboardButton("<<", callback_data='NVDSLK')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            hosts, remarks = sshx.HOSTS()
+            if host in hosts:
+                settings = get_settings()
+                if settings['server_custom_caption'].get(host, None) is None:
+                    link = (fixed_link_json(link)).replace(" ", "")
+                    settings['server_custom_caption'].update({host: link})
+                    update_settings(settings)
+                    message.reply_text("✔️ انجام شد", reply_markup=reply_markup)
+                else:
+                    message.reply_text("این سرور تو این لیست وجود داره برای اینکه کپشن جدید اضافه کنین باید اول حذف کنین ", reply_markup=reply_markup)
+            else:
+                message.reply_text("این سرور وجود نداره!", reply_markup=reply_markup)
+            delete_cache(chat_id)
+
+        elif status == "change_card_caption":
+            link = fixed_link_json(link)
+            if len(link) <= 3900:
+                settings = get_settings()
+                settings['card_caption'] = link
+                update_settings(settings)
+                message.reply_text("✔️ انجام شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='Card')]]))
+            else:
+                message.reply_text("کپشن خیلی طولانیه کوتاه تر بفرستین")
+
+        elif status == "change_trx_caption":
+            link = fixed_link_json(link)
+            if len(link) <= 3900:
+                settings = get_settings()
+                settings['trx_caption'] = link
+                update_settings(settings)
+                message.reply_text("✔️ انجام شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("<<", callback_data='wallet')]]))
+            else:
+                message.reply_text("کپشن خیلی طولانیه کوتاه تر بفرستین")
 
         elif status == "change":
             try:
@@ -4791,7 +4857,8 @@ def call_stats(bot, query):
     chat_id = query.message.chat.id
     if check_seller_exist(chat_id) is False:
         keyboard = [
-            [InlineKeyboardButton("🤖Bot users", callback_data='SABU'), InlineKeyboardButton("⚫️Full Servers", callback_data='full')],
+            [InlineKeyboardButton("🤖Bot users", callback_data='SABU'), InlineKeyboardButton("👤Clients", callback_data='MCLD')],
+            [InlineKeyboardButton("⚫️Full Servers", callback_data='full')],
             [InlineKeyboardButton("🔙Back", callback_data="back_admin")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -5694,7 +5761,7 @@ def call_IDMNU(bot, query):
                             for i in range(len(users)):
                                 if users[i] == user:
                                     count += 1
-                                    text += f"{str(i + 1)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
+                                    text += f"{str(count)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
                             text = f"🟢 {str(count)} کاربر آنلاین\n\n{text}"
                         else:
                             text = 'کسی آنلاین نیست ✖️'
@@ -6116,6 +6183,19 @@ def call_ONT(bot, query):
         query.answer("Already ON", show_alert=True)
 
 
+@app.on_callback_query(filters.regex('CPSHNTX'))
+def call_CPSHNTX(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "change_trx_caption")
+    query.edit_message_text(text="کپشنی که میخواید نمایش داده بشه رو بفرستین:")
+
+
 @app.on_callback_query(filters.regex('wallet'))
 def call_wallet(bot, query):
     chat_id = query.message.chat.id
@@ -6139,6 +6219,7 @@ def call_wallet(bot, query):
         [InlineKeyboardButton("🔧تغییر", callback_data='ChangeWallet')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFT'), InlineKeyboardButton("🟢 On", callback_data='ONT')],
         [InlineKeyboardButton(f"نشان دادن قیمت تتر: {emoji}", callback_data=f'wallet_{cb}')],
+        [InlineKeyboardButton("تغییر کپشن", callback_data='CPSHNTX')],
         [InlineKeyboardButton("<<", callback_data='ZBSHP')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -6147,7 +6228,7 @@ def call_wallet(bot, query):
         status = "🔴 OFF"
     else:
         status = "🟢 ON"
-    text = f"💳Wallet: <code>{str(wallet)}</code>\n\n👤آخرین ادمینی که اطلاعات ادیت کرد \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
+    text = f"💳Wallet: <code>{str(wallet)}</code>\n\n👤آخرین ادمینی که اطلاعات ادیت کرد \nName: {name}\nusername: @{username}\nStatus: {status}\nکپشن: {settings['trx_caption']}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -6194,6 +6275,7 @@ def call_card(bot, query):
     keyboard = [
         [InlineKeyboardButton("🔧تغییر", callback_data='Change')],
         [InlineKeyboardButton("🔴 Off", callback_data='OFC'), InlineKeyboardButton("🟢 On", callback_data='ONC')],
+        [InlineKeyboardButton("تغییر کپشن", callback_data='CPSHNCBC')],
         [InlineKeyboardButton("<<", callback_data='ZBSHP')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -6203,7 +6285,7 @@ def call_card(bot, query):
         status = "🔴 OFF"
     else:
         status = "🟢 ON"
-    text = f"💳Card: <code>{str(card)}</code>\n\n👤آخرین ادمینی که اطلاعاتو ادیت کرد \nName: {name}\nusername: @{username}\nStatus: {status}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
+    text = f"💳Card: <code>{str(card)}</code>\n\n👤آخرین ادمینی که اطلاعاتو ادیت کرد \nName: {name}\nusername: @{username}\nStatus: {status}\nکپشن: {settings['card_caption']}\n\nمیتونین با خاموش روشن کردن این بخش فروش با این روش پرداخت فعال و غیرفعال کنین"
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
 
 
@@ -6218,6 +6300,19 @@ def call_change(bot, query):
         delete_cache(chat_id)
     add_cache(chat_id, "change")
     query.edit_message_text(text="خب شماره کارتتون بفرستین (فقط شماره کارت)")
+
+
+@app.on_callback_query(filters.regex('CPSHNCBC'))
+def call_CPSHNCBC(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    chat_id = query.message.chat.id
+    if check_cache(chat_id) is True:
+        delete_cache(chat_id)
+    add_cache(chat_id, "change_card_caption")
+    query.edit_message_text(text="کپشنی که میخواید نمایش داده بشه رو بفرستین:")
 
 
 @app.on_callback_query(filters.regex('ANS_'))
@@ -6442,6 +6537,8 @@ def call_CUWPD(bot, query):
 
 
 برای کنسل کردن دکمه  بک بزنید
+
+{get_settings()['card_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -6467,7 +6564,8 @@ def call_TUWPD(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [price, "💲ترون"]
         add_code_buy(chat_id, Code, "userdeposit", cache_list)
-        if get_settings()['currency_usdt'] == "on":
+        settings = get_settings()
+        if settings['currency_usdt'] == "on":
             price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
         else:
             price = trx_price(price)
@@ -6475,7 +6573,7 @@ def call_TUWPD(bot, query):
 مبلغ:
 {price}
 
-به آدرس ترون :
+به آدرس ولت :
 <code>{wallet}</code>
 واریز کنین و سپس رسید عکس خودرا بفرستید
 یکبار روی آدرس بزنین کپی میشه
@@ -6483,6 +6581,8 @@ def call_TUWPD(bot, query):
 
 برای کنسل کردن دکمه  بک بزنید
 قیمت دلار: {str(Toman_USD())}
+
+{settings['trx_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -6793,6 +6893,8 @@ def call_CTPB(bot, query):
 اگر روش پرداخت دیگه ای مد نظر دارین به پشتیبانی پیام بدین
 
 برای کنسل کردن دکمه  بک بزنید
+
+{get_settings()['card_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -6866,7 +6968,8 @@ def call_TTPB(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [GB, price, user, host, "💲ترون"]
         add_code_buy(chat_id, Code, "traffic", cache_list)
-        if get_settings()['currency_usdt'] == "on":
+        settings = get_settings()
+        if settings['currency_usdt'] == "on":
             price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
         else:
             price = trx_price(price)
@@ -6874,7 +6977,7 @@ def call_TTPB(bot, query):
 مبلغ:
 {price}
 
-به آدرس ترون :
+به آدرس ولت :
 <code>{wallet}</code>
 واریز کنین و سپس رسید عکس خودرا بفرستید
 یکبار روی آدرس بزنین کپی میشه
@@ -6882,6 +6985,8 @@ def call_TTPB(bot, query):
 
 برای کنسل کردن دکمه  بک بزنید
 قیمت دلار: {str(Toman_USD())}
+
+{settings['trx_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -7025,6 +7130,8 @@ def call_CC(bot, query):
 
 
 برای کنسل کردن دکمه  بک بزنید
+
+{get_settings()['card_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -7055,7 +7162,8 @@ def call_TR(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [days, GB, client, price, query.message.chat.first_name, UNAME, Selected_host, "💲 ترون"]
         add_code_buy(chat_id, Code, "add", cache_list)
-        if get_settings()['currency_usdt'] == "on":
+        settings = get_settings()
+        if settings['currency_usdt'] == "on":
             price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
         else:
             price = trx_price(price)
@@ -7063,7 +7171,7 @@ def call_TR(bot, query):
 مبلغ:
 {price}
 
-به آدرس ترون :
+به آدرس ولت :
 <code>{wallet}</code>
 واریز کنین و سپس رسید عکس خودرا بفرستید
 یکبار روی آدرس بزنین کپی میشه
@@ -7071,6 +7179,8 @@ def call_TR(bot, query):
 
 برای کنسل کردن دکمه  بک بزنید
 قیمت دلار: {str(Toman_USD())}
+
+{settings['trx_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -7222,6 +7332,9 @@ def call_BL(bot, query):
                         [InlineKeyboardButton("<<", callback_data='back')]
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
+                    if settings['server_custom_caption'].get(host, None) is not None:
+                        bot.send_message(chat_id, settings['server_custom_caption'][host])
+                    sleep(0.1)
                     bot.send_message(chat_id, settings['after_buy'], reply_markup=reply_markup)
                     if settings['buy_notification'] == "on":
                         keyboard = [[InlineKeyboardButton("ℹ️ اطلاعات کامل", callback_data=f"IDADMIN_{host}${user}")], [InlineKeyboardButton("<<", callback_data='back')]]
@@ -7229,7 +7342,7 @@ def call_BL(bot, query):
                         for admin in admin_id:
                             try:
                                 mention = f"<a href='tg://user?id={str(chat_id)}'>{name}</a>"
-                                bot.send_message(admin, f"📃 اطلاعات اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                                bot.send_message(admin, f"📃 اطلاعات اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPhone: {str(p)}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                             except:
                                 pass
                 else:
@@ -7437,6 +7550,9 @@ def call_Confirmed(bot, query):
                     [InlineKeyboardButton("<<", callback_data='back')]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
+                if settings['server_custom_caption'].get(host, None) is not None:
+                    bot.send_message(chat_id, settings['server_custom_caption'][host])
+                sleep(0.1)
                 bot.send_message(chat_id, settings['after_buy'], reply_markup=reply_markup)
                 delete_code_buy(code)
                 bot.edit_message_text(query.message.chat.id, msg, "اطلاعات به کاربر ارسال شد", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("full info", callback_data=f"IDADMIN_{host}${user}")], [InlineKeyboardButton("<<", callback_data='back_admin')]]))
@@ -7653,7 +7769,7 @@ def call_UPKIF(bot, query):
                     for admin in admin_id:
                         try:
                             mention = f"<a href='tg://user?id={str(chat_id)}'>{name}</a>"
-                            bot.send_message(admin, f"🔄 اطلاعات تمدید اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                            bot.send_message(admin, f"🔄 اطلاعات تمدید اکانت خریداری شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPhone: {str(phone)}\nPrice: {str(price)} Toman", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
                         except:
                             pass
             else:
@@ -7685,7 +7801,8 @@ def call_UPTXR(bot, query):
         reply_markup = InlineKeyboardMarkup(keyboard)
         cache_list = [days, GB, connection_limit, price, user, host, "💲ترون"]
         add_code_buy(chat_id, Code, "upgrade", cache_list)
-        if get_settings()['currency_usdt'] == "on":
+        settings = get_settings()
+        if settings['currency_usdt'] == "on":
             price = str("{:.2f}".format(float(int(price) / Toman_USD()))) + " USDT تتر"
         else:
             price = trx_price(price)
@@ -7693,7 +7810,7 @@ def call_UPTXR(bot, query):
 مبلغ:
 {price}
 
-به آدرس ترون :
+به آدرس ولت :
 <code>{wallet}</code>
 واریز کنین و سپس رسید عکس خودرا بفرستید
 یکبار روی آدرس بزنین کپی میشه
@@ -7701,6 +7818,8 @@ def call_UPTXR(bot, query):
 
 برای کنسل کردن دکمه  بک بزنید
 قیمت دلار: {str(Toman_USD())}
+
+{settings['trx_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -7808,6 +7927,8 @@ def call_UPC(bot, query):
 اگر روش پرداخت دیگه ای مد نظر دارین به پشتیبانی پیام بدین
 
 برای کنسل کردن دکمه  بک بزنید
+
+{get_settings()['card_caption']}
             """
         query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
     else:
@@ -8164,7 +8285,42 @@ def call_SABU(bot, query):
         USERNAME = records[i][2]
         if USERNAME == "None" or USERNAME is None:
             USERNAME = ""
-        text += f"{str(i + 1)}. {records[i][1]} {USERNAME} {phone}\n"
+        if records[i][4] == 0:
+            balance = ""
+        else:
+            balance = str(records[i][4])
+        text += f"{str(i + 1)}. {records[i][1]} {USERNAME} {phone} {balance}\n"
+    if len(text) > 4095:
+        for x in range(0, len(text), 4095):
+            sleep(0.2)
+            bot.send_message(chat_id, text[x:x+4095])
+    else:
+        bot.send_message(chat_id, text)
+    bot.send_message(chat_id, "✔️ انجام شد", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('MCLD'))
+def call_MCLD(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    keyboard = [[InlineKeyboardButton("<<", callback_data='back_admin')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    records = get_all_accounts_bot()
+    text = f"⚪️ {str(len(records))}مشتری \n\n"
+    hosts, remarks = sshx.HOSTS()
+    for i in range(len(records)):
+        USERNAME = records[i][2]
+        if USERNAME == "None" or USERNAME is None:
+            USERNAME = ""
+        elif "@" not in USERNAME:
+            USERNAME = "@" + USERNAME
+        if records[i][4] in hosts:
+            remark = remarks[hosts.index(records[i][4])]
+        else:
+            remark = ""
+        text += f"{str(i + 1)}. {records[i][1]} {USERNAME} {records[i][3]} {records[i][4]} {remark}\n"
     if len(text) > 4095:
         for x in range(0, len(text), 4095):
             sleep(0.2)
@@ -8946,6 +9102,87 @@ def call_SRJUQ(bot, query):
         query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
 
 
+@app.on_callback_query(filters.regex('NVDSLK'))
+def call_NVDSLK(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    settings = get_settings()
+    keyboard = [
+        [InlineKeyboardButton("➖ حذف", callback_data='rCSLK'), InlineKeyboardButton("➕ افزودن", callback_data='aCSLK')],
+        [InlineKeyboardButton("<<", callback_data='SMT')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    hosts, remarks = sshx.HOSTS()
+    plus_host = ""
+    for host in hosts:
+        if settings['server_custom_caption'].get(host, None) is not None:
+            plus_host += f"{host}"
+    query.edit_message_text(text=f"این گزینه برای اینه که هر وقت یوزری خریداری کرد کپشن مخصوص همون سرور که شما تعیین میکنین براش فرستاده بشه\n\n{plus_host}", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('aCSLK'))
+def call_aCSLK(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای افزودن کپشن یکی از سرور هارو انتخاب کنین:", reply_markup=server_cb_creator("SACSLK_"))
+
+
+@app.on_callback_query(filters.regex('SACSLK_'))
+def call_SACSLK(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if settings['server_custom_caption'].get(host, None) is not None:
+        query.answer("برای اعمال کپشن جدید باید اول حذف کنین سرورو از لیست.", show_alert=True)
+    else:
+        keyboard = [[InlineKeyboardButton("<<", callback_data='NVDSLK')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        hosts, remarks = sshx.HOSTS()
+        if host in hosts:
+            if check_cache(chat_id) is True:
+                delete_cache(chat_id)
+            add_cache(chat_id, "CaptionServer_" + host)
+            query.edit_message_text(text="خب کپشن مورد نظرتون بفرستین:", reply_markup=reply_markup)
+        else:
+            query.edit_message_text(text="این سرور وجود نداره!", reply_markup=reply_markup)
+
+
+@app.on_callback_query(filters.regex('rCSLK'))
+def call_rCSLK(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    query.edit_message_text(text="برای حذف سرور از این لیست کلیک کنین:", reply_markup=server_cb_creator("SRCSLK_"))
+
+
+@app.on_callback_query(filters.regex('SRCSLK_'))
+def call_SRCSLK(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    host = data.split("_")[1]
+    settings = get_settings()
+    if settings['server_custom_caption'].get(host, None) is None:
+        query.answer("این سرور توی این لیست وجود نداره!", show_alert=True)
+    else:
+        del settings['server_custom_caption'][host]
+        update_settings(settings)
+        keyboard = [[InlineKeyboardButton("<<", callback_data='NVDSLK')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
+
+
 @app.on_callback_query(filters.regex('SMT'))
 def call_SMT(bot, query):
     chat_id = query.message.chat.id
@@ -8959,7 +9196,7 @@ def call_SMT(bot, query):
         [InlineKeyboardButton("⚫️ظرفیت سرورها", callback_data='full')],
         [InlineKeyboardButton("➖ حذف", callback_data='RST'), InlineKeyboardButton("➕ افزودن", callback_data='AST')],
         [InlineKeyboardButton("تغییر پورت ssh", callback_data='XESSP'), InlineKeyboardButton("تغییر پورت udp", callback_data='UXEP')],
-        [InlineKeyboardButton("↪️پورت SSH کاستوم ", callback_data='JUQSTC')],
+        [InlineKeyboardButton("↪️پورت SSH کاستوم ", callback_data='JUQSTC'), InlineKeyboardButton("کپشن کاستوم ", callback_data='NVDSLK')],
         [InlineKeyboardButton("🌐 IPv6", callback_data='ipv6'), InlineKeyboardButton("⚡️ Session", callback_data='VDNKHF')],
         [InlineKeyboardButton("🏳️تغییر نام سرور ", callback_data='FSLJC'), InlineKeyboardButton("⚪️تغییر اولویت انتخاب سرور", callback_data='CGDJS')],
         [InlineKeyboardButton("📂 آرشیو سرور ", callback_data='archive')],
@@ -9143,7 +9380,7 @@ def call_BDKSC(bot, query):
                     for i in range(len(users)):
                         if users[i] == user:
                             count += 1
-                            text += f"{str(i + 1)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
+                            text += f"{str(count)}. {users[i]} {ips[i]} {sshx.ISP(ips[i])}\n"
                     text = f"🟢 {str(count)} کاربر آنلاین\n\n{text}"
                     query.edit_message_text(text=text, reply_markup=reply_markup)
                 else:
@@ -9307,6 +9544,16 @@ def call_test(bot, query):
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     bot.send_message(chat_id, "برای آموزش وصل شدن به سرویس دکمه پایینو بزنین", reply_markup=reply_markup)
+                    if settings['notify_test_account'] == "on":
+                        name, USERNAME, phone, old_value = get_full_user_data_id(chat_id)
+                        keyboard = [[InlineKeyboardButton("ℹ️ اطلاعات کامل", callback_data=f"IDADMIN_{host}${user}")], [InlineKeyboardButton("<<", callback_data='back')]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        for admin in admin_id:
+                            try:
+                                mention = f"<a href='tg://user?id={str(chat_id)}'>{name}</a>"
+                                bot.send_message(admin, f"🔄 اطلاعات اکانت تست دریافت شده توسط {mention}\nHost: {host}\nUser: {user}\nID: {str(chat_id)}\nuser username: {USERNAME}\nPhone: {str(phone)}", reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+                            except:
+                                pass
                 else:
                     bot.send_message(chat_id, f"Error: {text}")
             except Exception as e:
@@ -11647,14 +11894,23 @@ def call_NSCLS(bot, query):
         emoji_3 = "🔴"
         cb_3 = 'on'
         emoji_cb_3 = "🟢"
+    if settings['notify_test_account'] == "on":
+        emoji_4 = "🟢"
+        cb_4 = 'off'
+        emoji_cb_4 = "🔴"
+    else:
+        emoji_4 = "🔴"
+        cb_4 = 'on'
+        emoji_cb_4 = "🟢"
     keyboard = [
         [InlineKeyboardButton(f"New user: {cb} {emoji_cb}", callback_data=f'NSCXZ_{cb}')],
         [InlineKeyboardButton(f"Phone: {cb_2} {emoji_cb_2}", callback_data=f'SVJLD_{cb_2}')],
         [InlineKeyboardButton(f"Buy: {cb_3} {emoji_cb_3}", callback_data=f'SWHFlN_{cb_3}')],
+        [InlineKeyboardButton(f"Test: {cb_4} {emoji_cb_4}", callback_data=f'vogrog_{cb_4}')],
         [InlineKeyboardButton("🗒پیام قبل استارت", callback_data='QPAEOI')]
     ]
-    t0 = "\n\nCurrent: \nNotify New user: " + settings['notification'] + " " + emoji + "\nNotify phone number: " + settings['phone_notification'] + " " + emoji_2 + "\nBuy Notify: " + settings['buy_notification'] + " " + emoji_3
-    text = '<b>Notification Settings</b>\n\n' + 'بهتون اطلاع میده کی عضو ربات شده \n\nگزینه دوم وقتی کاربر شمارشو میده به شما اطلاع بده\n\nگزینه سوم وقتی کاربر یا فروشنده از طریق کیف پول خریدی انجام دادن به شما اطلاع رسانی بشه فرقی نداره که خرید یا تمدید باشه\n\nگزینه چهارم میتونین برای کاربر یه پیامی رو تنظیم کنین که بعد از استارت نمایش داده بشه و فقط یکبار نشون داده میشه' + t0
+    t0 = "\n\nCurrent: \nNotify New user: " + settings['notification'] + " " + emoji + "\nNotify phone number: " + settings['phone_notification'] + " " + emoji_2 + "\nBuy Notify: " + settings['buy_notification'] + " " + emoji_3 + "\nTest Notify: " + settings['notify_test_account'] + " " + emoji_4
+    text = '<b>Notification Settings</b>\n\n' + 'بهتون اطلاع میده کی عضو ربات شده \n\nگزینه دوم وقتی کاربر شمارشو میده به شما اطلاع بده\n\nگزینه سوم وقتی کاربر یا فروشنده از طریق کیف پول خریدی انجام دادن به شما اطلاع رسانی بشه فرقی نداره که خرید یا تمدید باشه\n\nگزینه چهارم برای اطلاع رسانی اکانت تست هست هرکی که دریافت کنه اطلاع میده بهتون\n\nگزینه پنجم میتونین برای کاربر یه پیامی رو تنظیم کنین که بعد از استارت نمایش داده بشه و فقط یکبار نشون داده میشه' + t0
     keyboard.append([InlineKeyboardButton("<<", callback_data='settings')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
@@ -11708,6 +11964,22 @@ def call_QPAEOI(bot, query):
     keyboard.append([InlineKeyboardButton("<<", callback_data='NSCLS')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_callback_query(filters.regex('vogrog_'))
+def call_SWHFlN(bot, query):
+    chat_id = query.message.chat.id
+    if chat_id not in admin_id:
+        query.answer("Access denied", show_alert=True)
+        return
+    data = query.data
+    notify_test_account = data.split("vogrog_")[1]
+    settings = get_settings()
+    settings['notify_test_account'] = notify_test_account
+    update_settings(settings)
+    keyboard = [[InlineKeyboardButton("<<", callback_data='NSCLS')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="✔️ انجام شد", reply_markup=reply_markup)
 
 
 @app.on_callback_query(filters.regex('SWHFlN_'))
