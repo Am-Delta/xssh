@@ -210,6 +210,17 @@ def db_update():
         cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
         conn.commit()
 
+    if settings.get("notify_test_account", None) is None:
+        add_dict = {
+            "notify_test_account": "on",
+            "trx_caption": "",
+            "card_caption": "",
+            "server_custom_caption": {}
+        }
+        settings.update(add_dict)
+        cur.execute("UPDATE Settings SET settings = ? WHERE ID =?", (str(settings), 1))
+        conn.commit()
+
     try:
         cur.execute("SELECT * FROM Redeem")
         records = cur.fetchall()
