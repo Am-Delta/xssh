@@ -227,7 +227,12 @@ settings = {
     "buy_only_customers": "off",
     "invitation_type": "money",
     "invitation_percentage": 10,
-    "currency_usdt": "off"
+    "currency_usdt": "off",
+    "notify_test_account": "on",
+    "trx_caption": "",
+    "card_caption": "",
+    "server_custom_caption": {}
+
 }
 
 c.execute("INSERT INTO Settings (ID, Settings) VALUES (?, ?)", (1, str(settings)))
