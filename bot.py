@@ -4829,6 +4829,9 @@ def call_checker(bot, query):
                 if "❌" in text:
                     bot.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
                 checked_servers += 1
+            else:
+                offline_servers += 1
+                logs += f"\n⭕️ Connection PanelError: {host}"
         except Exception as e:
             offline_servers += 1
             logs += f"\n⭕️ Connection Error: {host}, {str(e)}"
