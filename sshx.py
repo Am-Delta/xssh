@@ -630,8 +630,15 @@ def get_cache_xpanel(html):
 
 def get_users_data_dragon(ssh):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("menu")
+    dirty = Force_string(ssh_stdout).read().decode()
+    cleaned = Clean_string(dirty)
+    cleaned = cleaned.split('◇ㅤOnline: ')[1].split('\n')[0]
+    counter = int(cleaned.split("Total: ")[1])
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("menu")
     ssh_stdin.write('9\n')
     ssh_stdin.flush()
+    if counter >= 20:
+        sleep(counter // 20)
     dirty = Force_string(ssh_stdout).read().decode()
     cleaned = Clean_string(dirty)
     cleaned = cleaned.split('◇User        ◇Password      ◇limit     ◇validity')[1].split('◇ TOTAL USERS')[0]
