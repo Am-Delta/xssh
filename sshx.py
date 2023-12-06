@@ -813,16 +813,12 @@ def Get_user_info_shahan(html, uname):
         if textarea.attributes.get("name", None) is not None:
             if "edituserinfo" in textarea.attributes['name']:
                 descriptions.append(textarea.text())
+    if len(days_left_trubleshoots) == len(usernames):
+        days_left = days_left_trubleshoots
     for username in usernames:
         if username == uname:
             n = usernames.index(uname)
-            if (days_left[n] == "inactive"):
-                if len(days_left) == len(days_left_trubleshoots):
-                    days = days_left_trubleshoots[n]
-                else:
-                    days = "27784"
-            else:
-                days = days_left[n]
+            days = days_left[n]
             if len(ports) == len(dropbears):
                 dropbear = dropbears[n]
             else:
@@ -1078,6 +1074,8 @@ def Get_list_shahan(html):
                 days_left[i] = days_left_trubleshoots[i]
             else:
                 days_left[i] = "27784"
+    if len(days_left_trubleshoots) == len(usernames):
+        days_left = days_left_trubleshoots
     return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions,server_traffic, int(info[1]), True
 
 
