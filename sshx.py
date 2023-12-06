@@ -26,8 +26,10 @@ headers = {
     'user-agent': user_agent
 }
 
-http_panels = ['shahan', 'xpanel', 'rocket']
+http_panels = ['shahan', 'xpanel', 'rocket', 'sanaie']
 ssh_panels = ['dragon']
+v2ray_panels = ['sanaie']
+supported_protocols = ['vless']
 
 
 shortcut_isp_json = {
@@ -333,6 +335,21 @@ def Test(r, host, port, panel, status):
             pass
         return True
 
+    elif panel == "sanaie":
+        protocol = check_panel_protocol(host + ':' + port)
+        try:
+            s = r.post(f"{protocol}://{host}:{port}/server/status", allow_redirects=False)
+            if s.status_code == 200:
+                return True
+            elif s.status_code == 301:
+                return False
+            else:
+                return False
+        except Exception as e:
+            print(e, "sanaie test")
+            return False
+        return True
+
 
 def Login(username, password, host, port, panel):
     if panel in http_panels:
@@ -351,6 +368,11 @@ def Login(username, password, host, port, panel):
             protocol = check_panel_protocol(host + ':' + port)
             login_path = f"{protocol}://{host}:{port}/ajax/login"
             data = {'username': username, 'password': password, "remember": ""}
+
+        elif panel == "sanaie":
+            protocol = check_panel_protocol(host + ':' + port)
+            data = {'username': username, 'password': password}
+            login_path = f"{protocol}://{host}:{port}/login"
 
         session = "ssh/" + host + ".session"
         try:
@@ -628,6 +650,56 @@ def get_cache_xpanel(html):
     return cache
 
 
+def get_users_data_sanaie(s):
+    inbounds, uids, remarks, connection_limits, traffics, usages, expires, days_left, status = ([] for i in range(9))
+    obj = json.loads(s)['obj']
+    for i in range(len(obj)):
+        if (obj[i]['protocol'] in supported_protocols):
+            if len(obj[i]['clientStats']) >= 1:
+                data_list = obj[i]
+                inbound_id = str(obj[i]['id'])
+                clients = json.loads(data_list['settings'].replace('\\', ''))["clients"]
+                for n in range(len(clients)):
+                    inbounds.append(inbound_id)
+                    uids.append(clients[n]['id'])
+                    remarks.append(clients[n]['email'])
+                    usage = (data_list['clientStats'][n]['up'] + data_list['clientStats'][n]['down'])
+                    usages.append(str("{:.2f}".format(float(usage / 1024 / 1024 / 1024))))
+                    if clients[n]['totalGB'] == 0:
+                        traffics.append("نامحدود")
+                    else:
+                        tr = str("{:.2f}".format(float(clients[n]['totalGB'] / 1024 / 1024 / 1024))) + " گیگابایت"
+                        traffics.append(tr)
+                    if clients[n]['expiryTime'] == 0:
+                        days_left.append("0")
+                        expires.append("♾Unlimited")
+                    else:
+                        expirytime = int(str(clients[n]['expiryTime'])[:-3])
+                        expiry = datetime.fromtimestamp(expirytime)
+                        now = datetime.fromtimestamp(time())
+                        remain_time = (str(expiry - now)).split(' ')
+                        remaining_days = '0'
+                        if len(remain_time) > 2:
+                            remaining_days = remain_time[0]
+                        days_left.append(remaining_days)
+                        expires.append(str(expiry).split(" ")[0])
+                    if clients[n]['enable'] is False:
+                        status.append("غیرفعال")
+                    else:
+                        if clients[n]['expiryTime'] != 0:
+                            if int(str(clients[n]['expiryTime'])[:-3]) - int(time()) < -1:
+                                status.append("منقضی")
+                            else:
+                                status.append("فعال")
+                        else:
+                            status.append("فعال")
+                    if clients[n].get(['limitIp'], None) is not None:
+                        connection_limits.append(clients[n]['limitIp'])
+                    else:
+                        connection_limits.append("0")
+    return inbounds, uids, remarks, connection_limits, traffics, usages, expires, days_left, status
+
+
 def get_users_data_dragon(ssh):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("menu")
     dirty = Force_string(ssh_stdout).read().decode()
@@ -663,19 +735,7 @@ def get_users_data_dragon(ssh):
 
 
 def Get_user_info_shahan(html, uname):
-    connection_limits = []
-    usernames = []
-    passwords = []
-    traffics = []
-    ips = []
-    ports = []
-    udgpws = []
-    expires = []
-    days_left = []
-    days_left_trubleshoots = []
-    descriptions = []
-    dropbears = []
-    tuics = []
+    ips, ports, udgpws, usernames, passwords, connection_limits, traffics, usages, expires, days, days_left_trubleshoots, descriptions, tuics, dropbears, status = ([] for i in range(15))
     for data in html.css('td'):
         if data.attributes.get("name", None) is None:
             if 'روز' in data.text():
@@ -721,14 +781,17 @@ def Get_user_info_shahan(html, uname):
                     udgpws.append(udgpw)
                 else:
                     ports.append(data.text())
-    status = []
     for a in html.css('a'):
         href = a.attributes.get("href", None)
         if href is not None:
             if "index.php?sortby=" in href:
-                status.append(a.text())
+                if "active" in href:
+                    status.append('فعال')
+                else:
+                    status.append('غیرفعال')
     del status[:4]
-    usages = []
+    if len(usernames) != len(status):
+        del status[:2]
     for button in html.css('button'):
         if button.attributes.get("type", None) is not None:
             if button.attributes['type'] == "button":
@@ -883,6 +946,13 @@ def Get_user_info_xpanel(html, uname):
             return passwords[i], traffics[i], int(connection_limits[i]), int(days_left[i]), status[i], usages[i], kind, expires[i], descriptions[i], dropbear
 
 
+def Get_user_info_sanaie(s, uid):
+    inbounds, uids, remarks, connection_limits, traffics, usages, expires, days_left, status = get_users_data_sanaie(s)
+    for i in range(len(uids)):
+        if uid == uids[i]:
+            return inbounds[i], uids[i], remarks[i], connection_limits[i], traffics[i], usages[i], expires[i], days_left[i], status[i]
+
+
 def Get_user_info_dragon(ssh, uname):
     usernames, passwords, connection_limits, days, status = get_users_data_dragon(ssh)
     for i in range(len(usernames)):
@@ -979,8 +1049,13 @@ def Get_list_shahan(html):
         href = a.attributes.get("href", None)
         if href is not None:
             if "index.php?sortby=" in href:
-                status.append(a.text())
+                if "active" in href:
+                    status.append('فعال')
+                else:
+                    status.append('غیرفعال')
     del status[:4]
+    if len(usernames) != len(status):
+        del status[:2]
     info = []
     for data in html.css('span.info-box-number'):
         info.append((data.text()).replace(" کاربر", ""))
@@ -1245,6 +1320,10 @@ class PANNEL:
                 self.passwd, self.traffic, self.connection_limit, self.days, self.status, self.usage, self.kind, self.Date, self.description, self.dropbear = Get_user_info_xpanel(html, uname)
                 self.ip = host
 
+            elif self.panel == "sanaie":
+                s = self.r.post(self.url + "/panel/inbound/list").text
+                self.inbound_id, self.uid, self.remark, self.connection_limit, self.traffic, self.usage, self.Date, self.days, self.status = Get_user_info_sanaie(s, uname)
+
             elif self.panel == "dragon":
                 self.ip = host
                 self.passwd, self.connection_limit, self.days, self.status = Get_user_info_dragon(ssh, uname)
@@ -1375,6 +1454,13 @@ class PANNEL:
             except Exception as e:
                 return False, str(e)
 
+        elif self.panel == "sanaie":
+            try:
+                rec = self.r.get(self.url + "/server/getDb").content
+                return True, rec
+            except Exception as e:
+                return False, str(e)
+
         elif self.panel == "dragon":
             for i in range(2):
                 ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
@@ -1430,6 +1516,8 @@ class PANNEL:
     def Backup(self):
         if self.panel in ssh_panels:
             f = uuid4().hex[0:8] + ".vps"
+        elif self.panel in v2ray_panels:
+            f = uuid4().hex[0:8] + ".db"
         else:
             f = uuid4().hex[0:8] + ".sql"
         try:
@@ -1534,6 +1622,53 @@ class PANNEL:
                     band_info.append(t)
                 server_traffic, clients_usage = get_traffic_xpanel(band_info)
                 text = f"🖥Host: {self.host}\nCPU: {cpu}\nRAM: {ram}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
+                return text
+            except Exception as e:
+                return "Error: " + str(e)
+
+        elif self.panel == "sanaie":
+            try:
+                status_json = json.loads(self.r.post(self.url + "/server/status").text)['obj']
+                cpu_percentage = str("{:.2f}".format(float(status_json['cpu'])))
+                cpu_cores = str(status_json['cpuCores'])
+                cpu_max_speed = str(int(status_json['cpuSpeedMhz'])) + "Mhz"
+                memory = str(status_json['mem']['current'] // 1024 // 1024) + "/" + str(status_json['mem']['total'] // 1024 // 1024) + " MB"
+                storage = str("{:.2f}".format(float(status_json['disk']['current'] / 1024 / 1024 / 1024))) + "/" + str("{:.2f}".format(float(status_json['disk']['total'] / 1024 / 1024 / 1024))) + " GB"
+                x_ray = status_json['xray']['version']
+                uptime = status_json['uptime']
+                if uptime >= 86400:
+                    uptime = str(uptime // 86400) + "d"
+                else:
+                    uptime = str(uptime // 3600) + "h"
+                server_traffic = str("{:.2f}".format(float((status_json['netTraffic']['sent'] + status_json['netTraffic']['recv']) / 1024 / 1024 / 1024))) + " GB"
+
+                s = self.r.post(self.url + "/panel/inbound/list").text
+                obj = json.loads(s)['obj']
+                active, disabled, onlines, clients_c, data_down, data_up = (0,)*6
+                for i in range(len(obj)):
+                    if obj[i].get('clientStats', None) is not None:
+                        if len(obj[i]['clientStats']) >= 1:
+                            data_list = obj[i]
+                            data_up += data_list['up']
+                            data_down += data_list['down']
+                            clients_c += len(data_list['clientStats'])
+                            clients = json.loads(data_list['settings'].replace('\\', ''))["clients"]
+                            for n in range(len(clients)):
+                                if (clients[n]['enable'] is True):
+                                    if clients[n]['expiryTime'] != 0:
+                                        if (int(str(clients[n]['expiryTime'])[:-3]) > int(time())) or (clients[n]['totalGB'] == 0) or ((data_list['clientStats'][n]['up'] + data_list['clientStats'][n]['down']) >= clients[n]['totalGB']):
+                                            active += 1
+                                        else:
+                                            disabled += 1
+                                    else:
+                                        active += 1
+                                else:
+                                    disabled += 1
+                up = float(str("{:.2f}".format(float(data_up // 1024 // 1024 / 1024))))
+                down = float(str("{:.2f}".format(float(data_down // 1024 // 1024 / 1024))))
+                clients_usage = str("{:.2f}".format(float(up + down))) + " GB"
+                clients = clients_c
+                text = f"🖥Host: {self.host}\nUptime: {uptime}\nX-ray version: {x_ray}\nCPU: {cpu_percentage}%\nCore/s: {cpu_cores}\nMax speed: {cpu_max_speed}\nRAM: {memory}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
                 return text
             except Exception as e:
                 return "Error: " + str(e)
@@ -1665,6 +1800,53 @@ class PANNEL:
             except Exception as e:
                 return "Error: " + str(e)
 
+        elif self.panel == "sanaie":
+            try:
+                status_json = json.loads(self.r.post(self.url + "/server/status").text)['obj']
+                cpu_percentage = str("{:.2f}".format(float(status_json['cpu'])))
+                cpu_cores = str(status_json['cpuCores'])
+                cpu_max_speed = str(int(status_json['cpuSpeedMhz'])) + "Mhz"
+                memory = str(status_json['mem']['current'] // 1024 // 1024) + "/" + str(status_json['mem']['total'] // 1024 // 1024) + " MB"
+                storage = str("{:.2f}".format(float(status_json['disk']['current'] / 1024 / 1024 / 1024))) + "/" + str("{:.2f}".format(float(status_json['disk']['total'] / 1024 / 1024 / 1024))) + " GB"
+                x_ray = status_json['xray']['version']
+                uptime = status_json['uptime']
+                if uptime >= 86400:
+                    uptime = str(uptime // 86400) + "d"
+                else:
+                    uptime = str(uptime // 3600) + "h"
+                server_traffic = str("{:.2f}".format(float((status_json['netTraffic']['sent'] + status_json['netTraffic']['recv']) / 1024 / 1024 / 1024))) + " GB"
+
+                s = self.r.post(self.url + "/panel/inbound/list").text
+                obj = json.loads(s)['obj']
+                active, disabled, onlines, clients_c, data_down, data_up = (0,)*6
+                for i in range(len(obj)):
+                    if obj[i].get('clientStats', None) is not None:
+                        if len(obj[i]['clientStats']) >= 1:
+                            data_list = obj[i]
+                            data_up += data_list['up']
+                            data_down += data_list['down']
+                            clients_c += len(data_list['clientStats'])
+                            clients = json.loads(data_list['settings'].replace('\\', ''))["clients"]
+                            for n in range(len(clients)):
+                                if (clients[n]['enable'] is True):
+                                    if clients[n]['expiryTime'] != 0:
+                                        if (int(str(clients[n]['expiryTime'])[:-3]) > int(time())) or (clients[n]['totalGB'] == 0) or ((data_list['clientStats'][n]['up'] + data_list['clientStats'][n]['down']) >= clients[n]['totalGB']):
+                                            active += 1
+                                        else:
+                                            disabled += 1
+                                    else:
+                                        active += 1
+                                else:
+                                    disabled += 1
+                up = float(str("{:.2f}".format(float(data_up // 1024 // 1024 / 1024))))
+                down = float(str("{:.2f}".format(float(data_down // 1024 // 1024 / 1024))))
+                clients_usage = str("{:.2f}".format(float(up + down))) + " GB"
+                clients = clients_c
+                text = f"🖥Host: {self.host}\nUptime: {uptime}\nX-ray version: {x_ray}\nCPU: {cpu_percentage}%\nCore/s: {cpu_cores}\nMax speed: {cpu_max_speed}\nRAM: {memory}\nStorage: {storage}\nServer Traffic: {str(server_traffic)}\nClients Traffic: {str(clients_usage)}\n👤Clients: {str(clients)}\n✔️Active: {str(active)}\n🔴Disabled: {str(disabled)}\n🟢Online: {str(onlines)}"
+                return text
+            except Exception as e:
+                return "Error: " + str(e)
+
         elif self.panel == "dragon":
             ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command("menu")
             ssh_stdin.flush()
@@ -1713,6 +1895,22 @@ class PANNEL:
                 for sec in html.css('h6'):
                     info.append(sec.text())
                 return str((info[10]).replace("All User: ", "").replace("تمام کاربران: ", ""))
+            except Exception as e:
+                return "Error: " + str(e)
+
+        elif self.panel == "sanaie":
+            try:
+                s = self.r.post(self.url + "/panel/inbound/list").text
+                obj = json.loads(s)['obj']
+                clients_c = 0
+                for i in range(len(obj)):
+                    if obj[i].get('clientStats', None) is not None:
+                        if len(obj[i]['clientStats']) >= 1:
+                            data_list = obj[i]
+                            data_up += data_list['up']
+                            data_down += data_list['down']
+                            clients_c += len(data_list['clientStats'])
+                return clients_c
             except Exception as e:
                 return "Error: " + str(e)
 
