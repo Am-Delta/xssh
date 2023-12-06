@@ -735,7 +735,7 @@ def get_users_data_dragon(ssh):
 
 
 def Get_user_info_shahan(html, uname):
-    ips, ports, udgpws, usernames, passwords, connection_limits, traffics, usages, expires, days, days_left_trubleshoots, descriptions, tuics, dropbears, status = ([] for i in range(15))
+    ips, ports, udgpws, usernames, passwords, connection_limits, traffics, usages, expires, days_left, days_left_trubleshoots, descriptions, tuics, dropbears, status = ([] for i in range(15))
     for data in html.css('td'):
         if data.attributes.get("name", None) is None:
             if 'روز' in data.text():
