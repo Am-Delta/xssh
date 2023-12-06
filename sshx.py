@@ -6,6 +6,7 @@ import ast
 import paramiko
 import ipaddress
 import jdatetime
+import traceback
 from pathlib import Path
 from bs4 import BeautifulSoup
 from selectolax.parser import HTMLParser
@@ -1924,8 +1925,8 @@ class PANNEL:
                 s = request_more(self.r, self.url + "/p/index.php")
                 html = HTMLParser(s)
                 return Get_list_shahan(html)
-            except Exception as e:
-                print("Error: " + str(e))
+            except Exception:
+                print(traceback.format_exc())
                 return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
         elif self.panel == "rocket":
@@ -1936,8 +1937,8 @@ class PANNEL:
                 data = json.loads(s)
                 text = self.Short_info()
                 return Get_list_rocket(data, self.host, text, self.r, self.url)
-            except Exception as e:
-                print("Error: " + str(e))
+            except Exception:
+                print(traceback.format_exc())
                 return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
         elif self.panel == "xpanel":
@@ -1946,8 +1947,8 @@ class PANNEL:
                 html = HTMLParser(s)
                 text = self.Short_info()
                 return Get_list_xpanel(html, self.host, text, self.r, self.url)
-            except Exception as e:
-                print("Error: " + str(e))
+            except Exception:
+                print(traceback.format_exc())
                 return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
         elif self.panel == "dragon":
@@ -1965,8 +1966,8 @@ class PANNEL:
                     expires.append(expire)
 
                 return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions, 0, 0, True
-            except Exception as e:
-                print("Error: " + str(e))
+            except Exception:
+                print(traceback.format_exc())
                 return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
 
     def Check_Premium(self):
