@@ -759,7 +759,11 @@ def Get_user_info_shahan(html, uname):
             if 'password' in data.attributes['name']:
                 passwords.append(data.text())
             if 'traffic' in data.attributes['name']:
-                traffics.append(data.text())
+                if ("گیگابایت" in data.text()) or ("نامحدود" in data.text()):
+                    traffic = data.text()
+                else:
+                    traffic = data.text().replace("گیگ", "گیگابایت")
+                traffics.append(traffic)
             if 'ip' in data.attributes['name']:
                 ips.append(data.text())
             if 'drop' in data.attributes['name']:
@@ -798,7 +802,7 @@ def Get_user_info_shahan(html, uname):
             if button.attributes['type'] == "button":
                 if "/" in button.text():
                     usages.append((button.text()).split(" /")[0])
-                elif ("گیگابایت" in button.text()) or ("نامحدود" in button.text()):
+                elif ("گیگابایت" in button.text()) or ("نامحدود" in button.text()) or ("گیگ" in button.text()):
                     usages.append('0.0')
     for inp in html.css("input.form-control"):
         if inp.attributes.get("placeholder", None) is not None:
@@ -1035,7 +1039,11 @@ def Get_list_shahan(html):
                 if (data.attributes['name']).split("port")[0] != "udp":
                     ports.append(data.text())
             if 'traffic' in data.attributes['name']:
-                traffics.append(data.text())
+                if ("گیگابایت" in data.text()) or ("نامحدود" in data.text()):
+                    traffic = data.text()
+                else:
+                    traffic = data.text().replace("گیگ", "گیگابایت")
+                traffics.append(traffic)
             if 'ip' in data.attributes['name']:
                 ips.append(data.text())
     for button in html.css('button'):
@@ -1043,7 +1051,7 @@ def Get_list_shahan(html):
             if button.attributes['type'] == "button":
                 if "/" in button.text():
                     usages.append((button.text()).split(" /")[0])
-                elif ("گیگابایت" in button.text()) or ("نامحدود" in button.text()):
+                elif ("گیگابایت" in button.text()) or ("نامحدود" in button.text()) or ("گیگ" in button.text()):
                     usages.append('0.0')
     for a in html.css('a'):
         href = a.attributes.get("href", None)
