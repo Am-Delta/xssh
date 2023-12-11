@@ -884,7 +884,7 @@ def Get_user_info_rocket(datas, uname, r, url):
                         break
                     except:
                         pass
-            return data['password'], traffic, int(data['limit_users']), int(days), data['status_label'], usage, data['id'], kind, Date, description, public_link, port, udgpw
+            return data['password'], traffic.replace(",", ""), int(data['limit_users']), int(days), data['status_label'], usage, data['id'], kind, Date, description, public_link, port, udgpw
 
 
 def Get_user_info_xpanel(html, uname):
@@ -1110,11 +1110,11 @@ def Get_list_rocket(datas, ip, info, r, url):
         status.append(data['status_label'])
         usages.append(str('{:.2f}'.format(float(int(data['consumer_traffic'])) / 1024)))
         if "GB" in data['traffic_format']:
-            traffics.append(data['traffic_format'].replace("GB", "گیگابایت"))
+            traffics.append(data['traffic_format'].replace("GB", "گیگابایت").replace(",", ""))
         elif "MB" in data['traffic_format']:
-            traffics.append(('{:.2f}'.format(float(data['traffic_format'].split(" ")[0]) / 1024)) + " گیگابایت")
+            traffics.append(('{:.2f}'.format(float(data['traffic_format'].split(" ")[0]) / 1024)).replace(",", "") + " گیگابایت")
         else:
-            traffics.append(data['traffic_format'])
+            traffics.append(data['traffic_format'].replace(",", ""))
         if data['end_date'] == 0:
             s = r.get(f"{url}/ajax-views/users/{str(data['id'])}/edit?_={str(int(time()))}").text
             s = json.loads(s)['html']
