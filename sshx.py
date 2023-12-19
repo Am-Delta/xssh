@@ -735,7 +735,7 @@ def get_users_data_dragon(ssh):
     return usernames, passwords, connection_limits, days, status
 
 
-def Get_user_info_shahan(html, uname):
+def Get_user_info_shahan(html, uname, host):
     ips, ports, udgpws, usernames, passwords, connection_limits, traffics, usages, expires, days_left, days_left_trubleshoots, descriptions, tuics, dropbears, status = ([] for i in range(15))
     for data in html.css('td'):
         if data.attributes.get("name", None) is None:
@@ -771,7 +771,7 @@ def Get_user_info_shahan(html, uname):
             if 'tuic' in data.attributes['name']:
                 tuics.append(data.text())
             if 'port' in data.attributes['name']:
-                if (data.attributes['name']).split("port")[0] == "udp":
+                if ((data.attributes['name']).split("port")[0] != "udp") and ((data.attributes['name']).split("port")[0] != "panel"):
                     if "badvpn" in data.text():
                         udgpw = (data.text()).split("badvpn")[0]
                     elif "localhost" in data.text():
@@ -819,6 +819,39 @@ def Get_user_info_shahan(html, uname):
                 descriptions.append(textarea.text())
     if len(days_left_trubleshoots) == len(usernames):
         days_left = days_left_trubleshoots
+    if len(expires) == 0:
+        for data in html.css('p'):
+            if data.attributes.get("name", None) is not None:
+                if 'expire' in data.attributes['name']:
+                    expires.append(data.text())
+                if 'multilogin' in data.attributes['name']:
+                    connection_limits.append(data.text())
+                if 'port' in data.attributes['name']:
+                    if ((data.attributes['name']).split("port")[0] != "udp") and ((data.attributes['name']).split("port")[0] != "panel"):
+                        ports.append(data.text())
+                    elif ((data.attributes['name']).split("port")[0] == "udp"):
+                        udgpws.append(data.text())
+                if 'traffic' in data.attributes['name']:
+                    if ("گیگابایت" in data.text()) or ("نامحدود" in data.text()):
+                        traffic = data.text()
+                    else:
+                        traffic = data.text().replace("گیگ", "گیگابایت")
+                    traffics.append(traffic)
+    if len(usages) == 0:
+        for data in html.css('p.btn-warning'):
+            if "/" in data.text():
+                usages.append((data.text()).split(" /")[0])
+            elif ("گیگابایت" in data.text()) or ("نامحدود" in data.text()) or ("گیگ" in data.text()):
+                usages.append('0.0')
+
+    if len(status) == 0:
+        for p in html.css('p.btn'):
+            if p.text() in ["فعال", "منقضی شده", "اتمام ترافیک", "ترافیک"]:
+                status.append(p.text())
+
+    if len(ips) == 0:
+        for i in range(len(usernames)):
+            ips.append(host)
     for username in usernames:
         if username == uname:
             n = usernames.index(uname)
@@ -988,7 +1021,7 @@ def Get_list_users_only_xpanel(html):
     return usernames
 
 
-def Get_list_shahan(html):
+def Get_list_shahan(html, host):
     ips = []
     expires = []
     connection_limits = []
@@ -1036,7 +1069,7 @@ def Get_list_shahan(html):
             if 'password' in data.attributes['name']:
                 passwords.append(data.text())
             if 'port' in data.attributes['name']:
-                if (data.attributes['name']).split("port")[0] != "udp":
+                if ((data.attributes['name']).split("port")[0] != "udp") and ((data.attributes['name']).split("port")[0] != "panel"):
                     ports.append(data.text())
             if 'traffic' in data.attributes['name']:
                 if ("گیگابایت" in data.text()) or ("نامحدود" in data.text()):
@@ -1084,7 +1117,39 @@ def Get_list_shahan(html):
                 days_left[i] = "27784"
     if len(days_left_trubleshoots) == len(usernames):
         days_left = days_left_trubleshoots
-    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions,server_traffic, int(info[1]), True
+    if len(expires) == 0:
+        for data in html.css('p'):
+            if data.attributes.get("name", None) is not None:
+                if 'expire' in data.attributes['name']:
+                    expires.append(data.text())
+                if 'multilogin' in data.attributes['name']:
+                    connection_limits.append(data.text())
+                if 'port' in data.attributes['name']:
+                    if ((data.attributes['name']).split("port")[0] != "udp") and ((data.attributes['name']).split("port")[0] != "panel"):
+                        ports.append(data.text())
+                if 'traffic' in data.attributes['name']:
+                    if ("گیگابایت" in data.text()) or ("نامحدود" in data.text()):
+                        traffic = data.text()
+                    else:
+                        traffic = data.text().replace("گیگ", "گیگابایت")
+                    traffics.append(traffic)
+    if len(usages) == 0:
+        for data in html.css('p.btn-warning'):
+            if "/" in data.text():
+                usages.append((data.text()).split(" /")[0])
+            elif ("گیگابایت" in data.text()) or ("نامحدود" in data.text()) or ("گیگ" in data.text()):
+                usages.append('0.0')
+
+    if len(status) == 0:
+        for p in html.css('p.btn'):
+            if p.text() in ["فعال", "منقضی شده", "اتمام ترافیک", "ترافیک"]:
+                status.append(p.text())
+
+    if len(ips) == 0:
+        for i in range(len(usernames)):
+            ips.append(host)
+
+    return expires, connection_limits, usernames, passwords, ports, traffics, usages, days_left, status, ips, descriptions, server_traffic, int(info[1]), True
 
 
 def Get_list_rocket(datas, ip, info, r, url):
@@ -1314,7 +1379,7 @@ class PANNEL:
                 s = self.r.get(self.url + "/p/index.php").text
                 html = HTMLParser(s)
                 self.req = self.url + "/p/newuser.php"
-                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description, self.SPort, self.Sudgpw, self.dropbear, self.tuic = Get_user_info_shahan(html, uname)
+                self.passwd, self.traffic, self.connection_limit, self.ip, self.days, self.status, self.usage, self.Date, self.description, self.SPort, self.Sudgpw, self.dropbear, self.tuic = Get_user_info_shahan(html, uname, host)
 
             elif panel == "rocket":
                 s = self.r.post(self.url + "/ajax/users/list").text
@@ -1936,7 +2001,7 @@ class PANNEL:
             try:
                 s = request_more(self.r, self.url + "/p/index.php")
                 html = HTMLParser(s)
-                return Get_list_shahan(html)
+                return Get_list_shahan(html, self.host)
             except Exception:
                 print(traceback.format_exc())
                 return [], [], [], [], [], [], [], [], [], [], [], 0, 0, False
@@ -2597,7 +2662,7 @@ class PANNEL:
                     try:
                         s = self.r.get(self.url + "/p/index.php").text
                         html = HTMLParser(s)
-                        PASSW, TRAFFIC, CONNECTION_LIMIT, IP, DAYS, STATUS, USAGE, DATE, DESCRIPTION, PORT, UDGPW, DROP, TUIC = Get_user_info_shahan(html, uname)
+                        PASSW, TRAFFIC, CONNECTION_LIMIT, IP, DAYS, STATUS, USAGE, DATE, DESCRIPTION, PORT, UDGPW, DROP, TUIC = Get_user_info_shahan(html, uname, self.host)
                     except:
                         IP = self.host
                         PORT, UDGPW, DROP = self.Ports()
