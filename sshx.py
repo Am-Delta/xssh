@@ -846,7 +846,7 @@ def Get_user_info_shahan(html, uname, host):
 
     if len(status) == 0:
         for p in html.css('p.btn'):
-            if p.text() in ["فعال", "منقضی شده", "اتمام ترافیک", "ترافیک"]:
+            if p.text() in ["فعال", "منقضی شده", "اتمام ترافیک", "ترافیک", "غیرفعال"]:
                 status.append(p.text())
 
     if len(ips) == 0:
@@ -1142,7 +1142,7 @@ def Get_list_shahan(html, host):
 
     if len(status) == 0:
         for p in html.css('p.btn'):
-            if p.text() in ["فعال", "منقضی شده", "اتمام ترافیک", "ترافیک"]:
+            if p.text() in ["فعال", "منقضی شده", "اتمام ترافیک", "ترافیک", "غیرفعال"]:
                 status.append(p.text())
 
     if len(ips) == 0:
