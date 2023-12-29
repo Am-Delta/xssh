@@ -1,0 +1,15 @@
+pyrogram
+random2
+qrcode
+cryptocompare
+tgcrypto
+selectolax
+bs4
+requests
+termcolor
+Unidecode
+jdatetime
+ipaddress
+paramiko
+psutil
+pyopenssl

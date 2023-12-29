@@ -5,21 +5,7 @@ sudo apt install python3-pip
 sudo apt install pip
 sudo apt install git
 pip install --upgrade pip
-pip install pyrogram
-pip install random2
-pip install qrcode
-pip install cryptocompare
-pip install tgcrypto
-pip install selectolax
-pip install bs4
-pip install requests
-pip install termcolor
-pip install Unidecode
-pip install jdatetime
-pip install ipaddress
-pip install paramiko
-pip install psutil
-pip install pyopenssl --upgrade
+pip install -r requirements.txt --upgrade
 
 mkdir /root/botCh
 
